@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2, GripVertical } from 'lucide-react';
+import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2, GripVertical, ArrowUpDown, ArrowLeft } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { cn, debounce } from '../../lib/utils';
 import { 
@@ -29,6 +29,20 @@ export const PreviewSidebar = () => {
   const activeDevice = useUIStore((state) => state.activeDevice);
   const setDrillDownId = useUIStore((state) => state.setDrillDownId);
   const openConfirmModal = useUIStore((state) => state.openConfirmModal);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const [view, setView] = useState<'config' | 'theme'>('config');
+
+  // 🚀 UX IMPROVEMENT: Auto-scroll to top when focused element or view changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [focusedId, view]);
+
+  // 🚀 UX IMPROVEMENT: Parent Navigation logic
+  const parentItem = selectionPath.length > 1 ? selectionPath[selectionPath.length - 2] : null;
 
   // 🚀 OPTIMIZATION (Fase 5): Debounced editor update for textContent
   const debouncedTextUpdate = useMemo(() => 
@@ -137,7 +151,6 @@ export const PreviewSidebar = () => {
     }
   }, [resolveNode]);
 
-  const [view, setView] = useState<'config' | 'theme'>('config');
   const [targetAttrs, setTargetAttrs] = useState<any>(null);
   const [nodeType, setNodeType] = useState<string>('');
   const [activeFormatting, setActiveFormatting] = useState<any>({});
@@ -389,11 +402,30 @@ export const PreviewSidebar = () => {
            <DeviceSelector />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar"
+        >
            {view === 'theme' ? (
              <ThemeSettings />
            ) : (
              <>
+                {/* 🚀 NEW: Parent Navigation Header */}
+                {parentItem && (
+                  <button 
+                    onClick={() => setFocusedId(parentItem.id, 'element')}
+                    className="flex items-center gap-3 w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl group/back hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-left animate-in slide-in-from-left-4 mb-4"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover/back:text-indigo-600 group-hover/back:border-indigo-200 shadow-sm">
+                      <ArrowLeft className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Return to parent</span>
+                      <span className="text-[10px] font-black text-slate-700 uppercase italic tracking-tighter group-hover/back:text-indigo-700">{parentItem.label}</span>
+                    </div>
+                  </button>
+                )}
+
                 {/* Hierarchy Selection Pilihan untuk masuk ke hirarky */}
                 {isLayoutBlock && (
                   <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
@@ -469,30 +501,70 @@ export const PreviewSidebar = () => {
 
                       <BackgroundConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
 
-                      {(nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid') && (
+                      {(nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid' || nodeType === 'layoutColumn') && (
                         <RowGridConfig value={targetAttrs} onChange={updateAttribute} elementPath="" nodeType={nodeType} />
                       )}
 
                       <DimensionConfig value={targetAttrs} onChange={updateAttribute} nodeType={nodeType} />
 
-                      <div className="space-y-4">
-                        <ResponsiveLabel>Vertical Padding</ResponsiveLabel>
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                              <span>Spacing Scale</span>
-                              <span>{typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || targetAttrs.padding.desktop || 'py-8') : (targetAttrs.padding || 'py-8')}</span>
+                      {/* 🚀 ENHANCED SPACING UI */}
+                      <div className="space-y-6 pt-6 border-t border-slate-100">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ArrowUpDown className="w-3.5 h-3.5 text-indigo-500" />
+                          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic text-left">Vertical Spacing</h4>
+                        </div>
+
+                        <div className="space-y-6">
+                          {/* Margin Control - Only for blocks that support it (Row, Section) */}
+                          {(nodeType === 'layoutRow' || nodeType.toLowerCase().includes('section')) && (
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center">
+                                <ResponsiveLabel>Margin Top</ResponsiveLabel>
+                                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                  {nodeType.toLowerCase().includes('section') && !targetAttrs.marginTop ? 'GLOBAL' : (typeof targetAttrs.marginTop === 'object' ? (targetAttrs.marginTop[activeDevice] || '0px') : (targetAttrs.marginTop || '0px'))}
+                                </span>
+                              </div>
+                              <input 
+                                type="range" 
+                                className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+                                min="0" max="100" step="4"
+                                value={parseInt((typeof targetAttrs.marginTop === 'object' ? (targetAttrs.marginTop[activeDevice] || '0px') : (targetAttrs.marginTop || '0px'))) || 0}
+                                onChange={(e) => {
+                                    const newVal = updateResponsiveValue(targetAttrs.marginTop, activeDevice, `${e.target.value}px`);
+                                    updateAttribute('marginTop', newVal);
+                                }}
+                              />
+                            </div>
+                          )}
+
+                          {/* Padding Control */}
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <ResponsiveLabel>Vertical Padding</ResponsiveLabel>
+                              <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                {nodeType.toLowerCase().includes('section') && (!targetAttrs.padding || targetAttrs.padding === 'py-24') ? 'GLOBAL' : (typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || 'py-8') : (targetAttrs.padding || 'py-8'))}
+                              </span>
                             </div>
                             <input 
                               type="range" 
                               className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
-                              min="0" max="64"
-                              value={(typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || targetAttrs.padding.desktop || 'py-8') : (targetAttrs.padding || 'py-8')).replace(/[^\d]/g, '') || 8}
+                              min="0" max="160" step="8"
+                              value={parseInt((typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || '8') : (targetAttrs.padding || '8')).toString().replace(/[^\d]/g, '')) || 0}
                               onChange={(e) => {
                                   const newVal = updateResponsiveValue(targetAttrs.padding, activeDevice, `py-${e.target.value}`);
                                   updateAttribute('padding', newVal);
                               }}
                             />
+                            {nodeType.toLowerCase().includes('section') && (targetAttrs.padding && targetAttrs.padding !== 'py-24') && (
+                              <button 
+                                onClick={() => updateAttribute('padding', 'py-24')}
+                                className="text-[9px] font-black text-indigo-500 uppercase tracking-widest hover:text-indigo-700 transition-colors"
+                              >
+                                ↺ Reset to Global
+                              </button>
+                            )}
                           </div>
+                        </div>
                       </div>
                     </section>
                 ) : (
@@ -502,12 +574,14 @@ export const PreviewSidebar = () => {
                         <h2 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">{nodeType.replace(/([A-Z])/g, ' $1').trim().toUpperCase()}</h2>
                       </div>
 
-                      <HeadingConfig 
-                        value={targetAttrs} 
-                        onChange={updateAttribute} 
-                        elementPath="" 
-                        activeFormatting={activeFormatting}
-                      />
+                      {['heroHeadline', 'heroSubheadline', 'heroBadge', 'sectionHeading', 'featureCard'].includes(nodeType) && (
+                        <HeadingConfig 
+                          value={targetAttrs} 
+                          onChange={updateAttribute} 
+                          elementPath="" 
+                          activeFormatting={activeFormatting}
+                        />
+                      )}
                       
                       {nodeType === 'testimonialSection' && (
                         <TestimonialConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
@@ -518,7 +592,12 @@ export const PreviewSidebar = () => {
                       )}
 
                       {(nodeType === 'heroMedia' || nodeType === 'imageElement') && (
-                        <MediaConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                        <MediaConfig 
+                          value={targetAttrs} 
+                          onChange={updateAttribute} 
+                          elementPath="" 
+                          mediaKey={nodeType === 'heroMedia' ? 'bgImage' : 'src'}
+                        />
                       )}
 
                       {nodeType === 'iconElement' && (

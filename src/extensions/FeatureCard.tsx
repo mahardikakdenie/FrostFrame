@@ -15,11 +15,13 @@ const FeatureCardView = ({ node, selected }: any) => {
   return (
     <NodeViewWrapper>
       <motion.div 
-        whileHover={{ x: 5 }}
-        className={`group/item p-4 rounded-xl transition-all ${selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : ''}`}
+        whileHover={{ y: -5 }}
+        className={`group/item p-8 rounded-[2rem] border-2 border-slate-100 bg-white transition-all hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 ${selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : ''}`}
       >
-        <div className="w-12 h-12 bg-slate-50 rounded flex items-center justify-center text-indigo-600 mb-6 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all shadow-sm border border-slate-100">
-          <Icon className="w-6 h-6" />
+        <div className="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mb-8 group-hover/item:bg-indigo-600 transition-all shadow-xl skew-x--10">
+          <div className="skew-x-10">
+            <Icon className="w-7 h-7" />
+          </div>
         </div>
         <NodeViewContent className="feature-card-content" />
       </motion.div>

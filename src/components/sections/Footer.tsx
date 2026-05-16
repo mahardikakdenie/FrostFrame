@@ -30,27 +30,39 @@ export const Footer = (props: NodeViewProps) => {
         )}
       >
         {isActive && (
-          <div className="absolute top-0 left-4 bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-b font-black z-20 shadow-lg font-mono">FOOTER_SECTION.NODE</div>
+          <div className="absolute top-0 left-4 bg-slate-900 text-white text-[9px] px-3 py-1.5 rounded-b-xl font-black z-30 shadow-2xl skew-x--10 flex items-center gap-2">
+            <div className="skew-x-10 flex items-center gap-2">
+              <span className="text-emerald-500">â</span>
+              <span className="italic tracking-widest">FOOTER_SECTION.NODE</span>
+            </div>
+          </div>
         )}
 
         <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
-            <h2 className="text-2xl font-black italic tracking-tighter text-slate-900 mb-6">{logo || 'LANDO'}</h2>
-            <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8">{description}</p>
+            <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black italic shadow-2xl skew-x--10 text-xl mb-8">L</div>
+            <h2 className="text-2xl font-black italic tracking-tighter text-slate-900 mb-6 uppercase skew-x-[-2deg]">{logo || 'LANDO'}</h2>
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-relaxed mb-8 italic">{description}</p>
             <div className="flex gap-4">
-              <Twitter className="w-5 h-5 text-slate-400 hover:text-indigo-500 transition-colors" />
-              <Github className="w-5 h-5 text-slate-400 hover:text-indigo-500 transition-colors" />
-              <Linkedin className="w-5 h-5 text-slate-400 hover:text-indigo-500 transition-colors" />
+              <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all hover:-translate-y-1 cursor-pointer">
+                <Twitter className="w-4 h-4" />
+              </div>
+              <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all hover:-translate-y-1 cursor-pointer">
+                <Github className="w-4 h-4" />
+              </div>
+              <div className="w-10 h-10 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all hover:-translate-y-1 cursor-pointer">
+                <Linkedin className="w-4 h-4" />
+              </div>
             </div>
           </div>
 
           {(links || []).map((group: any, i: number) => (
             <div key={i}>
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-6 italic">{group?.title}</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 mb-8 italic">{group?.title}</h3>
               <ul className="space-y-4">
                 {(group?.items || []).map((item: any, j: number) => (
                   <li key={j}>
-                    <a className="text-slate-500 text-sm font-medium hover:text-indigo-600 transition-colors cursor-pointer">{item?.label}</a>
+                    <a className="text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-indigo-600 transition-colors cursor-pointer italic">{item?.label}</a>
                   </li>
                 ))}
               </ul>
@@ -58,12 +70,12 @@ export const Footer = (props: NodeViewProps) => {
           ))}
         </div>
 
-        <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{copyright}</p>
-          <div className="flex gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-             <span className="hover:text-indigo-500 transition-colors">Privacy</span>
-             <span className="hover:text-indigo-500 transition-colors">Terms</span>
-             <span className="hover:text-indigo-500 transition-colors">Cookies</span>
+        <div className="max-w-7xl mx-auto mt-24 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] italic">{copyright}</p>
+          <div className="flex gap-8 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 italic">
+             <span className="hover:text-indigo-600 transition-colors cursor-pointer">Privacy</span>
+             <span className="hover:text-indigo-600 transition-colors cursor-pointer">Terms</span>
+             <span className="hover:text-indigo-600 transition-colors cursor-pointer">Security</span>
           </div>
         </div>
       </div>
@@ -77,16 +89,10 @@ export const Footer = (props: NodeViewProps) => {
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2"
           >
             <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('strictHeroRow'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3 font-mono"
+              onClick={(e) => { e.stopPropagation(); insertAfter('layoutRow'); }}
+              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
             >
-              <Plus className="w-4 h-4" /> ADD HERO
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('footerSection'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3 font-mono"
-            >
-              <Plus className="w-4 h-4" /> ADD FOOTER
+              <Plus className="w-4 h-4" /> ADD ROW
             </button>
           </motion.div>
         )}

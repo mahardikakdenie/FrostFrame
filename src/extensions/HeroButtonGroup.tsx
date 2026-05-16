@@ -3,11 +3,61 @@ import { ReactNodeViewRenderer } from '@tiptap/react';
 import React from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { cn } from '../lib/utils';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Trash2, Plus } from 'lucide-react';
 
-const HeroButtonGroupComponent = (props: any) => {
-  const { node, selected } = props;
-  const { primaryCTA, secondaryCTA, textAlign } = node.attrs;
+const ButtonGroupComponent = (props: any) => {
+  const { node, selected, editor, getPos } = props;
+  const { buttons, textAlign } = node.attrs;
+
+  const handleSelectNode = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof getPos === 'function') {
+      editor.commands.setNodeSelection(getPos());
+    }
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof getPos === 'function') {
+      editor.commands.setNodeSelection(getPos());
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Delete this button group?')) {
+      const pos = getPos();
+      if (typeof pos === 'number') {
+        editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+      }
+    }
+  };
+
+  const renderButton = (btn: any, index: number) => {
+    const isPrimary = btn.variant === 'primary';
+    
+    if (isPrimary) {
+      return (
+        <button 
+          key={index}
+          style={{ backgroundColor: btn.color || '#0f172a' }}
+          className="text-white font-black text-[10px] px-8 py-4 rounded-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 active:translate-y-0 text-center uppercase italic tracking-widest skew-x--10"
+        >
+          <div className="skew-x-10">{btn.text || 'BUTTON'}</div>
+        </button>
+      );
+    }
+
+    return (
+      <button 
+        key={index}
+        style={{ borderColor: btn.color || '#e2e8f0', color: btn.color || '#0f172a' }}
+        className="bg-white border-2 text-[10px] px-8 py-4 rounded-xl font-black hover:bg-slate-50 transition-all uppercase italic tracking-widest skew-x--10 hover:border-indigo-500 hover:text-indigo-600 shadow-xl"
+      >
+        <div className="skew-x-10">{btn.text || 'BUTTON'}</div>
+      </button>
+    );
+  };
 
   return (
     <NodeViewWrapper className={cn(
@@ -32,30 +82,33 @@ const HeroButtonGroupComponent = (props: any) => {
       <div className={cn(
         "flex flex-wrap gap-4 relative transition-all duration-300 p-2",
         selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-xl"
-      )}>
-        {/* Badge Label */}
+      )}
+      onDoubleClick={handleDoubleClick}
+      >
+        {/* Badge Label & Actions */}
         <div className={cn(
-          "absolute -top-10 left-0 flex items-center gap-2 pointer-events-none transition-all duration-300",
-          (selected || props.editor.isActive('heroButtonGroup')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          "absolute -top-10 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-20",
+          (selected || editor.isActive('heroButtonGroup')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
-          <span className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl">
-            BUTTONS
+          <button 
+            onClick={handleDelete}
+            className="bg-rose-500 text-white p-0.5 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            title="Delete Group"
+          >
+             <Trash2 className="w-2.5 h-2.5" />
+          </button>
+          <span className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20">
+            BUTTON GROUP
           </span>
         </div>
         
-        <button 
-          style={{ backgroundColor: primaryCTA?.color || '#0f172a' }}
-          className="text-white font-mono text-xs px-8 py-4 rounded font-bold shadow-2xl hover:brightness-110 transition-all hover:-translate-y-0.5 active:translate-y-0 text-center uppercase"
-        >
-          {primaryCTA?.text || 'GET STARTED'}
-        </button>
-
-        <button 
-          style={{ borderColor: secondaryCTA?.color || '#e2e8f0', color: secondaryCTA?.color || '#0f172a' }}
-          className="bg-white border text-mono text-xs px-8 py-4 rounded font-bold hover:bg-slate-50 transition-all uppercase"
-        >
-          {secondaryCTA?.text || 'VIEW DEMO'}
-        </button>
+        {buttons.map((btn: any, idx: number) => renderButton(btn, idx))}
+        
+        {buttons.length === 0 && (
+          <div className="text-[10px] font-black uppercase italic text-slate-400 p-4 border-2 border-dashed border-slate-100 rounded-xl w-full text-center">
+            Empty Button Group
+          </div>
+        )}
       </div>
     </NodeViewWrapper>
   );
@@ -63,14 +116,25 @@ const HeroButtonGroupComponent = (props: any) => {
 
 export const HeroButtonGroup = Node.create({
   name: 'heroButtonGroup',
-  group: 'heroBlock levelThreeElement',
+  group: 'block heroBlock levelThreeElement',
   draggable: true,
 
   addAttributes() {
     return {
       id: { default: null },
-      primaryCTA: { default: { text: 'Get Started', link: '#', color: '#0f172a' } },
-      secondaryCTA: { default: { text: 'View Demo', link: '#', color: '#0f172a' } },
+      buttons: { 
+        default: [
+          { text: 'GET STARTED', link: '#', color: '#0f172a', variant: 'primary' },
+          { text: 'VIEW DEMO', link: '#', color: '#0f172a', variant: 'secondary' }
+        ],
+        parseHTML: element => {
+          const val = element.getAttribute('data-buttons');
+          try { return JSON.parse(val || '[]'); } catch(e) { return []; }
+        },
+        renderHTML: attributes => ({
+          'data-buttons': JSON.stringify(attributes.buttons)
+        })
+      },
       textAlign: { default: 'text-left' }
     };
   },
@@ -84,6 +148,6 @@ export const HeroButtonGroup = Node.create({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(HeroButtonGroupComponent);
+    return ReactNodeViewRenderer(ButtonGroupComponent);
   },
 });

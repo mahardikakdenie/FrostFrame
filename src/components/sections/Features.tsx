@@ -38,12 +38,16 @@ export const Features = (props: NodeViewProps) => {
         )}
 
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20">
-            <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter uppercase leading-[0.9] italic">
+          <div className="mb-20 relative">
+            <div className="absolute -left-8 top-0 bottom-0 w-1.5 bg-indigo-600 rounded-full skew-x--10 opacity-20" />
+            <h2 className="text-5xl font-black text-slate-900 mb-4 tracking-tighter uppercase leading-[0.9] italic skew-x-[-2deg]">
               {title || 'OUR FEATURES'}
             </h2>
-            <p className="text-slate-500 font-medium max-w-xl">{subtitle}</p>
-            <div className="w-12 h-1 bg-indigo-600 mt-6 rounded-full" />
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] max-w-xl">{subtitle || 'Unmatched performance and scalability for your business.'}</p>
+            <div className="flex gap-1 mt-8">
+              <div className="w-12 h-2 bg-indigo-600 rounded-full skew-x-[-20deg]" />
+              <div className="w-2 h-2 bg-slate-900 rounded-full animate-pulse" />
+            </div>
           </div>
 
           <div className={cn(
@@ -55,13 +59,15 @@ export const Features = (props: NodeViewProps) => {
               return (
                 <motion.div 
                   key={idx}
-                  whileHover={{ x: 5 }}
-                  className="group/item"
+                  whileHover={{ y: -5 }}
+                  className="group/item p-8 rounded-[2rem] border-2 border-slate-100 bg-white transition-all hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100"
                 >
-                  <div className="w-12 h-12 bg-slate-50 rounded flex items-center justify-center text-indigo-600 mb-6 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all shadow-sm border border-slate-100">
-                    <Icon className="w-6 h-6" />
+                  <div className="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mb-8 group-hover/item:bg-indigo-600 transition-all shadow-xl skew-x--10">
+                    <div className="skew-x-10">
+                      <Icon className="w-7 h-7" />
+                    </div>
                   </div>
-                  <h3 className="text-lg font-black text-slate-900 mb-3 uppercase tracking-tight italic">{feature.title}</h3>
+                  <h3 className="text-xl font-black text-slate-900 mb-3 uppercase tracking-widest italic">{feature.title}</h3>
                   <p className="text-slate-500 text-sm leading-relaxed font-medium">{feature.description}</p>
                 </motion.div>
               );
@@ -79,20 +85,14 @@ export const Features = (props: NodeViewProps) => {
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2"
           >
             <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('strictHeroRow'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3 font-mono"
+              onClick={(e) => { e.stopPropagation(); insertAfter('layoutRow'); }}
+              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
             >
-              <Plus className="w-4 h-4" /> ADD HERO
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('featuresSection'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3 font-mono"
-            >
-              <Plus className="w-4 h-4" /> ADD FEATURES
+              <Plus className="w-4 h-4" /> ADD ROW
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); insertAfter('pricingSection'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3 font-mono"
+              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
             >
               <Plus className="w-4 h-4" /> ADD PRICING
             </button>

@@ -3,17 +3,42 @@ import { ReactNodeViewRenderer } from '@tiptap/react';
 import React from 'react';
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { cn } from '../lib/utils';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Trash2 } from 'lucide-react';
 
 const HeroBadgeComponent = (props: any) => {
   const { node, selected } = props;
-  const { color, textAlign } = node.attrs;
+  const { color, textAlign, letterSpacing, fontSizeScale } = node.attrs;
+
+  const getFontSize = () => {
+    if (fontSizeScale) return { fontSize: `${fontSizeScale}rem` };
+    return {};
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof props.getPos === 'function') {
+      props.editor.commands.setNodeSelection(props.getPos());
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Delete this badge?')) {
+      const pos = props.getPos();
+      if (typeof pos === 'number') {
+        props.editor.view.dispatch(props.editor.view.state.tr.delete(pos, pos + node.nodeSize));
+      }
+    }
+  };
 
   return (
-    <NodeViewWrapper className={cn(
-      "w-full group/badge relative my-2 z-10",
-      textAlign === 'text-center' ? 'flex justify-center' : 'flex justify-start'
-    )}>
+    <NodeViewWrapper 
+      className={cn(
+        "w-full group/badge relative my-2 z-10",
+        textAlign === 'text-center' ? 'flex justify-center' : 'flex justify-start'
+      )}
+      onDoubleClick={handleDoubleClick}
+    >
       {/* Visual Indicator & Drag Handle */}
       <div 
         className={cn(
@@ -33,21 +58,38 @@ const HeroBadgeComponent = (props: any) => {
         "relative transition-all duration-300 py-1",
         selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-lg" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-lg"
       )}>
-        {/* Badge Label */}
+        {/* Badge Label & Actions */}
         <div className={cn(
-          "absolute -top-10 left-0 flex items-center gap-2 pointer-events-none transition-all duration-300",
+          "absolute -top-10 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300",
           (selected || props.editor.isActive('heroBadge')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
-          <span className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl">
+          <button 
+            onClick={handleDelete}
+            className="bg-rose-500 text-white p-0.5 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            title="Delete Badge"
+          >
+             <Trash2 className="w-2.5 h-2.5" />
+          </button>
+          <div 
+            onClick={() => { if (typeof props.getPos === 'function') props.editor.commands.setNodeSelection(props.getPos()); }}
+            className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer"
+          >
             TOP BADGE
-          </span>
+          </div>
         </div>
 
         <div 
-          style={{ color: color || '#4f46e5', backgroundColor: color ? `${color}15` : '#eef2ff' }}
-          className="inline-block px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded italic outline-none min-w-[50px] min-h-[1.5em]"
+          style={{ 
+            color: color || 'var(--primary-color)', 
+            backgroundColor: color ? `${color}15` : 'rgba(var(--primary-color-rgb), 0.1)',
+            letterSpacing: letterSpacing || '0.2em',
+            ...getFontSize()
+          }}
+          className="inline-block px-4 py-1.5 text-[10px] font-black uppercase rounded-lg italic outline-none min-w-[50px] min-h-[1.5em] shadow-sm skew-x--10 border border-current/10"
         >
-          <NodeViewContent />
+          <div className="skew-x-10">
+            <NodeViewContent />
+          </div>
         </div>
       </div>
     </NodeViewWrapper>
@@ -56,16 +98,19 @@ const HeroBadgeComponent = (props: any) => {
 
 export const HeroBadge = Node.create({
   name: 'heroBadge',
-  group: 'heroBlock levelThreeElement',
+  group: 'block heroBlock levelThreeElement',
   content: 'inline*',
   draggable: true,
   defining: true,
+  isolating: true,
 
   addAttributes() {
     return {
       id: { default: null },
-      color: { default: '#4f46e5' },
-      textAlign: { default: 'text-left' }
+      color: { default: null }, // Fallback to primary-color via style
+      textAlign: { default: 'text-left' },
+      letterSpacing: { default: null },
+      fontSizeScale: { default: null }
     };
   },
 

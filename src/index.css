@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #4f46e5;
+  --color-primary: var(--primary-color);
+  --color-accent: var(--accent-color);
+  --color-secondary: var(--secondary-color);
+  --font-heading: var(--heading-font);
+  --font-body: var(--body-font);
+  --radius-theme: var(--border-radius);
+  
   --color-slate-50: #f8fafc;
   --color-slate-100: #f1f5f9;
   --color-slate-200: #e2e8f0;
@@ -50,7 +56,30 @@
   width: 100%;
 }
 
-.ProseMirror p.is-editor-empty:first-child::before {
+/* Tiptap Placeholder */
+.ProseMirror.is-editor-empty::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #94a3b8;
+  font-weight: 900;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-style: italic;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0.5;
+  border: 2px dashed #cbd5e1;
+  padding: 4rem;
+  border-radius: 2rem;
+  width: 80%;
+  text-align: center;
+}
+
+.ProseMirror p.is-empty::before {
   content: attr(data-placeholder);
   float: left;
   color: #adb5bd;
@@ -93,24 +122,40 @@ body[class*="is-dragging-featureCard"] {
 /* Builder Element Hover Outlines */
 .ProseMirror [data-type] {
   position: relative;
+  transition: all 0.2s ease;
 }
 
-.ProseMirror [data-type]::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border: 2px dashed transparent;
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 50;
-  transition: border-color 0.15s ease;
+/* Row Hover - Blue */
+.ProseMirror [data-type="layout-row"] {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
 }
 
-.ProseMirror [data-type]:hover::after {
-  border-color: rgba(99, 102, 241, 0.4); /* indigo-500 */
+.ProseMirror [data-type="layout-row"]:hover {
+  outline: 2px dashed #4f46e5;
+  outline-offset: 4px;
+  background-color: rgba(79, 70, 229, 0.02);
+}
+
+/* Column Hover - Green */
+.ProseMirror [data-type="layout-column"] {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+
+.ProseMirror [data-type="layout-column"]:hover {
+  outline: 2px dashed #10b981;
+  outline-offset: -2px;
+  background-color: rgba(16, 185, 129, 0.03);
+}
+
+/* Element Hover - Indigo */
+.ProseMirror [data-type]:not([data-type*="layout"]):hover {
+  outline: 2px solid #6366f1;
+  outline-offset: 4px;
 }
 
 .ProseMirror [data-type]:has([data-type]:hover)::after {
-  border-color: transparent !important;
+  display: none;
 }
 

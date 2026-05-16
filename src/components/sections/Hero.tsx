@@ -16,7 +16,7 @@ export const Hero = (props: NodeViewProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const insertAfter = (type: string) => {
-    const pos = props.getPos() + node.nodeSize;
+    const pos = (props.getPos() ?? 0) + node.nodeSize;
     editor.chain().focus().insertContentAt(pos, { type }).run();
   };
 
@@ -37,23 +37,26 @@ export const Hero = (props: NodeViewProps) => {
         )}
       >
         {(isSectionFocused || selected) && (
-          <div className="absolute top-0 left-4 bg-indigo-500 text-white text-[9px] px-2 py-1 rounded-b font-black z-20 shadow-lg font-mono uppercase tracking-widest">
-            SECTION: HERO
+          <div className="absolute top-0 left-4 bg-slate-900 text-white text-[9px] px-3 py-1.5 rounded-b-xl font-black z-20 shadow-2xl skew-x--10 flex items-center gap-2">
+            <div className="skew-x-10 flex items-center gap-2">
+               <span className="text-emerald-500">â</span>
+               <span className="italic tracking-widest uppercase">HERO_SECTION.NODE</span>
+            </div>
           </div>
         )}
         
         <div className="absolute inset-0 bg-white">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-white" />
-          <img src={mediaUrl} className="absolute right-0 top-0 w-1/2 h-full object-cover opacity-20 mask-gradient-to-l" referrerPolicy="no-referrer" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white" />
+          <div className="absolute right-0 top-0 w-1/2 h-full bg-indigo-600/5 skew-x--10 translate-x-12" />
         </div>
 
-        <div className="relative z-10 text-left p-12 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="relative z-10 text-left p-12 w-full max-w-7xl mx-auto flex flex-col items-center">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="hero-content-stack"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="hero-content-stack w-full"
           >
-            <NodeViewContent className="hero-section-children" />
+            <NodeViewContent className="hero-section-children w-full" />
           </motion.div>
         </div>
       </div>
@@ -67,16 +70,16 @@ export const Hero = (props: NodeViewProps) => {
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2"
           >
             <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('strictHeroRow'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3"
+              onClick={(e) => { e.stopPropagation(); insertAfter('layoutRow'); }}
+              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
             >
-              <Plus className="w-4 h-4" /> Add Hero
+              <Plus className="w-4 h-4" /> ADD ROW
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); insertAfter('pricingSection'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3"
+              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
             >
-              <Plus className="w-4 h-4" /> Add Pricing
+              <Plus className="w-4 h-4" /> ADD PRICING
             </button>
           </motion.div>
         )}

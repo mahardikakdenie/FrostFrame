@@ -7,7 +7,12 @@ import { GripVertical } from 'lucide-react';
 
 const HeroSubheadlineComponent = (props: any) => {
   const { node, selected } = props;
-  const { fontWeight, lineHeight, textAlign, color } = node.attrs;
+  const { fontWeight, lineHeight, textAlign, color, letterSpacing, fontSizeScale } = node.attrs;
+
+  const getFontSize = () => {
+    if (fontSizeScale) return { fontSize: `${fontSizeScale}rem` };
+    return {};
+  };
 
   return (
     <NodeViewWrapper className="group/subheadline relative my-4">
@@ -41,9 +46,13 @@ const HeroSubheadlineComponent = (props: any) => {
         </div>
 
         <div 
-          style={{ color: color || '#64748b' }}
+          style={{ 
+            color: color || '#64748b',
+            letterSpacing: letterSpacing || '0.1em',
+            ...getFontSize()
+          }}
           className={cn(
-            "text-xl leading-relaxed font-medium max-w-lg transition-all duration-300 outline-none min-h-[1.5em]",
+            "text-sm leading-relaxed font-black max-w-lg transition-all duration-300 outline-none min-h-[1.5em] uppercase opacity-80",
             fontWeight,
             lineHeight,
             textAlign
@@ -58,10 +67,11 @@ const HeroSubheadlineComponent = (props: any) => {
 
 export const HeroSubheadline = Node.create({
   name: 'heroSubheadline',
-  group: 'heroBlock levelThreeElement',
+  group: 'block heroBlock levelThreeElement',
   content: 'inline*',
   draggable: true,
   defining: true,
+  isolating: true,
 
   addAttributes() {
     return {
@@ -69,7 +79,9 @@ export const HeroSubheadline = Node.create({
       fontWeight: { default: 'font-medium' },
       lineHeight: { default: 'leading-relaxed' },
       textAlign: { default: 'text-left' },
-      color: { default: '#64748b' }
+      color: { default: '#64748b' },
+      letterSpacing: { default: null },
+      fontSizeScale: { default: null }
     };
   },
 

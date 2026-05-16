@@ -4,9 +4,13 @@ import React from 'react';
 
 const SectionHeadingView = () => {
   return (
-    <NodeViewWrapper className="mb-20">
+    <NodeViewWrapper className="mb-24 relative">
+      <div className="absolute -left-8 top-0 bottom-0 w-1.5 bg-indigo-600 rounded-full skew-x--10 opacity-20" />
       <NodeViewContent className="section-heading-content" />
-      <div className="w-12 h-1 bg-indigo-600 mt-6 rounded-full" />
+      <div className="flex gap-1 mt-8">
+        <div className="w-12 h-2 bg-indigo-600 rounded-full skew-x-[-20deg]" />
+        <div className="w-2 h-2 bg-slate-900 rounded-full animate-pulse" />
+      </div>
     </NodeViewWrapper>
   );
 };

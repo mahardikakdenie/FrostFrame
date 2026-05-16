@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Editor } from './components/builder/Editor';
 import { PreviewSidebar } from './components/builder/PreviewSidebar';
 import { BlockLibrarySidebar } from './components/builder/BlockLibrarySidebar';
 import { useStore } from './store/useStore';
 import { useUIStore } from './store/useUIStore';
-import { Monitor, Tablet, Smartphone, Eye, Plus, Send, Layout, ChevronLeft, Search } from 'lucide-react';
+import { Monitor, Tablet, Smartphone, Eye, Plus, Send, Layout, ChevronLeft, Search, Undo2, Redo2, Trash2, Save } from 'lucide-react';
 import { cn } from './lib/utils';
+import { MediaLibraryModal } from './components/builder/MediaLibraryModal';
 
 export default function App() {
   const previewMode = useUIStore((state) => state.previewMode);
@@ -18,90 +19,45 @@ export default function App() {
   const focusedId = useUIStore((state) => state.focusedId);
   const setFocusedId = useUIStore((state) => state.setFocusedId);
 
+  const [saveStatus, setSaveStatus] = React.useState<'idle' | 'saving' | 'saved'>('idle');
+
+  useEffect(() => {
+    const hasDraft = localStorage.getItem('lando-builder-draft');
+    if (hasDraft) {
+      console.log('Draft detected in LocalStorage and loaded.');
+    }
+  }, []);
+
+  const handleSaveDraft = () => {
+    const editor = (window as any).editor;
+    if (editor) {
+      setSaveStatus('saving');
+      const content = editor.getJSON();
+      localStorage.setItem('lando-builder-draft', JSON.stringify(content));
+      
+      setTimeout(() => {
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      }, 500);
+    }
+  };
+
   const addSection = (type: string, payload?: any) => {
     const editor = (window as any).editor;
     if (editor) {
       if (payload) {
         editor.chain().focus().insertContent(payload).run();
-      } else if (type === 'strictHeroRow') {
-        const content = {
-          type: 'strictHeroRow',
-          attrs: { id: crypto.randomUUID() },
-          content: [
-            {
-              type: 'strictHeroColumn',
-              attrs: { role: 'content', id: crypto.randomUUID() },
-              content: [
-                { type: 'heroBadge', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'NEW RELEASE' }] },
-                { type: 'heroHeadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Strict Block Library' }] },
-                { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'This block is predefined.' }] },
-                { type: 'heroButtonGroup', attrs: { id: crypto.randomUUID() } }
-              ]
-            },
-            {
-              type: 'strictHeroColumn',
-              attrs: { role: 'media', id: crypto.randomUUID() },
-              content: [
-                { type: 'heroMedia', attrs: { id: crypto.randomUUID() } }
-              ]
-            }
-          ]
-        };
-        editor.chain().focus().insertContent(content).run();
-      } else if (type === 'featuresSection') {
-        const content = {
-          type: 'featuresSection',
-          attrs: { id: crypto.randomUUID() },
-          content: [
-            {
-              type: 'sectionHeading',
-              attrs: { id: crypto.randomUUID() },
-              content: [
-                { type: 'heroHeadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'WHY CHOOSE LANDO' }] },
-                { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Everything you need to build high-converting landing pages.' }] }
-              ]
-            },
-            {
-              type: 'sectionGrid',
-              attrs: { columns: 3, id: crypto.randomUUID() },
-              content: [
-                {
-                  type: 'featureCard',
-                  attrs: { icon: 'Zap', id: crypto.randomUUID() },
-                  content: [
-                    { type: 'heroHeadline', attrs: { level: 'h3', id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Lightning Fast' }] },
-                    { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Built with Next.js 14 for maximum performance.' }] }
-                  ]
-                },
-                {
-                  type: 'featureCard',
-                  attrs: { icon: 'Search', id: crypto.randomUUID() },
-                  content: [
-                    { type: 'heroHeadline', attrs: { level: 'h3', id: crypto.randomUUID() }, content: [{ type: 'text', text: 'SEO Optimized' }] },
-                    { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Semantic HTML and best practices.' }] }
-                  ]
-                },
-                {
-                  type: 'featureCard',
-                  attrs: { icon: 'Smartphone', id: crypto.randomUUID() },
-                  content: [
-                    { type: 'heroHeadline', attrs: { level: 'h3', id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Responsive' }] },
-                    { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Designs that look stunning on any screen.' }] }
-                  ]
-                }
-              ]
-            }
-          ]
-        };
-        editor.chain().focus().insertContent(content).run();
-      } else if (type === 'freeRow') {
-        editor.chain().focus().insertContent({
-          type: 'freeRow',
-          attrs: { id: crypto.randomUUID() },
-          content: [{ type: 'freeColumn', attrs: { id: crypto.randomUUID() } }, { type: 'freeColumn', attrs: { id: crypto.randomUUID() } }]
-        }).run();
       } else {
-        editor.chain().focus().insertContent({ type, attrs: { id: crypto.randomUUID() } }).run();
+        // Ensure layoutRow has at least one column to satisfy schema
+        const content = type === 'layoutRow' 
+          ? { 
+              type, 
+              attrs: { id: crypto.randomUUID() },
+              content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() } }]
+            }
+          : { type, attrs: { id: crypto.randomUUID() } };
+          
+        editor.chain().focus().insertContent(content).run();
       }
       setTimeout(() => {
         const stage = document.getElementById('editor-stage');
@@ -138,47 +94,18 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-100 text-slate-900 font-sans overflow-hidden">
+      <MediaLibraryModal />
       {/* Top Navigation Bar */}
       <nav className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-40 shrink-0">
         <div className="flex items-center gap-6">
-          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black italic shadow-2xl skew-x-[-10deg]">L</div>
-          <div className="flex flex-col">
+          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black italic shadow-2xl skew-x--10">L</div>
+          <div className="flex flex-col text-left">
             <span className="font-black text-xs tracking-widest uppercase italic leading-none">Lando Studio</span>
             <div className="flex items-center gap-2 mt-1">
                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Workspace: Draft_01</span>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
-          <button 
-            onClick={() => setPreviewMode('desktop')}
-            className={cn(
-              "px-4 py-2 text-[10px] font-black uppercase italic tracking-widest transition-all rounded-xl",
-              previewMode === 'desktop' ? "bg-white shadow-xl text-indigo-600 scale-105" : "text-slate-400 hover:text-slate-600"
-            )}
-          >
-            Desktop
-          </button>
-          <button 
-            onClick={() => setPreviewMode('tablet')}
-            className={cn(
-              "px-4 py-2 text-[10px] font-black uppercase italic tracking-widest transition-all rounded-xl",
-              previewMode === 'tablet' ? "bg-white shadow-xl text-indigo-600 scale-105" : "text-slate-400 hover:text-slate-600"
-            )}
-          >
-            Tablet
-          </button>
-          <button 
-            onClick={() => setPreviewMode('mobile')}
-            className={cn(
-              "px-4 py-2 text-[10px] font-black uppercase italic tracking-widest transition-all rounded-xl",
-              previewMode === 'mobile' ? "bg-white shadow-xl text-indigo-600 scale-105" : "text-slate-400 hover:text-slate-600"
-            )}
-          >
-            Mobile
-          </button>
         </div>
 
         <div className="flex items-center gap-4">
@@ -195,7 +122,7 @@ export default function App() {
 
       <main className="flex-1 flex overflow-hidden relative">
         {/* Left Sidebar: Unified Panel (Blocks or Properties) */}
-        <aside className="w-[340px] bg-white border-r border-slate-200 flex flex-col shrink-0 z-50">
+        <aside className="w-85 bg-white border-r border-slate-200 flex flex-col shrink-0 z-50">
           {focusedId ? (
             <PreviewSidebar />
           ) : (
@@ -204,16 +131,94 @@ export default function App() {
         </aside>
 
         {/* Editor Stage */}
-        <div className="flex-1 bg-slate-100 p-12 flex justify-center items-start overflow-hidden relative">
-          {/* Viewport Badge */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/50 backdrop-blur px-4 py-2 rounded-full border border-white text-[9px] font-black uppercase tracking-widest text-slate-500 italic z-10">
-             Canvas Focus: {previewMode.toUpperCase()} VIEWPORT
+        <div className="flex-1 bg-slate-100 p-12 flex flex-col justify-start items-center overflow-auto relative">
+          {/* Integrated Toolbar */}
+          <div className="w-full max-w-[1280px] mb-6 flex items-center justify-between px-4">
+             <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-white shadow-xl">
+                <button 
+                  onClick={handleSaveDraft}
+                  className={cn(
+                    "p-2.5 rounded-xl transition-all active:scale-90 flex items-center gap-2 px-4",
+                    saveStatus === 'saved' ? "bg-emerald-500 text-white" : "hover:bg-slate-50 text-slate-400 hover:text-indigo-600"
+                  )}
+                  title="Save as Draft (Local)"
+                >
+                   <Save className="w-4 h-4" />
+                   <span className="text-[9px] font-black uppercase tracking-widest italic">
+                     {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved!' : 'Save Draft'}
+                   </span>
+                </button>
+                <div className="w-[1px] h-4 bg-slate-200 mx-1" />
+                <button 
+                  onClick={() => (window as any).editor?.commands.undo()}
+                  className="p-2.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all active:scale-90"
+                  title="Undo (Ctrl+Z)"
+                >
+                   <Undo2 className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => (window as any).editor?.commands.redo()}
+                  className="p-2.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all active:scale-90"
+                  title="Redo (Ctrl+Y)"
+                >
+                   <Redo2 className="w-4 h-4" />
+                </button>
+                <div className="w-[1px] h-4 bg-slate-200 mx-1" />
+                <button 
+                  className="p-2.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all"
+                  title="Clear Canvas"
+                  onClick={() => {
+                    if (confirm('Clear entire canvas and delete draft?')) {
+                      const editor = (window as any).editor;
+                      if (editor) {
+                        editor.commands.clearContent();
+                        localStorage.removeItem('lando-builder-draft');
+                        setSaveStatus('idle');
+                      }
+                    }
+                  }}
+                >
+                   <Trash2 className="w-4 h-4" />
+                </button>
+             </div>
+
+             <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-white shadow-xl">
+               {[
+                 { id: 'desktop', icon: Monitor, label: 'Desktop 1280px' },
+                 { id: 'tablet', icon: Tablet, label: 'Tablet 768px' },
+                 { id: 'mobile', icon: Smartphone, label: 'Mobile 375px' },
+               ].map((mode) => (
+                 <button
+                   key={mode.id}
+                   onClick={() => setPreviewMode(mode.id as any)}
+                   className={cn(
+                     "px-4 py-2 rounded-xl flex items-center gap-2 transition-all font-black text-[9px] uppercase tracking-widest",
+                     previewMode === mode.id 
+                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" 
+                       : "text-slate-400 hover:text-slate-600 hover:bg-white"
+                   )}
+                 >
+                   <mode.icon className="w-3.5 h-3.5" />
+                   <span className="hidden lg:inline">{mode.id}</span>
+                 </button>
+               ))}
+             </div>
+
+             <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end">
+                   <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</span>
+                   <span className="text-[10px] font-black text-emerald-500 uppercase italic tracking-tighter flex items-center gap-1.5 text-right">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                      Live Editor
+                   </span>
+                </div>
+             </div>
           </div>
 
           <div 
             id="editor-stage"
             className={cn(
-              "bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 ease-out overflow-y-auto relative border-4 border-slate-200/50 rounded-[40px] custom-scrollbar",
+              "bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 ease-out overflow-y-auto overflow-x-hidden relative border-4 border-slate-200/50 rounded-[40px] custom-scrollbar",
               previewMode === 'desktop' && "w-[1280px] h-full",
               previewMode === 'tablet' && "w-[768px] h-full",
               previewMode === 'mobile' && "w-[375px] h-full"
@@ -252,4 +257,3 @@ export default function App() {
     </div>
   );
 }
-

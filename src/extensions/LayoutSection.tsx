@@ -29,13 +29,13 @@ const SectionComponent = (props: any) => {
       <section 
         onClick={handleSelectNode}
         className={cn(
-          "w-full transition-all duration-300",
+          "w-full transition-all duration-300 relative",
           background || 'bg-white',
           padding || 'py-24',
           selected ? "ring-4 ring-indigo-500 ring-inset" : "hover:ring-2 hover:ring-indigo-100 ring-inset"
         )}
       >
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="w-full h-full">
           <NodeViewContent />
         </div>
       </section>
@@ -46,7 +46,7 @@ const SectionComponent = (props: any) => {
 export const LayoutSection = Node.create({
   name: 'layoutSection',
   group: 'block',
-  content: 'layoutBlock+',
+  content: 'layoutRow+',
   draggable: true,
   defining: true,
 

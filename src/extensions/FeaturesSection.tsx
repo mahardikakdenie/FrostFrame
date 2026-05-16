@@ -41,9 +41,12 @@ const FeaturesSectionNodeView = (props: any) => {
         )}
       >
         {isFocused && (
-          <div className="absolute top-0 left-4 bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-b font-black z-30 shadow-lg font-mono flex items-center gap-2">
-            <span>FEATURES_SECTION.NODE</span>
-            {isDrilledDown && <span className="bg-white/20 px-1 rounded">EDITING_INTERNALS</span>}
+          <div className="absolute top-0 left-4 bg-slate-900 text-white text-[9px] px-3 py-1.5 rounded-b-xl font-black z-30 shadow-2xl skew-x--10 flex items-center gap-2">
+            <div className="skew-x-10 flex items-center gap-2">
+              <span className="text-emerald-500">â</span>
+              <span className="italic tracking-widest">FEATURES_SECTION.NODE</span>
+              {isDrilledDown && <span className="bg-indigo-600 px-1.5 rounded text-[8px]">ACTIVE_EDIT</span>}
+            </div>
           </div>
         )}
 

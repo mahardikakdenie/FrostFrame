@@ -14,7 +14,7 @@ export const Pricing = (props: NodeViewProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const insertAfter = (type: string) => {
-    const pos = props.getPos() + node.nodeSize;
+    const pos = (props?.getPos() ?? 0) + node.nodeSize;
     editor.chain().focus().insertContentAt(pos, { type }).run();
   };
 
@@ -29,24 +29,32 @@ export const Pricing = (props: NodeViewProps) => {
         )}
       >
         {isActive && (
-          <div className="absolute top-0 left-4 bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-b font-black z-20">PRICING_SECTION.NODE</div>
+          <div className="absolute top-0 left-4 bg-slate-900 text-white text-[9px] px-3 py-1.5 rounded-b-xl font-black z-30 shadow-2xl skew-x--10 flex items-center gap-2">
+            <div className="skew-x-10 flex items-center gap-2">
+              <span className="text-emerald-500">â</span>
+              <span className="italic tracking-widest">PRICING_SECTION.NODE</span>
+            </div>
+          </div>
         )}
 
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight uppercase leading-none">{title}</h2>
-            <p className="text-slate-500 font-medium">{subtitle}</p>
+            <h2 className="text-5xl font-black text-slate-900 mb-4 tracking-tighter uppercase leading-none italic skew-x-[-2deg]">{title}</h2>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">{subtitle}</p>
             
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <span className={cn("text-xs font-bold uppercase tracking-widest transition-colors", billingCycle === 'monthly' ? "text-indigo-600" : "text-slate-400")}>Monthly</span>
-              <div className="w-12 h-6 bg-slate-200 rounded-full relative p-1 cursor-pointer hover:bg-slate-300 transition-colors">
+            <div className="mt-8 flex items-center justify-center gap-6">
+              <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] transition-colors italic", billingCycle === 'monthly' ? "text-indigo-600" : "text-slate-400")}>Monthly</span>
+              <div 
+                onClick={() => editor.chain().focus().updateAttributes('pricingSection', { billingCycle: billingCycle === 'monthly' ? 'annually' : 'monthly' }).run()}
+                className="w-14 h-7 bg-slate-900 rounded-full relative p-1 cursor-pointer transition-colors shadow-inner"
+              >
                 <motion.div 
-                  className="w-4 h-4 bg-white rounded-full shadow-sm"
+                  className="w-5 h-5 bg-white rounded-full shadow-lg"
                   initial={false}
-                  animate={{ x: billingCycle === 'monthly' ? 0 : 24 }}
+                  animate={{ x: billingCycle === 'monthly' ? 0 : 28 }}
                 />
               </div>
-              <span className={cn("text-xs font-bold uppercase tracking-widest transition-colors", billingCycle === 'annually' ? "text-indigo-600" : "text-slate-400")}>Annually <span className="ml-1 text-[9px] text-green-500">(-20%)</span></span>
+              <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] transition-colors italic", billingCycle === 'annually' ? "text-indigo-600" : "text-slate-400")}>Annually <span className="ml-1 text-[8px] text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">SAVE 20%</span></span>
             </div>
           </div>
 
@@ -54,35 +62,37 @@ export const Pricing = (props: NodeViewProps) => {
             {(tiers || []).map((tier: any, idx: number) => (
               <motion.div 
                 key={idx}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -10 }}
                 className={cn(
-                  "bg-white p-10 rounded shadow-sm border flex flex-col relative overflow-hidden",
-                  tier.badge ? "border-indigo-500 ring-1 ring-indigo-500" : "border-slate-200"
+                  "bg-white p-12 rounded-[3rem] shadow-2xl transition-all flex flex-col relative overflow-hidden border-2",
+                  tier.badge ? "border-indigo-500 shadow-indigo-100" : "border-slate-100 shadow-slate-200"
                 )}
               >
                 {tier.badge && (
-                   <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-black px-4 py-1 uppercase tracking-tighter rotate-45 translate-x-4 translate-y-3">
+                   <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[9px] font-black px-8 py-2 uppercase tracking-[0.2em] rotate-45 translate-x-8 translate-y-4 shadow-xl italic">
                       {tier.badge}
                    </div>
                 )}
-                <h3 className="text-lg font-black text-slate-900 mb-2 uppercase tracking-wide italic">{tier.name}</h3>
+                <h3 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-widest italic">{tier.name}</h3>
                 <div className="flex items-baseline mb-8">
-                  <span className="text-4xl font-black text-slate-900">{tier.price}</span>
-                  <span className="text-slate-400 text-sm font-bold ml-1 uppercase">/ MONTH</span>
+                  <span className="text-5xl font-black text-slate-900 tracking-tighter italic skew-x-[-2deg]">{tier.price}</span>
+                  <span className="text-slate-400 text-[10px] font-black ml-2 uppercase tracking-widest italic">/ Mo</span>
                 </div>
-                <ul className="space-y-4 mb-10 flex-grow">
+                <ul className="space-y-4 mb-12 grow">
                   {tier.features.map((feature: string, fIdx: number) => (
-                    <li key={fIdx} className="flex items-center text-slate-600 text-sm font-medium">
-                      <Check className="w-4 h-4 text-indigo-500 mr-3 shrink-0" />
+                    <li key={fIdx} className="flex items-center text-slate-600 text-[10px] font-black uppercase tracking-wider italic">
+                      <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center mr-3 shrink-0">
+                        <Check className="w-3 h-3 text-emerald-500" />
+                      </div>
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <button className={cn(
-                  "w-full py-3 rounded text-xs font-bold transition-all uppercase tracking-widest",
-                  tier.badge ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  "w-full py-4 rounded-2xl text-[10px] font-black transition-all uppercase tracking-[0.2em] italic skew-x--10",
+                  tier.badge ? "bg-indigo-600 text-white shadow-2xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1" : "bg-slate-900 text-white hover:bg-black hover:-translate-y-1 shadow-2xl"
                 )}>
-                  {tier.ctaText}
+                  <div className="skew-x-10">{tier.ctaText}</div>
                 </button>
               </motion.div>
             ))}
@@ -99,16 +109,16 @@ export const Pricing = (props: NodeViewProps) => {
             className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2"
           >
             <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('strictHeroRow'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3"
+              onClick={(e) => { e.stopPropagation(); insertAfter('layoutRow'); }}
+              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
             >
-              <Plus className="w-4 h-4" /> Add Hero
+              <Plus className="w-4 h-4" /> ADD ROW
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); insertAfter('pricingSection'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-bold pr-3"
+              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
             >
-              <Plus className="w-4 h-4" /> Add Pricing
+              <Plus className="w-4 h-4" /> ADD PRICING
             </button>
           </motion.div>
         )}

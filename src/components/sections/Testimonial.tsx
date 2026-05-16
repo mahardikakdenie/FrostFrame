@@ -1,43 +1,15 @@
-import React, { useState } from 'react';
-import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Plus, Quote } from 'lucide-react';
-import { useUIStore } from '../../store/useUIStore';
+import React from 'react';
+import { NodeViewProps } from '@tiptap/react';
+import { Star, Quote } from 'lucide-react';
+import { SectionWrapper } from './SectionWrapper';
 import { cn } from '../../lib/utils';
 
 export const Testimonial = (props: NodeViewProps) => {
-  const { node, selected, editor } = props;
-  const { id: sectionId, quote, author, rating, logos } = node.attrs;
-  const setFocusedId = useUIStore((state) => state.setFocusedId);
-  const focusedId = useUIStore((state) => state.focusedId);
-  const isActive = selected || focusedId === sectionId;
-  const [isHovered, setIsHovered] = useState(false);
-
-  const insertAfter = (type: string) => {
-    const pos = props.getPos() + node.nodeSize;
-    editor.chain().focus().insertContentAt(pos, { type }).run();
-  };
+  const { node } = props;
+  const { quote, author, rating, logos } = node.attrs;
 
   return (
-    <NodeViewWrapper className="group relative">
-      <div 
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onClick={() => setFocusedId(sectionId, 'section')}
-        className={cn(
-          "py-32 px-6 bg-slate-900 transition-all cursor-pointer m-4 rounded overflow-hidden relative text-white",
-          isActive ? "ring-2 ring-indigo-500 border-2 border-indigo-500 border-dashed" : "hover:ring-2 hover:ring-slate-700 shadow-2xl"
-        )}
-      >
-        {isActive && (
-          <div className="absolute top-0 left-4 bg-indigo-600 text-white text-[9px] px-3 py-1.5 rounded-b-xl font-black z-30 shadow-2xl skew-x--10 flex items-center gap-2">
-            <div className="skew-x-10 flex items-center gap-2">
-              <span className="text-white animate-pulse">â</span>
-              <span className="italic tracking-widest">TESTIMONIAL.NODE</span>
-            </div>
-          </div>
-        )}
-
+    <SectionWrapper {...props} sectionName="TESTIMONIAL.NODE" className="py-32 px-6 bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-10 transform -translate-y-4">
              <Quote className="w-32 h-32 text-indigo-400 rotate-180" />
@@ -51,7 +23,7 @@ export const Testimonial = (props: NodeViewProps) => {
             ))}
           </div>
 
-          <blockquote className="text-4xl md:text-5xl font-black italic tracking-tighter leading-[1.1] mb-16 skew-x-[-2deg] uppercase">
+          <blockquote className="text-4xl md:text-5xl mb-16 theme-headline !italic">
             "{quote || 'This is an amazing product.'}"
           </blockquote>
 
@@ -74,31 +46,6 @@ export const Testimonial = (props: NodeViewProps) => {
              ))}
           </div>
         </div>
-      </div>
-
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2"
-          >
-            <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('layoutRow'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
-            >
-              <Plus className="w-4 h-4" /> ADD ROW
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('pricingSection'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
-            >
-              <Plus className="w-4 h-4" /> ADD PRICING
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </NodeViewWrapper>
+    </SectionWrapper>
   );
 };

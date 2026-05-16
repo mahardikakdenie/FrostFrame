@@ -1,15 +1,23 @@
 import React from 'react';
-// @ts-ignore - BubbleMenu export might vary depending on Tiptap version installed
-import { Editor, BubbleMenu } from '@tiptap/react';
+// Use a more resilient import strategy for Tiptap React components
+import * as TiptapReact from '@tiptap/react';
 import { Bold, Italic, Strikethrough, RemoveFormatting, Type } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface FloatingToolbarProps {
-  editor: Editor | null;
+  editor: any; // Using any to avoid strict type issues with BubbleMenu
 }
 
 export const FloatingToolbar = ({ editor }: FloatingToolbarProps) => {
   if (!editor) return null;
+
+  // Safely extract BubbleMenu if it exists in the bundle
+  const BubbleMenu = (TiptapReact as any).BubbleMenu;
+
+  if (!BubbleMenu) {
+    console.warn("Tiptap BubbleMenu component not found in @tiptap/react");
+    return null;
+  }
 
   return (
     <BubbleMenu 
@@ -67,3 +75,4 @@ export const FloatingToolbar = ({ editor }: FloatingToolbarProps) => {
     </BubbleMenu>
   );
 };
+

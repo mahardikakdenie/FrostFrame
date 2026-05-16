@@ -56,6 +56,73 @@
   width: 100%;
 }
 
+/* 🚀 MULTI-THEME ENGINE COMPONENTS */
+@layer components {
+  /* Generic Sections */
+  .theme-section {
+    @apply transition-all duration-500 ease-out;
+  }
+  [data-theme="lando"] .theme-section {
+    /* Lando default uses its own specific container logic in components */
+  }
+
+  /* Theme Card (Feature cards, pricing tiers, testimonials) */
+  .theme-card {
+    @apply bg-white transition-all duration-300;
+  }
+
+  /* Lando Brutalist */
+  [data-theme="lando"] .theme-card {
+    @apply rounded-[3rem] border-2 border-slate-100 shadow-2xl skew-x-[-2deg] hover:border-indigo-500 hover:shadow-indigo-100;
+  }
+  [data-theme="lando"] .theme-card-inner {
+    @apply skew-x-[2deg];
+  }
+
+  /* Bootstrap Modern */
+  [data-theme="bootstrap"] .theme-card {
+    @apply rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300;
+  }
+
+  /* Material Design */
+  [data-theme="material"] .theme-card {
+    @apply rounded-lg shadow-lg hover:shadow-2xl border-none;
+  }
+
+  /* Flat Minimal */
+  [data-theme="flat"] .theme-card {
+    @apply rounded-none border-4 border-slate-900 shadow-none hover:translate-x-1 hover:translate-y-1;
+  }
+
+  /* Theme Badges / Buttons */
+  .theme-badge {
+    @apply px-3 py-1 font-black uppercase tracking-widest text-[9px] transition-all;
+  }
+  [data-theme="lando"] .theme-badge {
+    @apply rounded-b-xl skew-x-[-10deg] shadow-2xl;
+  }
+  [data-theme="bootstrap"] .theme-badge {
+    @apply rounded-full;
+  }
+  [data-theme="material"] .theme-badge {
+    @apply rounded shadow-md;
+  }
+  [data-theme="flat"] .theme-badge {
+    @apply border-2 border-slate-900;
+  }
+
+  /* Theme Headlines */
+  .theme-headline {
+    @apply font-black tracking-tighter uppercase leading-none transition-all;
+  }
+  [data-theme="lando"] .theme-headline {
+    @apply italic skew-x-[-2deg];
+  }
+  [data-theme="flat"] .theme-headline {
+    @apply tracking-normal;
+  }
+}
+
 /* Tiptap Placeholder */
 .ProseMirror.is-editor-empty::before {
   content: attr(data-placeholder);
@@ -157,5 +224,10 @@ body[class*="is-dragging-featureCard"] {
 
 .ProseMirror [data-type]:has([data-type]:hover)::after {
   display: none;
+}
+
+.dragging-over {
+  background-color: rgba(99, 102, 241, 0.05) !important;
+  box-shadow: inset 0 0 0 2px #6366f1 !important;
 }
 

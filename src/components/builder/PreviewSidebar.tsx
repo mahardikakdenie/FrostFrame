@@ -1,9 +1,21 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2, GripVertical } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
-import { cn } from '../../lib/utils';
-import { HeadingConfig, ButtonConfig, MediaConfig, BackgroundConfig, IconConfig, VideoConfig, ParagraphConfig, DividerConfig, SpacerConfig, AdvancedConfig } from './ElementConfigs';
+import { cn, debounce } from '../../lib/utils';
+import { 
+  HeadingConfig, 
+  ButtonConfig, 
+  MediaConfig, 
+  BackgroundConfig, 
+  IconConfig, 
+  VideoConfig, 
+  ParagraphConfig, 
+  DividerConfig, 
+  SpacerConfig, 
+  AdvancedConfig,
+  TestimonialConfig
+} from './configs';
 import { RowGridConfig } from './RowGridConfig';
 import { DimensionConfig } from './DimensionConfig';
 import { DeviceSelector, ResponsiveLabel, updateResponsiveValue } from './ResponsiveConfig';
@@ -16,24 +28,114 @@ export const PreviewSidebar = () => {
   const drillDownId = useUIStore((state) => state.drillDownId);
   const activeDevice = useUIStore((state) => state.activeDevice);
   const setDrillDownId = useUIStore((state) => state.setDrillDownId);
+  const openConfirmModal = useUIStore((state) => state.openConfirmModal);
+
+  // 🚀 OPTIMIZATION (Fase 5): Debounced editor update for textContent
+  const debouncedTextUpdate = useMemo(() => 
+    debounce((value: string, id: string) => {
+      const editor = (window as any).editor;
+      if (!editor) return;
+
+      editor.state.doc.descendants((node: any, pos: number) => {
+        if (node.attrs.id === id || pos.toString() === id) {
+          editor.chain()
+            .insertContentAt({ 
+              from: pos + 1, 
+              to: pos + node.nodeSize - 1 
+            }, value)
+            .run();
+          return false;
+        }
+      });
+    }, 400),
+  []);
+
+  // Helper to resolve node position (Optimized Fase 1)
+  const resolveNode = useCallback((idOverride?: string) => {
+    const editor = (window as any).editor;
+    const targetId = idOverride || focusedId;
+    if (!editor || !targetId) return null;
+
+    const { selection } = editor.state;
+    const selectedNode = (selection as any).node;
+    const $from = selection.$from;
+    const check = (n: any, p: number) => (n.attrs.id === targetId || p.toString() === targetId) ? { node: n, pos: p } : null;
+
+    if (selectedNode) {
+      const res = check(selectedNode, selection.from);
+      if (res) return res;
+    }
+    for (let d = $from.depth; d >= 0; d--) {
+      const res = check($from.node(d), $from.before(d));
+      if (res) return res;
+    }
+    let found: any = null;
+    editor.state.doc.descendants((node: any, pos: number) => {
+      const res = check(node, pos);
+      if (res) { found = res; return false; }
+    });
+    return found;
+  }, [focusedId]);
 
   const deleteNode = useCallback((id: string) => {
     const editor = (window as any).editor;
     if (!editor) return;
 
-    if (confirm('Are you sure you want to delete this element?')) {
-      editor.state.doc.descendants((node: any, pos: number) => {
-        const nodeId = node.attrs.id || pos.toString();
-        if (nodeId === id) {
+    openConfirmModal({
+      title: 'Delete Element',
+      message: 'Are you sure you want to remove this element from your layout? This action cannot be undone.',
+      variant: 'danger',
+      onConfirm: () => {
+        // 🚀 OPTIMIZATION: Use resolveNode (O(1)) instead of doc.descendants
+        const target = resolveNode(id);
+        if (target) {
           editor.view.dispatch(
-            editor.view.state.tr.delete(pos, pos + node.nodeSize)
+            editor.view.state.tr.delete(target.pos, target.pos + target.node.nodeSize)
           );
           if (focusedId === id) setFocusedId(null);
-          return false;
         }
-      });
+      }
+    });
+  }, [focusedId, setFocusedId, openConfirmModal, resolveNode]);
+
+  const handleReorder = (newOrder: typeof childNodes) => {
+    // 🚀 OPTIMIZATION: Only update local visual state during drag
+    setChildNodes(newOrder);
+  };
+
+  const commitReorderToTiptap = useCallback((currentNodes: typeof childNodes) => {
+    const editor = (window as any).editor;
+    if (!editor) return;
+
+    const target = resolveNode();
+    if (!target) return;
+
+    const { node: parentNode, pos: parentPos } = target;
+    const newContent: any[] = [];
+
+    // 🚀 OPTIMIZATION: O(N) Map for faster lookup
+    const idMap = new Map();
+    let offset = 0;
+    parentNode.forEach((child: any) => {
+      const id = child.attrs.id || (parentPos + 1 + offset).toString();
+      idMap.set(id, child.toJSON());
+      offset += child.nodeSize;
+    });
+
+    currentNodes.forEach(item => {
+      const json = idMap.get(item.id);
+      if (json) newContent.push(json);
+    });
+
+    if (newContent.length === parentNode.childCount) {
+      editor.chain()
+        .insertContentAt({ 
+          from: parentPos + 1, 
+          to: parentPos + parentNode.nodeSize - 1 
+        }, newContent)
+        .run();
     }
-  }, [focusedId, setFocusedId]);
+  }, [resolveNode]);
 
   const [view, setView] = useState<'config' | 'theme'>('config');
   const [targetAttrs, setTargetAttrs] = useState<any>(null);
@@ -51,16 +153,17 @@ export const PreviewSidebar = () => {
     if (!editor || !focusedId) return;
 
     const handleUpdate = () => {
-      // Find the node in the doc
       let found = false;
       let children: {id: string, type: string, label: string}[] = [];
 
-      console.log('Sidebar searching for ID:', focusedId);
-
-      editor.state.doc.descendants((n: any, pos: number) => {
+      // 🚀 OPTIMIZATION (Fase 1): Check current selection first (O(1))
+      const { selection } = editor.state;
+      const selectedNode = (selection as any).node;
+      const $from = selection.$from;
+      
+      const checkNode = (n: any, pos: number) => {
         const id = n.attrs.id || pos.toString();
         if (id === focusedId) {
-          console.log('Sidebar found node:', n.type.name, n.attrs);
           setTargetAttrs({
             ...n.attrs,
             textContent: n.textContent,
@@ -77,9 +180,29 @@ export const PreviewSidebar = () => {
           });
           
           found = true;
-          return false;
+          return true;
         }
-      });
+        return false;
+      };
+
+      // Try resolving from current selection/cursor path first
+      if (selectedNode && checkNode(selectedNode, selection.from)) {
+        // Found via NodeSelection
+      } else {
+        // Try resolving node at cursor depth (from deep to root)
+        for (let d = $from.depth; d > 0; d--) {
+          const node = $from.node(d);
+          const pos = $from.before(d);
+          if (checkNode(node, pos)) break;
+        }
+      }
+
+      // Fallback: Full scan only if not found in active selection path
+      if (!found) {
+        editor.state.doc.descendants((n: any, pos: number) => {
+          if (checkNode(n, pos)) return false;
+        });
+      }
       
       if (found) {
         setChildNodes(children);
@@ -109,31 +232,14 @@ export const PreviewSidebar = () => {
     const editor = (window as any).editor;
     if (!editor || !focusedId) return;
 
+    const target = resolveNode();
+    if (!target) return;
+
     // Special case for textContent (updating the node's inner content)
     if (key === 'textContent') {
-      let nodePos = -1;
-      let targetNode: any = null;
-
-      editor.state.doc.descendants((node: any, pos: number) => {
-        const id = node.attrs.id || pos.toString();
-        if (id === focusedId) {
-          nodePos = pos;
-          targetNode = node;
-          return false;
-        }
-      });
-
-      if (nodePos !== -1 && targetNode) {
-        editor.chain()
-          .focus()
-          .insertContentAt({ 
-            from: nodePos + 1, 
-            to: nodePos + targetNode.nodeSize - 1 
-          }, value)
-          .run();
-        
-        setTargetAttrs((prev: any) => prev ? { ...prev, textContent: value } : null);
-      }
+      // 🚀 OPTIMIZATION (Fase 5): Update local state immediately, editor eventually
+      setTargetAttrs((prev: any) => prev ? { ...prev, textContent: value } : null);
+      debouncedTextUpdate(value, focusedId);
       return;
     }
 
@@ -144,24 +250,19 @@ export const PreviewSidebar = () => {
       return;
     }
 
-    editor.state.doc.descendants((node: any, pos: number) => {
-      if ((node.attrs.id === focusedId || pos.toString() === focusedId)) {
-        editor.view.dispatch(
-          editor.view.state.tr.setNodeMarkup(pos, undefined, {
-            ...node.attrs,
-            [key]: value
-          })
-        );
-        setTargetAttrs((prev: any) => prev ? { ...prev, [key]: value } : null);
-        return false;
-      }
-    });
+    editor.view.dispatch(
+      editor.view.state.tr.setNodeMarkup(target.pos, undefined, {
+        ...target.node.attrs,
+        [key]: value
+      })
+    );
+    setTargetAttrs((prev: any) => prev ? { ...prev, [key]: value } : null);
   }, [focusedId, nodeType]);
 
   if (!focusedId || !targetAttrs) return null;
   
   const layoutTypes = [
-    'pricingSection', 'featuresSection', 'testimonialSection', 'footerSection', 'layoutSection',
+    'pricingSection', 'featuresSection', 'footerSection', 'layoutSection',
     'layoutColumn', 'layoutRow', 'sectionGrid', 'sectionHeading'
   ];
   const isLayoutBlock = layoutTypes.includes(nodeType);
@@ -312,29 +413,43 @@ export const PreviewSidebar = () => {
                         </button>
                       </div>
                       <div className="grid gap-2">
-                        {childNodes.length > 0 ? childNodes.map((child) => (
-                          <div 
-                            key={child.id} 
-                            className="group flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer"
-                            onClick={() => setFocusedId(child.id, 'element')}
+                        {childNodes.length > 0 ? (
+                          <Reorder.Group 
+                            axis="y" 
+                            values={childNodes} 
+                            onReorder={handleReorder} 
+                            className="grid gap-2"
                           >
-                              <div className="w-6 h-6 bg-white border border-slate-200 rounded flex items-center justify-center text-[8px] font-black text-slate-400 group-hover:text-indigo-500 group-hover:border-indigo-200">
-                                {child.type.substring(0, 2).toUpperCase()}
-                              </div>
-                              <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 uppercase tracking-tight">{child.label}</span>
-                              
-                              <div className="ml-auto flex items-center gap-2">
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); deleteNode(child.id); }}
-                                  className="p-1.5 rounded-lg text-slate-300 hover:bg-rose-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
-                                  title="Delete Element"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                                <ChevronRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-400" />
-                              </div>
-                          </div>
-                        )) : (
+                            {childNodes.map((child) => (
+                              <Reorder.Item 
+                                key={child.id} 
+                                value={child}
+                                className="group flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer relative"
+                                onClick={() => setFocusedId(child.id, 'element')}
+                                onDragEnd={() => commitReorderToTiptap(childNodes)}
+                              >
+                                  <div className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-indigo-500 transition-colors">
+                                    <GripVertical className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div className="w-6 h-6 bg-white border border-slate-200 rounded flex items-center justify-center text-[8px] font-black text-slate-400 group-hover:text-indigo-500 group-hover:border-indigo-200">
+                                    {child.type.substring(0, 2).toUpperCase()}
+                                  </div>
+                                  <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 uppercase tracking-tight">{child.label}</span>
+                                  
+                                  <div className="ml-auto flex items-center gap-2">
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); deleteNode(child.id); }}
+                                      className="p-1.5 rounded-lg text-slate-300 hover:bg-rose-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                                      title="Delete Element"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                    <ChevronRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-400" />
+                                  </div>
+                              </Reorder.Item>
+                            ))}
+                          </Reorder.Group>
+                        ) : (
                           <div className="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
                               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">No Nested Elements</span>
                           </div>
@@ -394,6 +509,10 @@ export const PreviewSidebar = () => {
                         activeFormatting={activeFormatting}
                       />
                       
+                      {nodeType === 'testimonialSection' && (
+                        <TestimonialConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                      )}
+
                       {nodeType === 'heroButtonGroup' && (
                         <ButtonConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
                       )}

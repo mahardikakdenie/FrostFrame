@@ -13,6 +13,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     root.style.setProperty('--heading-font', theme.headingFont);
     root.style.setProperty('--body-font', theme.bodyFont);
     root.style.setProperty('--border-radius', theme.borderRadius);
+
+    // 🚀 OPTIMIZATION (Multi-Theme): Inject activeTheme attribute
+    root.setAttribute('data-theme', theme.activeTheme || 'lando');
     
     // Add RGB variants for opacity support (Tailwind utility compatibility)
     const hexToRgb = (hex: string) => {

@@ -1,43 +1,14 @@
-import React, { useState } from 'react';
-import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Twitter, Github, Linkedin, Plus } from 'lucide-react';
-import { useUIStore } from '../../store/useUIStore';
-import { cn } from '../../lib/utils';
+import React from 'react';
+import { NodeViewProps } from '@tiptap/react';
+import { Twitter, Github, Linkedin } from 'lucide-react';
+import { SectionWrapper } from './SectionWrapper';
 
 export const Footer = (props: NodeViewProps) => {
-  const { node, selected, editor } = props;
-  const { id: sectionId, logo, description, links, copyright } = node.attrs;
-  const setFocusedId = useUIStore((state) => state.setFocusedId);
-  const focusedId = useUIStore((state) => state.focusedId);
-  const isActive = selected || focusedId === sectionId;
-  const [isHovered, setIsHovered] = useState(false);
-
-  const insertAfter = (type: string) => {
-    const pos = props.getPos() + node.nodeSize;
-    editor.chain().focus().insertContentAt(pos, { type }).run();
-  };
+  const { node } = props;
+  const { logo, description, links, copyright } = node.attrs;
 
   return (
-    <NodeViewWrapper className="group relative">
-      <div 
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onClick={() => setFocusedId(sectionId, 'section')}
-        className={cn(
-          "py-20 px-12 bg-white transition-all cursor-pointer m-4 rounded overflow-hidden relative border-t border-slate-100",
-          isActive ? "ring-2 ring-indigo-500 border-2 border-indigo-500 border-dashed" : "hover:ring-2 hover:ring-slate-100"
-        )}
-      >
-        {isActive && (
-          <div className="absolute top-0 left-4 bg-slate-900 text-white text-[9px] px-3 py-1.5 rounded-b-xl font-black z-30 shadow-2xl skew-x--10 flex items-center gap-2">
-            <div className="skew-x-10 flex items-center gap-2">
-              <span className="text-emerald-500">â</span>
-              <span className="italic tracking-widest">FOOTER_SECTION.NODE</span>
-            </div>
-          </div>
-        )}
-
+    <SectionWrapper {...props} sectionName="FOOTER_SECTION.NODE" showAddPricing={false} className="py-20 px-12 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
             <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black italic shadow-2xl skew-x--10 text-xl mb-8">L</div>
@@ -78,25 +49,6 @@ export const Footer = (props: NodeViewProps) => {
              <span className="hover:text-indigo-600 transition-colors cursor-pointer">Security</span>
           </div>
         </div>
-      </div>
-
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2"
-          >
-            <button 
-              onClick={(e) => { e.stopPropagation(); insertAfter('layoutRow'); }}
-              className="bg-white border border-slate-200 text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2 text-[10px] font-black pr-3 italic px-4"
-            >
-              <Plus className="w-4 h-4" /> ADD ROW
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </NodeViewWrapper>
+    </SectionWrapper>
   );
 };

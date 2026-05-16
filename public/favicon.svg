@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="28" height="28" x="2" y="2" rx="6" fill="#4f46e5" transform="skewX(-2)" transform-origin="center" />
+  <text x="50%" y="55%" dominant-baseline="central" text-anchor="middle" fill="white" 
+        style="font-family: sans-serif; font-weight: 900; font-style: italic; font-size: 20px;">L</text>
+</svg>

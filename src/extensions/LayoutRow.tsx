@@ -268,12 +268,44 @@ const LayoutRowComponent = (props: any) => {
               e.stopPropagation();
               editor.commands.addLayoutColumn();
             }}
-            className="group/slot border-2 border-dashed border-slate-100 rounded-2xl min-h-[120px] flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer"
+            className="group/slot relative border-2 border-dashed border-slate-100 rounded-2xl min-h-[120px] flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer"
           >
-             <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-300 group-hover/slot:text-indigo-500 group-hover/slot:scale-110 transition-all">
+             {/* Delete Slot Button */}
+             <button 
+               onClick={(e) => {
+                 e.stopPropagation();
+                 const currentCols = typeof gridCols === 'object' ? (gridCols.desktop || 1) : (gridCols || 1);
+                 
+                 // If there's only 1 target column left and it's empty, delete the whole row
+                 if (currentCols <= 1 && childCount === 0) {
+                   handleDelete(e);
+                 } else if (currentCols > 1) {
+                   // Otherwise, reduce the column count
+                   const pos = getPos();
+                   if (typeof pos === 'number') {
+                     const newVal = typeof gridCols === 'object' 
+                        ? { ...gridCols, desktop: Math.max(1, currentCols - 1) } 
+                        : Math.max(1, currentCols - 1);
+
+                     editor.view.dispatch(
+                       editor.view.state.tr.setNodeMarkup(pos, undefined, {
+                         ...node.attrs,
+                         gridCols: newVal
+                       })
+                     );
+                   }
+                 }
+               }}
+               className="absolute top-2 right-2 bg-rose-500 text-white p-1.5 rounded-full shadow-md hover:bg-rose-600 transition-all opacity-0 group-hover/slot:opacity-100 z-20"
+               title="Remove Column Slot"
+             >
+               <Trash2 className="w-3.5 h-3.5" />
+             </button>
+
+             <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-300 group-hover/slot:text-indigo-500 group-hover/slot:scale-110 transition-all pointer-events-none">
                 <Plus className="w-4 h-4" />
              </div>
-             <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest group-hover/slot:text-indigo-400">Add Column</span>
+             <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest group-hover/slot:text-indigo-400 pointer-events-none">Add Column</span>
           </div>
         ))}
       </div>

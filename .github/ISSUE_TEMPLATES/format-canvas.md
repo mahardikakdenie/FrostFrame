@@ -1,8 +1,1 @@
-![alt text](image-7.png) ini adalah Preview Kanvas
-
-dan ini adalah Sidebar UI Layout Columns
-![alt text](image-8.png)
-
-apakah di Layout Columns tidak ada KOnfigurasi untuk Mengatur Tinggi dan LEBAR 
-
-TOLONG FIXING DI SIDEBAR UI nya
+bisa anda lihat di editor canvas saya ada ![alt text](image.png), ini tidak bisa di hapus, dan dari sisi user ini sangat menggagu jika ada ini flow nya harus pijik tambahkan columns tapi user juga bisa hapus ini columns jika user berubah Pikiran

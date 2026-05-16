@@ -38,6 +38,36 @@ export const ThemeSettings = () => {
          <h2 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter text-left">BRAND IDENTITY</h2>
       </div>
 
+      {/* 🚀 NEW: Theme Presets Section */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 mb-4">
+          <RefreshCcw className="w-3.5 h-3.5 text-indigo-500" />
+          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic text-left">Theme Presets</h4>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { id: 'lando', label: 'Lando Brutalist' },
+            { id: 'bootstrap', label: 'Corporate (BS)' },
+            { id: 'material', label: 'Material UI' },
+            { id: 'flat', label: 'Flat Design' },
+          ].map(preset => (
+            <button
+              key={preset.id}
+              onClick={() => theme.applyThemePreset(preset.id)}
+              className={cn(
+                "p-3 rounded-xl border-2 text-[8px] font-black uppercase tracking-widest transition-all text-center",
+                theme.activeTheme === preset.id 
+                  ? "bg-indigo-600 border-indigo-600 text-white shadow-lg" 
+                  : "bg-white border-slate-100 text-slate-400 hover:border-indigo-200"
+              )}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Colors Section */}
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">

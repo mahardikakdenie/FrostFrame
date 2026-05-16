@@ -12,12 +12,17 @@ import { useUIStore } from './store/useUIStore';
 import { Monitor, Tablet, Smartphone, Eye, Plus, Send, Layout, ChevronLeft, Search, Undo2, Redo2, Trash2, Save } from 'lucide-react';
 import { cn } from './lib/utils';
 import { MediaLibraryModal } from './components/builder/MediaLibraryModal';
+import { ConfirmationModal } from './components/builder/ConfirmationModal';
+import { ThemeSettings } from './components/builder/ThemeSettings';
 
 export default function App() {
   const previewMode = useUIStore((state) => state.previewMode);
   const setPreviewMode = useUIStore((state) => state.setPreviewMode);
   const focusedId = useUIStore((state) => state.focusedId);
   const setFocusedId = useUIStore((state) => state.setFocusedId);
+  const activeSidebarTab = useUIStore((state) => state.activeSidebarTab);
+  const setActiveSidebarTab = useUIStore((state) => state.setActiveSidebarTab);
+  const openConfirmModal = useUIStore((state) => state.openConfirmModal);
 
   const [saveStatus, setSaveStatus] = React.useState<'idle' | 'saving' | 'saved'>('idle');
 
@@ -123,11 +128,39 @@ export default function App() {
       <main className="flex-1 flex overflow-hidden relative">
         {/* Left Sidebar: Unified Panel (Blocks or Properties) */}
         <aside className="w-85 bg-white border-r border-slate-200 flex flex-col shrink-0 z-50">
-          {focusedId ? (
-            <PreviewSidebar />
-          ) : (
-            <BlockLibrarySidebar onAddSection={addSection} />
-          )}
+          {/* Global Sidebar Tabs Navigation */}
+          <div className="flex p-4 border-b border-slate-100 gap-2 bg-slate-50/50">
+             <button 
+               onClick={() => setActiveSidebarTab('library')}
+               className={cn(
+                 "flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                 activeSidebarTab === 'library' ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200" : "text-slate-400 hover:text-slate-600"
+               )}
+             >
+               <Layout className="w-3.5 h-3.5" />
+               {focusedId ? 'Properties' : 'Library'}
+             </button>
+             <button 
+               onClick={() => setActiveSidebarTab('design')}
+               className={cn(
+                 "flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                 activeSidebarTab === 'design' ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200" : "text-slate-400 hover:text-slate-600"
+               )}
+             >
+               <Save className="w-3.5 h-3.5" />
+               Design
+             </button>
+          </div>
+
+          <div className="flex-1 overflow-hidden relative">
+             {activeSidebarTab === 'library' ? (
+                focusedId ? <PreviewSidebar /> : <BlockLibrarySidebar onAddSection={addSection} />
+             ) : (
+                <div className="p-8 overflow-y-auto h-full custom-scrollbar">
+                   <ThemeSettings />
+                </div>
+             )}
+          </div>
         </aside>
 
         {/* Editor Stage */}
@@ -168,14 +201,19 @@ export default function App() {
                   className="p-2.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all"
                   title="Clear Canvas"
                   onClick={() => {
-                    if (confirm('Clear entire canvas and delete draft?')) {
-                      const editor = (window as any).editor;
-                      if (editor) {
-                        editor.commands.clearContent();
-                        localStorage.removeItem('lando-builder-draft');
-                        setSaveStatus('idle');
+                    openConfirmModal({
+                      title: 'Clear Canvas',
+                      message: 'Are you sure you want to clear the entire canvas and delete your draft? This action cannot be undone.',
+                      variant: 'danger',
+                      onConfirm: () => {
+                        const editor = (window as any).editor;
+                        if (editor) {
+                          editor.commands.clearContent();
+                          localStorage.removeItem('lando-builder-draft');
+                          setSaveStatus('idle');
+                        }
                       }
-                    }
+                    });
                   }}
                 >
                    <Trash2 className="w-4 h-4" />
@@ -254,6 +292,7 @@ export default function App() {
           Viewport: {previewMode === 'desktop' ? '1280' : previewMode === 'tablet' ? '768' : '375'}px x AUTO | 60FPS STABLE
         </div>
       </footer>
+      <ConfirmationModal />
     </div>
   );
 }

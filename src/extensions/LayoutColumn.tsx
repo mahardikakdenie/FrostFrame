@@ -2,7 +2,7 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import React from 'react';
 import { cn } from '../lib/utils';
-import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import { GripVertical, Plus, Trash2, LayoutTemplate } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
 import { getResponsiveSpacing, normalizeResponsive } from '../lib/responsive';
 
@@ -56,6 +56,11 @@ const LayoutColumnComponent = (props: any) => {
     }
   };
 
+  const handleWrapWithRow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    editor.commands.wrapInRow();
+  };
+
   // Map width values to Tailwind classes
   const getWidthClass = () => {
     if (flexSizing === 'flex-1') return 'flex-1 w-full';
@@ -84,35 +89,70 @@ const LayoutColumnComponent = (props: any) => {
 
   const getFlexClass = () => {
     if (displayType === 'flex') {
-      const direction = {
+      const normalizedDirection = normalizeResponsive(flexDirection, 'col');
+      const normalizedAlign = normalizeResponsive(alignItems, 'stretch');
+      const normalizedJustify = normalizeResponsive(justifyContent, 'start');
+      const normalizedContent = normalizeResponsive(node.attrs.alignContent, 'start');
+
+      const classes = ['flex', 'flex-wrap'];
+
+      const directionMap: Record<string, string> = {
         'row': 'flex-row',
         'row-reverse': 'flex-row-reverse',
         'col': 'flex-col',
         'col-reverse': 'flex-col-reverse'
-      }[flexDirection as string] || 'flex-col';
+      };
 
-      const align = {
+      const alignMap: Record<string, string> = {
         'start': 'items-start',
         'center': 'items-center',
         'end': 'items-end',
         'stretch': 'items-stretch'
-      }[alignItems as string] || 'items-stretch';
+      };
 
-      const justify = {
+      const justifyMap: Record<string, string> = {
         'start': 'justify-start',
         'center': 'justify-center',
         'end': 'justify-end',
         'between': 'justify-between',
         'around': 'justify-around'
-      }[justifyContent as string] || 'justify-start';
+      };
 
-      return `flex ${direction} ${align} ${justify} flex-wrap`;
+      const contentMap: Record<string, string> = {
+        'start': 'content-start',
+        'center': 'content-center',
+        'end': 'content-end',
+        'between': 'content-between',
+        'around': 'content-around',
+        'stretch': 'content-stretch'
+      };
+
+      // Base (Mobile)
+      classes.push(directionMap[normalizedDirection.mobile] || directionMap.col);
+      classes.push(alignMap[normalizedAlign.mobile] || alignMap.stretch);
+      classes.push(justifyMap[normalizedJustify.mobile] || justifyMap.start);
+      classes.push(contentMap[normalizedContent.mobile] || contentMap.start);
+
+      // Tablet (md)
+      if (normalizedDirection.tablet) classes.push(`md:${directionMap[normalizedDirection.tablet]}`);
+      if (normalizedAlign.tablet) classes.push(`md:${alignMap[normalizedAlign.tablet]}`);
+      if (normalizedJustify.tablet) classes.push(`md:${justifyMap[normalizedJustify.tablet]}`);
+      if (normalizedContent.tablet) classes.push(`md:${contentMap[normalizedContent.tablet]}`);
+
+      // Desktop (lg)
+      if (normalizedDirection.desktop) classes.push(`lg:${directionMap[normalizedDirection.desktop]}`);
+      if (normalizedAlign.desktop) classes.push(`lg:${alignMap[normalizedAlign.desktop]}`);
+      if (normalizedJustify.desktop) classes.push(`lg:${justifyMap[normalizedJustify.desktop]}`);
+      if (normalizedContent.desktop) classes.push(`lg:${contentMap[normalizedContent.desktop]}`);
+
+      return classes.join(' ');
     }
     return 'flex flex-col'; // Default
   };
 
   const currentMinHeight = (typeof minHeight === 'object' && minHeight !== null) ? (minHeight[activeDevice] || '120px') : (minHeight || '120px');
   const currentMarginTop = (typeof marginTop === 'object' && marginTop !== null) ? (marginTop[activeDevice] || '0px') : (marginTop || '0px');
+  const currentGap = (typeof gap === 'object' && gap !== null) ? (gap[activeDevice] || '1rem') : (gap || '1rem');
 
   return (
     <NodeViewWrapper 
@@ -179,6 +219,13 @@ const LayoutColumnComponent = (props: any) => {
             >
                <Trash2 className="w-2.5 h-2.5" />
             </button>
+            <button 
+              onClick={handleWrapWithRow}
+              className="bg-indigo-500 text-white p-0.5 rounded-full shadow-xl hover:bg-indigo-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto ml-1"
+              title="Refactor: Wrap with Row"
+            >
+               <LayoutTemplate className="w-2.5 h-2.5" />
+            </button>
             <div 
               onClick={handleSelectNode}
               className="bg-indigo-600 text-[8px] text-white px-2 py-0.5 rounded font-black uppercase tracking-widest pointer-events-auto cursor-pointer shadow-xl"
@@ -211,13 +258,21 @@ const LayoutColumnComponent = (props: any) => {
                 "w-full h-full min-h-[120px] relative z-10",
                 getFlexClass()
               )} 
-              style={{ gap: gap || '1rem' }}
+              style={{ gap: currentGap }}
             />
           </div>
       </div>
     </NodeViewWrapper>
   );
 };
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    layoutColumn: {
+      wrapInRow: () => ReturnType;
+    }
+  }
+}
 
 export const LayoutColumn = Node.create({
   name: 'layoutColumn',
@@ -232,14 +287,55 @@ export const LayoutColumn = Node.create({
       width: { 
         default: 'w-full',
         keepAttributes: true,
-        parseHTML: element => element.getAttribute('data-width'),
+        parseHTML: element => {
+          const val = element.getAttribute('data-width');
+          try { return JSON.parse(val || '"w-full"'); } catch(e) { return val || 'w-full'; }
+        },
         renderHTML: attributes => ({ 'data-width': typeof attributes.width === 'object' ? JSON.stringify(attributes.width) : attributes.width })
       },
       displayType: { default: 'flex' },
-      flexDirection: { default: 'col' },
-      alignItems: { default: 'stretch' },
-      justifyContent: { default: 'start' },
-      gap: { default: '1rem' },
+      flexDirection: { 
+        default: 'col',
+        keepAttributes: true,
+        parseHTML: element => {
+           const val = element.getAttribute('data-flex-direction');
+           try { return JSON.parse(val || '"col"'); } catch(e) { return val || 'col'; }
+        },
+        renderHTML: attributes => ({ 'data-flex-direction': typeof attributes.flexDirection === 'object' ? JSON.stringify(attributes.flexDirection) : attributes.flexDirection })
+      },
+      alignItems: { 
+        default: 'stretch',
+        keepAttributes: true,
+        parseHTML: element => {
+           const val = element.getAttribute('data-align-items');
+           try { return JSON.parse(val || '"stretch"'); } catch(e) { return val || 'stretch'; }
+        },
+        renderHTML: attributes => ({ 'data-align-items': typeof attributes.alignItems === 'object' ? JSON.stringify(attributes.alignItems) : attributes.alignItems })
+      },
+      justifyContent: { 
+        default: 'start',
+        keepAttributes: true,
+        parseHTML: element => {
+           const val = element.getAttribute('data-justify-content');
+           try { return JSON.parse(val || '"start"'); } catch(e) { return val || 'start'; }
+        },
+        renderHTML: attributes => ({ 'data-justify-content': typeof attributes.justifyContent === 'object' ? JSON.stringify(attributes.justifyContent) : attributes.justifyContent })
+      },
+      alignContent: { 
+        default: 'start',
+        keepAttributes: true,
+        parseHTML: element => {
+           const val = element.getAttribute('data-align-content');
+           try { return JSON.parse(val || '"start"'); } catch(e) { return val || 'start'; }
+        },
+        renderHTML: attributes => ({ 'data-align-content': typeof attributes.alignContent === 'object' ? JSON.stringify(attributes.alignContent) : attributes.alignContent })
+      },
+      gap: { 
+        default: '1rem',
+        keepAttributes: true,
+        parseHTML: element => { try { return JSON.parse(element.getAttribute('data-gap') || '"1rem"'); } catch(e) { return element.getAttribute('data-gap') || '1rem'; } },
+        renderHTML: attributes => ({ 'data-gap': typeof attributes.gap === 'object' ? JSON.stringify(attributes.gap) : attributes.gap })
+      },
       minHeight: { 
         default: 'min-h-[120px]',
         keepAttributes: true,
@@ -250,7 +346,10 @@ export const LayoutColumn = Node.create({
       padding: { 
         default: '4',
         keepAttributes: true,
-        parseHTML: element => element.getAttribute('data-padding'),
+        parseHTML: element => {
+          const val = element.getAttribute('data-padding');
+          try { return JSON.parse(val || '"4"'); } catch(e) { return val || '4'; }
+        },
         renderHTML: attributes => ({ 'data-padding': typeof attributes.padding === 'object' ? JSON.stringify(attributes.padding) : attributes.padding })
       },
       background: { default: null },
@@ -263,8 +362,62 @@ export const LayoutColumn = Node.create({
       marginTop: { 
         default: '0px',
         keepAttributes: true,
-        parseHTML: element => element.getAttribute('data-margin-top'),
+        parseHTML: element => {
+          const val = element.getAttribute('data-margin-top');
+          try { return JSON.parse(val || '"0px"'); } catch(e) { return val || '0px'; }
+        },
         renderHTML: attributes => ({ 'data-margin-top': typeof attributes.marginTop === 'object' ? JSON.stringify(attributes.marginTop) : attributes.marginTop })
+      }
+    };
+  },
+
+  addCommands() {
+    return {
+      wrapInRow: () => ({ tr, state, dispatch }) => {
+        const { selection } = state;
+        let nodePos = -1;
+        let targetNode = null;
+
+        if ('node' in selection) {
+          targetNode = (selection as any).node;
+          nodePos = selection.from;
+        } else {
+          let $pos = state.doc.resolve(selection.from);
+          for (let d = $pos.depth; d >= 0; d--) {
+            const node = $pos.node(d);
+            if (node.type.isBlock) {
+              targetNode = node;
+              nodePos = $pos.before(d);
+              break;
+            }
+          }
+        }
+
+        if (!targetNode || nodePos === -1) return false;
+
+        if (dispatch) {
+          let columnToWrap = targetNode;
+          
+          // If the node is NOT a column, we must wrap it in a column first
+          if (targetNode.type.name !== 'layoutColumn') {
+            columnToWrap = state.schema.nodes.layoutColumn.createAndFill(
+              { id: crypto.randomUUID() },
+              [targetNode]
+            );
+          }
+
+          if (columnToWrap) {
+            const rowNode = state.schema.nodes.layoutRow.createAndFill(
+              { id: crypto.randomUUID(), displayType: 'grid', gridCols: 1 }, 
+              [columnToWrap]
+            );
+            
+            if (rowNode) {
+              tr.replaceWith(nodePos, nodePos + targetNode.nodeSize, rowNode);
+            }
+          }
+        }
+        return true;
       }
     };
   },
@@ -277,10 +430,22 @@ export const LayoutColumn = Node.create({
         let padding = dom.getAttribute('data-padding');
         let minHeight = dom.getAttribute('data-min-height');
         let marginTop = dom.getAttribute('data-margin-top');
+        let flexDirection = dom.getAttribute('data-flex-direction');
+        let alignItems = dom.getAttribute('data-align-items');
+        let justifyContent = dom.getAttribute('data-justify-content');
+        let alignContent = dom.getAttribute('data-align-content');
+        let gap = dom.getAttribute('data-gap');
+
         try { width = JSON.parse(width || '"w-full"'); } catch(e) {}
         try { padding = JSON.parse(padding || '"4"'); } catch(e) {}
         try { marginTop = JSON.parse(marginTop || '"0px"'); } catch(e) {}
-        return { width, padding, minHeight, marginTop };
+        try { flexDirection = JSON.parse(flexDirection || '"col"'); } catch(e) {}
+        try { alignItems = JSON.parse(alignItems || '"stretch"'); } catch(e) {}
+        try { justifyContent = JSON.parse(justifyContent || '"start"'); } catch(e) {}
+        try { alignContent = JSON.parse(alignContent || '"start"'); } catch(e) {}
+        try { gap = JSON.parse(gap || '"1rem"'); } catch(e) {}
+
+        return { width, padding, minHeight, marginTop, flexDirection, alignItems, justifyContent, alignContent, gap };
       }
     }];
   },

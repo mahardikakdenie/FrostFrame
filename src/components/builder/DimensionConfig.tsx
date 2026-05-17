@@ -8,9 +8,10 @@ interface DimensionConfigProps {
   value: any;
   onChange: (key: string, val: any) => void;
   nodeType: string;
+  isParentGrid?: boolean;
 }
 
-export function DimensionConfig({ value, onChange, nodeType }: DimensionConfigProps) {
+export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: DimensionConfigProps) {
   const activeDevice = useUIStore(state => state.activeDevice);
   const isRow = nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid' || nodeType.toLowerCase().includes('section');
   const isColumn = nodeType.toLowerCase().includes('column');
@@ -116,27 +117,38 @@ export function DimensionConfig({ value, onChange, nodeType }: DimensionConfigPr
             <ResponsiveLabel>
               Width
             </ResponsiveLabel>
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { id: 'w-1/4', label: '25%' },
-                { id: 'w-1/3', label: '33%' },
-                { id: 'w-1/2', label: '50%' },
-                { id: 'w-full', label: '100%' },
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => handleWidthChange(opt.id)}
-                  className={cn(
-                    "py-2 px-1 text-[10px] font-semibold rounded-md transition-all border",
-                    currentWidth === opt.id 
-                      ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+            {isParentGrid ? (
+              <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                 <span className="text-[9px] font-bold text-amber-700 leading-tight block uppercase">
+                   Width managed by Parent Grid
+                 </span>
+                 <p className="text-[7px] text-amber-600/70 mt-1 italic leading-relaxed">
+                   Lebar kolom ini dikontrol secara otomatis oleh sistem Grid pada baris (Row) induknya.
+                 </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: 'w-1/4', label: '25%' },
+                  { id: 'w-1/3', label: '33%' },
+                  { id: 'w-1/2', label: '50%' },
+                  { id: 'w-full', label: '100%' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => handleWidthChange(opt.id)}
+                    className={cn(
+                      "py-2 px-1 text-[10px] font-semibold rounded-md transition-all border",
+                      currentWidth === opt.id 
+                        ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
+                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">

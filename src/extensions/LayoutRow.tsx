@@ -15,6 +15,7 @@ const LayoutRowComponent = (props: any) => {
   flexDirection, 
   alignItems, 
   justifyContent, 
+  alignContent,
   gap, 
   background, 
   bgImage,
@@ -98,31 +99,38 @@ const LayoutRowComponent = (props: any) => {
 
   // Helper to generate flex classes
   const getFlexClass = () => {
-  // Row is Horizontal by default (flex-row)
   if (displayType === 'flex') {
-    const direction = {
-      'row': 'flex-row',
-      'row-reverse': 'flex-row-reverse',
-      'col': 'flex-col',
-      'col-reverse': 'flex-col-reverse'
-    }[flexDirection as string] || 'flex-row';
+    const normalizedDirection = normalizeResponsive(flexDirection, 'row');
+    const normalizedAlign = normalizeResponsive(alignItems, 'center');
+    const normalizedJustify = normalizeResponsive(justifyContent, 'start');
+    const normalizedContent = normalizeResponsive(alignContent, 'start');
 
-    const align = {
-      'start': 'items-start',
-      'center': 'items-center',
-      'end': 'items-end',
-      'stretch': 'items-stretch'
-    }[alignItems as string] || 'items-center'; // Center align horizontally by default
+    const classes = ['flex', 'flex-wrap'];
 
-    const justify = {
-      'start': 'justify-start',
-      'center': 'justify-center',
-      'end': 'justify-end',
-      'between': 'justify-between',
-      'around': 'justify-around'
-    }[justifyContent as string] || 'justify-start';
+    const directionMap: Record<string, string> = { 'row': 'flex-row', 'row-reverse': 'flex-row-reverse', 'col': 'flex-col', 'col-reverse': 'flex-col-reverse' };
+    const alignMap: Record<string, string> = { 'start': 'items-start', 'center': 'items-center', 'end': 'items-end', 'stretch': 'items-stretch' };
+    const justifyMap: Record<string, string> = { 'start': 'justify-start', 'center': 'justify-center', 'end': 'justify-end', 'between': 'justify-between', 'around': 'justify-around' };
+    const contentMap: Record<string, string> = { 'start': 'content-start', 'center': 'content-center', 'end': 'content-end', 'between': 'content-between', 'around': 'content-around', 'stretch': 'content-stretch' };
 
-    return `flex ${direction} ${align} ${justify} flex-wrap`;
+    // Base (Mobile)
+    classes.push(directionMap[normalizedDirection.mobile] || directionMap.row);
+    classes.push(alignMap[normalizedAlign.mobile] || alignMap.center);
+    classes.push(justifyMap[normalizedJustify.mobile] || justifyMap.start);
+    classes.push(contentMap[normalizedContent.mobile] || contentMap.start);
+
+    // Tablet (md)
+    if (normalizedDirection.tablet) classes.push(`md:${directionMap[normalizedDirection.tablet]}`);
+    if (normalizedAlign.tablet) classes.push(`md:${alignMap[normalizedAlign.tablet]}`);
+    if (normalizedJustify.tablet) classes.push(`md:${justifyMap[normalizedJustify.tablet]}`);
+    if (normalizedContent.tablet) classes.push(`md:${contentMap[normalizedContent.tablet]}`);
+
+    // Desktop (lg)
+    if (normalizedDirection.desktop) classes.push(`lg:${directionMap[normalizedDirection.desktop]}`);
+    if (normalizedAlign.desktop) classes.push(`lg:${alignMap[normalizedAlign.desktop]}`);
+    if (normalizedJustify.desktop) classes.push(`lg:${justifyMap[normalizedJustify.desktop]}`);
+    if (normalizedContent.desktop) classes.push(`lg:${contentMap[normalizedContent.desktop]}`);
+
+    return classes.join(' ');
   }
 
   // Default to horizontal row if not grid
@@ -141,6 +149,7 @@ const LayoutRowComponent = (props: any) => {
 
   const currentMinHeight = (typeof minHeight === 'object' && minHeight !== null) ? (minHeight[activeDevice] || 'auto') : (minHeight || 'auto');
   const currentMarginTop = (typeof marginTop === 'object' && marginTop !== null) ? (marginTop[activeDevice] || '0px') : (marginTop || '0px');
+  const currentGap = (typeof gap === 'object' && gap !== null) ? (gap[activeDevice] || '1.5rem') : (gap || '1.5rem');
 
   return (
   <NodeViewWrapper 
@@ -255,7 +264,7 @@ const LayoutRowComponent = (props: any) => {
           "[&_[data-node-view-content]]:contents",
           "[&_[data-node-view-content-react]]:contents"
         )}
-        style={{ gap: gap || '1.5rem' }}
+        style={{ gap: currentGap }}
       >
         {/* Existing Columns */}
         <NodeViewContent />
@@ -311,22 +320,24 @@ const LayoutRowComponent = (props: any) => {
       </div>
     </div>
 
-    {/* Add Column Button Line */}
-    <div className="absolute -bottom-4 left-0 right-0 h-8 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity z-40">
-      <div className="w-full h-[1px] bg-indigo-200 absolute"></div>
+    {/* 🚀 NEW: Floating Add Column Button (Right Side) */}
+    <div className={cn(
+      "absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 transition-all z-50",
+      selected && "opacity-100 translate-x-2"
+    )}>
       <button 
         onClick={(e) => {
           e.stopPropagation();
           editor.commands.addLayoutColumn();
         }}
-        className="relative bg-white border border-indigo-200 text-indigo-600 rounded-full p-1.5 shadow-xl hover:bg-indigo-600 hover:text-white transition-all transform hover:scale-110 active:scale-95 flex items-center gap-1.5 px-3"
+        className="bg-indigo-600 text-white w-10 h-10 rounded-full shadow-2xl hover:bg-indigo-700 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white group/btn"
+        title="Add New Column to Row"
       >
-        <Plus className="w-3.5 h-3.5" />
-        <span className="text-[9px] font-black uppercase tracking-widest italic">Add New Column</span>
+        <Plus className="w-5 h-5 group-hover/btn:rotate-90 transition-transform duration-300" />
       </button>
     </div>
 
-    {/* 🚀 Visual Resize Handle */}
+    {/* Visual Resize Handle */}
     <div 
       onMouseDown={startResizing}
       className={cn(
@@ -368,10 +379,51 @@ const LayoutRowComponent = (props: any) => {
       parseHTML: element => element.getAttribute('data-grid-cols'),
       renderHTML: attributes => ({ 'data-grid-cols': typeof attributes.gridCols === 'object' ? JSON.stringify(attributes.gridCols) : attributes.gridCols })
     },
-    flexDirection: { default: 'row' },
-    alignItems: { default: 'stretch' },
-    justifyContent: { default: 'start' },
-    gap: { default: '1.5rem' },
+    flexDirection: { 
+      default: 'row',
+      keepAttributes: true,
+      parseHTML: element => {
+         const val = element.getAttribute('data-flex-direction');
+         try { return JSON.parse(val || '"row"'); } catch(e) { return val || 'row'; }
+      },
+      renderHTML: attributes => ({ 'data-flex-direction': typeof attributes.flexDirection === 'object' ? JSON.stringify(attributes.flexDirection) : attributes.flexDirection })
+    },
+    alignItems: { 
+      default: 'stretch',
+      keepAttributes: true,
+      parseHTML: element => {
+         const val = element.getAttribute('data-align-items');
+         try { return JSON.parse(val || '"stretch"'); } catch(e) { return val || 'stretch'; }
+      },
+      renderHTML: attributes => ({ 'data-align-items': typeof attributes.alignItems === 'object' ? JSON.stringify(attributes.alignItems) : attributes.alignItems })
+    },
+    justifyContent: { 
+      default: 'start',
+      keepAttributes: true,
+      parseHTML: element => {
+         const val = element.getAttribute('data-justify-content');
+         try { return JSON.parse(val || '"start"'); } catch(e) { return val || 'start'; }
+      },
+      renderHTML: attributes => ({ 'data-justify-content': typeof attributes.justifyContent === 'object' ? JSON.stringify(attributes.justifyContent) : attributes.justifyContent })
+    },
+    alignContent: { 
+      default: 'start',
+      keepAttributes: true,
+      parseHTML: element => {
+         const val = element.getAttribute('data-align-content');
+         try { return JSON.parse(val || '"start"'); } catch(e) { return val || 'start'; }
+      },
+      renderHTML: attributes => ({ 'data-align-content': typeof attributes.alignContent === 'object' ? JSON.stringify(attributes.alignContent) : attributes.alignContent })
+    },
+    gap: { 
+      default: '1.5rem',
+      keepAttributes: true,
+      parseHTML: element => {
+        const val = element.getAttribute('data-gap');
+        try { return JSON.parse(val || '"1.5rem"'); } catch(e) { return val || '1.5rem'; }
+      },
+      renderHTML: attributes => ({ 'data-gap': typeof attributes.gap === 'object' ? JSON.stringify(attributes.gap) : attributes.gap })
+    },
     background: { default: null },
     bgImage: { default: null },
     bgOverlay: { default: null },
@@ -381,7 +433,10 @@ const LayoutRowComponent = (props: any) => {
     padding: { 
       default: 'py-8',
       keepAttributes: true,
-      parseHTML: element => element.getAttribute('data-padding'),
+      parseHTML: element => {
+        const val = element.getAttribute('data-padding');
+        try { return JSON.parse(val || '"py-8"'); } catch(e) { return val || 'py-8'; }
+      },
       renderHTML: attributes => ({ 'data-padding': typeof attributes.padding === 'object' ? JSON.stringify(attributes.padding) : attributes.padding })
     },
     minHeight: { 
@@ -490,10 +545,22 @@ const LayoutRowComponent = (props: any) => {
         let gridCols = dom.getAttribute('data-grid-cols');
         let padding = dom.getAttribute('data-padding');
         let minHeight = dom.getAttribute('data-min-height');
+        let flexDirection = dom.getAttribute('data-flex-direction');
+        let alignItems = dom.getAttribute('data-align-items');
+        let justifyContent = dom.getAttribute('data-justify-content');
+        let alignContent = dom.getAttribute('data-align-content');
+        let gap = dom.getAttribute('data-gap');
+
         try { gridCols = JSON.parse(gridCols || '1'); } catch(e) {}
         try { padding = JSON.parse(padding || '"py-8"'); } catch(e) {}
         try { minHeight = JSON.parse(minHeight || 'null'); } catch(e) {}
-        return { gridCols, padding, minHeight };
+        try { flexDirection = JSON.parse(flexDirection || '"row"'); } catch(e) {}
+        try { alignItems = JSON.parse(alignItems || '"stretch"'); } catch(e) {}
+        try { justifyContent = JSON.parse(justifyContent || '"start"'); } catch(e) {}
+        try { alignContent = JSON.parse(alignContent || '"start"'); } catch(e) {}
+        try { gap = JSON.parse(gap || '"1.5rem"'); } catch(e) {}
+
+        return { gridCols, padding, minHeight, flexDirection, alignItems, justifyContent, alignContent, gap };
       }
     }];
   },

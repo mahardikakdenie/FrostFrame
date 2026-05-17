@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2, GripVertical, ArrowUpDown, ArrowLeft, Info } from 'lucide-react';
+import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2, GripVertical, ArrowUpDown, ArrowLeft, Info, LayoutTemplate } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { cn, debounce } from '../../lib/utils';
 import { 
@@ -70,13 +70,13 @@ const ConfigAccordion = ({
               <AnimatePresence>
                 {showTooltip && (
                   <motion.div 
-                    initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                    className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-slate-900 text-white text-[9px] font-medium leading-relaxed rounded-xl shadow-2xl z-50 pointer-events-none border border-white/10 backdrop-blur-xl"
+                    initial={{ opacity: 0, x: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: -10, scale: 0.95 }}
+                    className="absolute right-full top-0 mr-3 w-64 p-4 bg-slate-900 text-white text-[10px] font-medium leading-relaxed rounded-2xl shadow-2xl z-[9999] pointer-events-none border border-white/10 backdrop-blur-xl"
                   >
                     {description}
-                    <div className="absolute top-full right-2 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1" />
+                    <div className="absolute top-3 -right-1 w-2 h-2 bg-slate-900 rotate-45" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -159,7 +159,7 @@ export const PreviewSidebar = () => {
       };
 
       if (selectedNode && updateIfMatch(selectedNode, selection.from)) return;
-      for (let d = $from.depth; d >= 0; d--) {
+      for (let d = $from.depth; d > 0; d--) {
         if (updateIfMatch($from.node(d), $from.before(d))) return;
       }
 
@@ -284,10 +284,17 @@ export const PreviewSidebar = () => {
       const checkNode = (n: any, pos: number) => {
         const id = n.attrs.id || pos.toString();
         if (id === focusedId) {
-          setTargetAttrs({
+          const newAttrs = {
             ...n.attrs,
             textContent: n.textContent,
+          };
+
+          // 🚀 OPTIMIZATION: Only update state if attributes actually changed
+          setTargetAttrs((prev: any) => {
+            if (prev && JSON.stringify(prev) === JSON.stringify(newAttrs)) return prev;
+            return newAttrs;
           });
+          
           setNodeType(n.type.name);
           
           // Get children
@@ -583,6 +590,23 @@ export const PreviewSidebar = () => {
                                     <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 uppercase tracking-tight">{child.label}</span>
                                     
                                     <div className="ml-auto flex items-center gap-2">
+                                      {!['layoutRow', 'sectionGrid', 'layoutSection', 'featuresSection', 'pricingSection', 'testimonialSection'].includes(child.type) && (
+                                        <button 
+                                          onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            // Focus the node first, then wrap it
+                                            setFocusedId(child.id, 'element');
+                                            setTimeout(() => {
+                                              const editor = (window as any).editor;
+                                              if (editor) editor.commands.wrapInRow();
+                                            }, 10);
+                                          }}
+                                          className="p-1.5 rounded-lg text-slate-300 hover:bg-indigo-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                                          title="Wrap in Row"
+                                        >
+                                          <LayoutTemplate className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
                                       <button 
                                         onClick={(e) => { e.stopPropagation(); deleteNode(child.id); }}
                                         className="p-1.5 rounded-lg text-slate-300 hover:bg-rose-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
@@ -591,8 +615,7 @@ export const PreviewSidebar = () => {
                                         <Trash2 className="w-3 h-3" />
                                       </button>
                                       <ChevronRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-400" />
-                                    </div>
-                                </Reorder.Item>
+                                    </div>                                </Reorder.Item>
                               ))}
                             </Reorder.Group>
                           ) : (
@@ -635,10 +658,34 @@ export const PreviewSidebar = () => {
                           description="Konfigurasi sistem grid, jumlah kolom, perataan konten (alignment), serta lebar dan tinggi container."
                         >
                           <div className="space-y-8">
-                            {(nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid' || nodeType === 'layoutColumn') && (
-                              <RowGridConfig value={targetAttrs} onChange={updateAttribute} elementPath="" nodeType={nodeType} />
-                            )}
-                            <DimensionConfig value={targetAttrs} onChange={updateAttribute} nodeType={nodeType} />
+                            {(() => {
+                              let isParentGrid = false;
+                              if (nodeType === 'layoutColumn' && selectionPath.length > 1) {
+                                const parentId = selectionPath[selectionPath.length - 2].id;
+                                const parentNode = resolveNode(parentId);
+                                isParentGrid = parentNode?.node.attrs.displayType === 'grid';
+                              }
+                              
+                              return (
+                                <>
+                                  {(nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid' || nodeType === 'layoutColumn') && (
+                                    <RowGridConfig 
+                                      value={targetAttrs} 
+                                      onChange={updateAttribute} 
+                                      elementPath="" 
+                                      nodeType={nodeType} 
+                                      isParentGrid={isParentGrid}
+                                    />
+                                  )}
+                                  <DimensionConfig 
+                                    value={targetAttrs} 
+                                    onChange={updateAttribute} 
+                                    nodeType={nodeType} 
+                                    isParentGrid={isParentGrid}
+                                  />
+                                </>
+                              );
+                            })()}
                           </div>
                         </ConfigAccordion>
 

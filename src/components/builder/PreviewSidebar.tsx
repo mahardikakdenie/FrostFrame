@@ -21,6 +21,51 @@ import { DimensionConfig } from './DimensionConfig';
 import { DeviceSelector, ResponsiveLabel, updateResponsiveValue } from './ResponsiveConfig';
 import { ThemeSettings } from './ThemeSettings';
 
+// 🚀 REUSABLE UI: Accordion Component for grouping settings
+const ConfigAccordion = ({ title, icon: Icon, children, defaultOpen = true }: { title: string, icon: any, children: React.ReactNode, defaultOpen?: boolean }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <div className="border-b border-slate-100 last:border-0 pb-6">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full group/acc py-2 text-left"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className={cn(
+            "p-1.5 rounded-lg transition-all",
+            isOpen ? "bg-indigo-50 text-indigo-600" : "bg-slate-50 text-slate-400 group-hover/acc:bg-slate-100 group-hover/acc:text-slate-600"
+          )}>
+            <Icon className="w-3.5 h-3.5" />
+          </div>
+          <span className={cn(
+            "text-[10px] font-black uppercase tracking-widest italic transition-colors",
+            isOpen ? "text-slate-900" : "text-slate-400 group-hover/acc:text-slate-600"
+          )}>{title}</span>
+        </div>
+        <ChevronRight className={cn(
+          "w-3.5 h-3.5 text-slate-300 transition-transform duration-300",
+          isOpen ? "rotate-90 text-indigo-400" : "group-hover/acc:text-slate-400"
+        )} />
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="pt-6 space-y-6">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export const PreviewSidebar = () => {
   const focusedId = useUIStore((state) => state.focusedId);
   const selectionPath = useUIStore((state) => state.selectionPath);
@@ -50,17 +95,36 @@ export const PreviewSidebar = () => {
       const editor = (window as any).editor;
       if (!editor) return;
 
-      editor.state.doc.descendants((node: any, pos: number) => {
-        if (node.attrs.id === id || pos.toString() === id) {
+      // 🚀 UX IMPROVEMENT: Use path-based resolution first (O(1) average)
+      let found = false;
+      const { selection } = editor.state;
+      const selectedNode = (selection as any).node;
+      const $from = selection.$from;
+      
+      const updateIfMatch = (n: any, p: number) => {
+        if (n.attrs.id === id || p.toString() === id) {
           editor.chain()
             .insertContentAt({ 
-              from: pos + 1, 
-              to: pos + node.nodeSize - 1 
+              from: p + 1, 
+              to: p + n.nodeSize - 1 
             }, value)
             .run();
-          return false;
+          found = true;
+          return true;
         }
-      });
+        return false;
+      };
+
+      if (selectedNode && updateIfMatch(selectedNode, selection.from)) return;
+      for (let d = $from.depth; d >= 0; d--) {
+        if (updateIfMatch($from.node(d), $from.before(d))) return;
+      }
+
+      if (!found) {
+        editor.state.doc.descendants((node: any, pos: number) => {
+          if (updateIfMatch(node, pos)) return false;
+        });
+      }
     }, 400),
   []);
 
@@ -404,233 +468,258 @@ export const PreviewSidebar = () => {
 
         <div 
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar"
+          className="flex-1 overflow-y-auto custom-scrollbar"
         >
            {view === 'theme' ? (
-             <ThemeSettings />
+             <div className="p-8">
+               <ThemeSettings />
+             </div>
            ) : (
-             <>
-                {/* 🚀 NEW: Parent Navigation Header */}
+             <div className="p-8 space-y-10 relative">
+                {/* 🚀 UX IMPROVEMENT: Sticky Parent Navigation Header */}
                 {parentItem && (
-                  <button 
-                    onClick={() => setFocusedId(parentItem.id, 'element')}
-                    className="flex items-center gap-3 w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl group/back hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-left animate-in slide-in-from-left-4 mb-4"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover/back:text-indigo-600 group-hover/back:border-indigo-200 shadow-sm">
-                      <ArrowLeft className="w-4 h-4" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Return to parent</span>
-                      <span className="text-[10px] font-black text-slate-700 uppercase italic tracking-tighter group-hover/back:text-indigo-700">{parentItem.label}</span>
-                    </div>
-                  </button>
+                  <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md pb-4 -mx-2 px-2">
+                    <button 
+                      onClick={() => setFocusedId(parentItem.id, 'element')}
+                      className="flex items-center gap-3 w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl group/back hover:bg-indigo-50/50 hover:border-indigo-200 transition-all text-left animate-in slide-in-from-left-4"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover/back:text-indigo-600 group-hover/back:border-indigo-200 shadow-sm">
+                        <ArrowLeft className="w-4 h-4" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Return to parent</span>
+                        <span className="text-[10px] font-black text-slate-700 uppercase italic tracking-tighter group-hover/back:text-indigo-700">{parentItem.label}</span>
+                      </div>
+                    </button>
+                  </div>
                 )}
 
                 {/* Hierarchy Selection Pilihan untuk masuk ke hirarky */}
                 {isLayoutBlock && (
-                  <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Layers className="w-3.5 h-3.5 text-indigo-500" />
-                          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic text-left">Layers & Hierarchy</h4>
-                        </div>
-                        <button 
-                          onClick={() => setDrillDownId(drillDownId === focusedId ? null : focusedId)}
-                          className={cn(
-                            "px-2 py-1 rounded text-[8px] font-black uppercase transition-all",
-                            drillDownId === focusedId ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500 hover:bg-indigo-100"
-                          )}
-                        >
-                          {drillDownId === focusedId ? 'Exit Drill-down' : 'Enter Hierarchy'}
-                        </button>
-                      </div>
-                      <div className="grid gap-2">
-                        {childNodes.length > 0 ? (
-                          <Reorder.Group 
-                            axis="y" 
-                            values={childNodes} 
-                            onReorder={handleReorder} 
-                            className="grid gap-2"
+                  <ConfigAccordion title="Layers & Hierarchy" icon={Layers} defaultOpen={childNodes.length > 0}>
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic">Nested Elements</span>
+                          <button 
+                            onClick={() => setDrillDownId(drillDownId === focusedId ? null : focusedId)}
+                            className={cn(
+                              "px-2 py-1 rounded text-[8px] font-black uppercase transition-all",
+                              drillDownId === focusedId ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500 hover:bg-indigo-100"
+                            )}
                           >
-                            {childNodes.map((child) => (
-                              <Reorder.Item 
-                                key={child.id} 
-                                value={child}
-                                className="group flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer relative"
-                                onClick={() => setFocusedId(child.id, 'element')}
-                                onDragEnd={() => commitReorderToTiptap(childNodes)}
-                              >
-                                  <div className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-indigo-500 transition-colors">
-                                    <GripVertical className="w-3.5 h-3.5" />
-                                  </div>
-                                  <div className="w-6 h-6 bg-white border border-slate-200 rounded flex items-center justify-center text-[8px] font-black text-slate-400 group-hover:text-indigo-500 group-hover:border-indigo-200">
-                                    {child.type.substring(0, 2).toUpperCase()}
-                                  </div>
-                                  <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 uppercase tracking-tight">{child.label}</span>
-                                  
-                                  <div className="ml-auto flex items-center gap-2">
-                                    <button 
-                                      onClick={(e) => { e.stopPropagation(); deleteNode(child.id); }}
-                                      className="p-1.5 rounded-lg text-slate-300 hover:bg-rose-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
-                                      title="Delete Element"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                    <ChevronRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-400" />
-                                  </div>
-                              </Reorder.Item>
-                            ))}
-                          </Reorder.Group>
-                        ) : (
-                          <div className="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
-                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">No Nested Elements</span>
-                          </div>
-                        )}
-                      </div>
-                  </div>
+                            {drillDownId === focusedId ? 'Exit Drill-down' : 'Enter Hierarchy'}
+                          </button>
+                        </div>
+                        <div className="grid gap-2">
+                          {childNodes.length > 0 ? (
+                            <Reorder.Group 
+                              axis="y" 
+                              values={childNodes} 
+                              onReorder={handleReorder} 
+                              className="grid gap-2"
+                            >
+                              {childNodes.map((child) => (
+                                <Reorder.Item 
+                                  key={child.id} 
+                                  value={child}
+                                  className="group flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer relative"
+                                  onClick={() => setFocusedId(child.id, 'element')}
+                                  onDragEnd={() => commitReorderToTiptap(childNodes)}
+                                >
+                                    <div className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-indigo-500 transition-colors">
+                                      <GripVertical className="w-3.5 h-3.5" />
+                                    </div>
+                                    <div className="w-6 h-6 bg-white border border-slate-200 rounded flex items-center justify-center text-[8px] font-black text-slate-400 group-hover:text-indigo-500 group-hover:border-indigo-200">
+                                      {child.type.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-900 uppercase tracking-tight">{child.label}</span>
+                                    
+                                    <div className="ml-auto flex items-center gap-2">
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); deleteNode(child.id); }}
+                                        className="p-1.5 rounded-lg text-slate-300 hover:bg-rose-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                                        title="Delete Element"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                      <ChevronRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-400" />
+                                    </div>
+                                </Reorder.Item>
+                              ))}
+                            </Reorder.Group>
+                          ) : (
+                            <div className="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">No Nested Elements</span>
+                            </div>
+                          )}
+                        </div>
+                    </div>
+                  </ConfigAccordion>
                 )}
 
                 {isLayoutBlock ? (
-                  <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-                      <div className="flex flex-col gap-1">
+                  <div className="animate-in fade-in slide-in-from-bottom-4">
+                      <div className="flex flex-col gap-1 mb-8">
                         <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none mb-1 italic">Layout Detail Settings</span>
                         <h2 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter text-left">{nodeType.replace(/([A-Z])/g, ' $1').trim().toUpperCase()}</h2>
                       </div>
 
-                      {renderBlockConfig()}
+                      <div className="space-y-2">
+                        <ConfigAccordion title="Content Settings" icon={Settings2}>
+                          {renderBlockConfig()}
+                        </ConfigAccordion>
 
-                      <BackgroundConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                        <ConfigAccordion title="Style & Background" icon={Palette}>
+                          <BackgroundConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                        </ConfigAccordion>
 
-                      {(nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid' || nodeType === 'layoutColumn') && (
-                        <RowGridConfig value={targetAttrs} onChange={updateAttribute} elementPath="" nodeType={nodeType} />
-                      )}
+                        <ConfigAccordion title="Layout & Dimensions" icon={Layout}>
+                          <div className="space-y-8">
+                            {(nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid' || nodeType === 'layoutColumn') && (
+                              <RowGridConfig value={targetAttrs} onChange={updateAttribute} elementPath="" nodeType={nodeType} />
+                            )}
+                            <DimensionConfig value={targetAttrs} onChange={updateAttribute} nodeType={nodeType} />
+                          </div>
+                        </ConfigAccordion>
 
-                      <DimensionConfig value={targetAttrs} onChange={updateAttribute} nodeType={nodeType} />
+                        <ConfigAccordion title="Vertical Spacing" icon={ArrowUpDown}>
+                          <div className="space-y-6">
+                            {/* Margin Control - Only for blocks that support it (Row, Section) */}
+                            {(nodeType === 'layoutRow' || nodeType.toLowerCase().includes('section')) && (
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <ResponsiveLabel>Margin Top</ResponsiveLabel>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                      {nodeType.toLowerCase().includes('section') && !targetAttrs.marginTop ? 'GLOBAL' : (typeof targetAttrs.marginTop === 'object' ? (targetAttrs.marginTop[activeDevice] || '0px') : (targetAttrs.marginTop || '0px'))}
+                                    </span>
+                                    {(targetAttrs.marginTop && targetAttrs.marginTop !== '0px') && (
+                                      <button 
+                                        onClick={() => updateAttribute('marginTop', '0px')}
+                                        className="p-1 rounded-md text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"
+                                        title="Reset to 0"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                                <input 
+                                  type="range" 
+                                  className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+                                  min="0" max="100" step="4"
+                                  value={parseInt((typeof targetAttrs.marginTop === 'object' ? (targetAttrs.marginTop[activeDevice] || '0px') : (targetAttrs.marginTop || '0px'))) || 0}
+                                  onChange={(e) => {
+                                      const newVal = updateResponsiveValue(targetAttrs.marginTop, activeDevice, `${e.target.value}px`);
+                                      updateAttribute('marginTop', newVal);
+                                  }}
+                                />
+                              </div>
+                            )}
 
-                      {/* 🚀 ENHANCED SPACING UI */}
-                      <div className="space-y-6 pt-6 border-t border-slate-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <ArrowUpDown className="w-3.5 h-3.5 text-indigo-500" />
-                          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic text-left">Vertical Spacing</h4>
-                        </div>
-
-                        <div className="space-y-6">
-                          {/* Margin Control - Only for blocks that support it (Row, Section) */}
-                          {(nodeType === 'layoutRow' || nodeType.toLowerCase().includes('section')) && (
+                            {/* Padding Control */}
                             <div className="space-y-3">
                               <div className="flex justify-between items-center">
-                                <ResponsiveLabel>Margin Top</ResponsiveLabel>
-                                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                  {nodeType.toLowerCase().includes('section') && !targetAttrs.marginTop ? 'GLOBAL' : (typeof targetAttrs.marginTop === 'object' ? (targetAttrs.marginTop[activeDevice] || '0px') : (targetAttrs.marginTop || '0px'))}
-                                </span>
+                                <ResponsiveLabel>Vertical Padding</ResponsiveLabel>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                    {nodeType.toLowerCase().includes('section') && (!targetAttrs.padding || targetAttrs.padding === 'py-24') ? 'GLOBAL' : (typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || 'py-8') : (targetAttrs.padding || 'py-8'))}
+                                  </span>
+                                  {nodeType.toLowerCase().includes('section') && (targetAttrs.padding && targetAttrs.padding !== 'py-24') && (
+                                    <button 
+                                      onClick={() => updateAttribute('padding', 'py-24')}
+                                      className="p-1 rounded-md text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"
+                                      title="Reset to Global"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                               <input 
                                 type="range" 
                                 className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
-                                min="0" max="100" step="4"
-                                value={parseInt((typeof targetAttrs.marginTop === 'object' ? (targetAttrs.marginTop[activeDevice] || '0px') : (targetAttrs.marginTop || '0px'))) || 0}
+                                min="0" max="160" step="8"
+                                value={parseInt((typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || '8') : (targetAttrs.padding || '8')).toString().replace(/[^\d]/g, '')) || 0}
                                 onChange={(e) => {
-                                    const newVal = updateResponsiveValue(targetAttrs.marginTop, activeDevice, `${e.target.value}px`);
-                                    updateAttribute('marginTop', newVal);
+                                    const newVal = updateResponsiveValue(targetAttrs.padding, activeDevice, `py-${e.target.value}`);
+                                    updateAttribute('padding', newVal);
                                 }}
                               />
                             </div>
-                          )}
-
-                          {/* Padding Control */}
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <ResponsiveLabel>Vertical Padding</ResponsiveLabel>
-                              <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                {nodeType.toLowerCase().includes('section') && (!targetAttrs.padding || targetAttrs.padding === 'py-24') ? 'GLOBAL' : (typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || 'py-8') : (targetAttrs.padding || 'py-8'))}
-                              </span>
-                            </div>
-                            <input 
-                              type="range" 
-                              className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
-                              min="0" max="160" step="8"
-                              value={parseInt((typeof targetAttrs.padding === 'object' ? (targetAttrs.padding[activeDevice] || '8') : (targetAttrs.padding || '8')).toString().replace(/[^\d]/g, '')) || 0}
-                              onChange={(e) => {
-                                  const newVal = updateResponsiveValue(targetAttrs.padding, activeDevice, `py-${e.target.value}`);
-                                  updateAttribute('padding', newVal);
-                              }}
-                            />
-                            {nodeType.toLowerCase().includes('section') && (targetAttrs.padding && targetAttrs.padding !== 'py-24') && (
-                              <button 
-                                onClick={() => updateAttribute('padding', 'py-24')}
-                                className="text-[9px] font-black text-indigo-500 uppercase tracking-widest hover:text-indigo-700 transition-colors"
-                              >
-                                ↺ Reset to Global
-                              </button>
-                            )}
                           </div>
-                        </div>
+                        </ConfigAccordion>
                       </div>
-                    </section>
+                  </div>
                 ) : (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-                      <div className="flex flex-col gap-1 text-left">
+                  <div className="animate-in fade-in slide-in-from-bottom-4">
+                      <div className="flex flex-col gap-1 text-left mb-8">
                         <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1 italic">Element Details</span>
                         <h2 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">{nodeType.replace(/([A-Z])/g, ' $1').trim().toUpperCase()}</h2>
                       </div>
 
-                      {['heroHeadline', 'heroSubheadline', 'heroBadge', 'sectionHeading', 'featureCard'].includes(nodeType) && (
-                        <HeadingConfig 
-                          value={targetAttrs} 
-                          onChange={updateAttribute} 
-                          elementPath="" 
-                          activeFormatting={activeFormatting}
-                        />
-                      )}
-                      
-                      {nodeType === 'testimonialSection' && (
-                        <TestimonialConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
-                      )}
+                      <div className="space-y-2">
+                        <ConfigAccordion title="Basic Settings" icon={Settings2}>
+                          {['heroHeadline', 'heroSubheadline', 'heroBadge', 'sectionHeading', 'featureCard'].includes(nodeType) && (
+                            <HeadingConfig 
+                              value={targetAttrs} 
+                              onChange={updateAttribute} 
+                              elementPath="" 
+                              activeFormatting={activeFormatting}
+                            />
+                          )}
+                          
+                          {nodeType === 'testimonialSection' && (
+                            <TestimonialConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                          )}
 
-                      {nodeType === 'heroButtonGroup' && (
-                        <ButtonConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
-                      )}
+                          {nodeType === 'heroButtonGroup' && (
+                            <ButtonConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                          )}
 
-                      {(nodeType === 'heroMedia' || nodeType === 'imageElement') && (
-                        <MediaConfig 
-                          value={targetAttrs} 
-                          onChange={updateAttribute} 
-                          elementPath="" 
-                          mediaKey={nodeType === 'heroMedia' ? 'bgImage' : 'src'}
-                        />
-                      )}
+                          {(nodeType === 'heroMedia' || nodeType === 'imageElement') && (
+                            <MediaConfig 
+                              value={targetAttrs} 
+                              onChange={updateAttribute} 
+                              elementPath="" 
+                              mediaKey={nodeType === 'heroMedia' ? 'bgImage' : 'src'}
+                            />
+                          )}
 
-                      {nodeType === 'iconElement' && (
-                        <IconConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
-                      )}
+                          {nodeType === 'iconElement' && (
+                            <IconConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                          )}
 
-                      {nodeType === 'videoElement' && (
-                        <VideoConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
-                      )}
+                          {nodeType === 'videoElement' && (
+                            <VideoConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                          )}
 
-                      {nodeType === 'paragraphElement' && (
-                        <ParagraphConfig value={targetAttrs} onChange={updateAttribute} elementPath="" activeFormatting={activeFormatting} />
-                      )}
+                          {nodeType === 'paragraphElement' && (
+                            <ParagraphConfig value={targetAttrs} onChange={updateAttribute} elementPath="" activeFormatting={activeFormatting} />
+                          )}
 
-                      {nodeType === 'dividerElement' && (
-                        <DividerConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
-                      )}
+                          {nodeType === 'dividerElement' && (
+                            <DividerConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                          )}
 
-                      {nodeType === 'spacerElement' && (
-                        <SpacerConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
-                      )}
+                          {nodeType === 'spacerElement' && (
+                            <SpacerConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                          )}
+                        </ConfigAccordion>
 
-                      {/* Global Advanced Positioning for all elements */}
-                      <AdvancedConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                        <ConfigAccordion title="Advanced Positioning" icon={MousePointer2}>
+                          <AdvancedConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                        </ConfigAccordion>
 
-                      {nodeType === 'heroMedia' && (
-                        <div className="mt-8 pt-8 border-t border-slate-100">
-                          <BackgroundConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
-                        </div>
-                      )}
+                        {nodeType === 'heroMedia' && (
+                          <ConfigAccordion title="Media Background" icon={Palette}>
+                            <BackgroundConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
+                          </ConfigAccordion>
+                        )}
+                      </div>
                   </div>
                 )}
-             </>
+             </div>
            )}
          </div>
 

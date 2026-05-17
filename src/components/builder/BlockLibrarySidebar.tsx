@@ -90,12 +90,26 @@ export function BlockLibrarySidebar({ onAddSection }: VariantPickerProps) {
                         draggable
                         onDragStart={(e) => handleDragStartVariant(e, cat.type, variant.generatePayload())}
                         onDragEnd={() => document.body.className = document.body.className.replace(/\bis-dragging-\S+/g, '')}
-                        className="aspect-square bg-slate-50 border-2 border-slate-100 hover:border-indigo-500 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all group scale-100 active:scale-95 cursor-grab active:cursor-grabbing hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1"
+                        className={cn(
+                          "bg-slate-50 border-2 border-slate-100 hover:border-indigo-500 rounded-2xl flex flex-col items-center justify-center transition-all group scale-100 active:scale-95 cursor-grab active:cursor-grabbing hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1",
+                          variant.image ? "p-2 min-h-[140px]" : "aspect-square gap-3"
+                        )}
                       >
-                        <div className="w-12 h-12 bg-white border-2 border-slate-200 group-hover:border-indigo-100 rounded-xl transition-all shadow-sm flex items-center justify-center group-hover:rotate-6 group-hover:scale-110">
-                          <TargetIcon className="w-6 h-6 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                        </div>
-                        <span className="text-[8px] font-black justify-center items-center text-center uppercase tracking-[0.1em] text-slate-500 group-hover:text-indigo-600 italic leading-none px-2">
+                        {variant.image ? (
+                          <div className="w-full h-24 mb-3 overflow-hidden rounded-xl border border-slate-200 group-hover:border-indigo-200 transition-all shadow-sm bg-white relative">
+                            <img 
+                              src={variant.image} 
+                              alt={variant.name} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            />
+                            <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-colors" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-white border-2 border-slate-200 group-hover:border-indigo-100 rounded-xl transition-all shadow-sm flex items-center justify-center group-hover:rotate-6 group-hover:scale-110">
+                            <TargetIcon className="w-6 h-6 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                          </div>
+                        )}
+                        <span className="text-[8px] font-black justify-center items-center text-center uppercase tracking-[0.1em] text-slate-500 group-hover:text-indigo-600 italic leading-tight px-1">
                           {variant.name}
                         </span>
                       </div>

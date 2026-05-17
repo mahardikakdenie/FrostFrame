@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2, GripVertical, ArrowUpDown, ArrowLeft } from 'lucide-react';
+import { X, Settings2, MousePointer2, Type, Palette, Layout, Layers, ChevronRight, Sparkles, Trash2, GripVertical, ArrowUpDown, ArrowLeft, Info } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { cn, debounce } from '../../lib/utils';
 import { 
@@ -21,16 +21,30 @@ import { DimensionConfig } from './DimensionConfig';
 import { DeviceSelector, ResponsiveLabel, updateResponsiveValue } from './ResponsiveConfig';
 import { ThemeSettings } from './ThemeSettings';
 
-// 🚀 REUSABLE UI: Accordion Component for grouping settings
-const ConfigAccordion = ({ title, icon: Icon, children, defaultOpen = true }: { title: string, icon: any, children: React.ReactNode, defaultOpen?: boolean }) => {
+// 🚀 REUSABLE UI: Accordion Component for grouping settings with Tooltip Info
+const ConfigAccordion = ({ 
+  title, 
+  icon: Icon, 
+  children, 
+  description,
+  defaultOpen = true 
+}: { 
+  title: string, 
+  icon: any, 
+  children: React.ReactNode, 
+  description?: string,
+  defaultOpen?: boolean 
+}) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
     <div className="border-b border-slate-100 last:border-0 pb-6">
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full group/acc py-2 text-left"
-      >
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between w-full group/acc py-2">
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2.5 flex-1 text-left"
+        >
           <div className={cn(
             "p-1.5 rounded-lg transition-all",
             isOpen ? "bg-indigo-50 text-indigo-600" : "bg-slate-50 text-slate-400 group-hover/acc:bg-slate-100 group-hover/acc:text-slate-600"
@@ -41,12 +55,41 @@ const ConfigAccordion = ({ title, icon: Icon, children, defaultOpen = true }: { 
             "text-[10px] font-black uppercase tracking-widest italic transition-colors",
             isOpen ? "text-slate-900" : "text-slate-400 group-hover/acc:text-slate-600"
           )}>{title}</span>
+        </button>
+        
+        <div className="flex items-center gap-3">
+          {description && (
+            <div className="relative">
+              <button 
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+                className="p-1 text-slate-300 hover:text-indigo-500 transition-colors cursor-help"
+              >
+                <Info className="w-3 h-3" />
+              </button>
+              <AnimatePresence>
+                {showTooltip && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                    className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-slate-900 text-white text-[9px] font-medium leading-relaxed rounded-xl shadow-2xl z-50 pointer-events-none border border-white/10 backdrop-blur-xl"
+                  >
+                    {description}
+                    <div className="absolute top-full right-2 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+          <button onClick={() => setIsOpen(!isOpen)}>
+            <ChevronRight className={cn(
+              "w-3.5 h-3.5 text-slate-300 transition-transform duration-300",
+              isOpen ? "rotate-90 text-indigo-400" : "group-hover/acc:text-slate-400"
+            )} />
+          </button>
         </div>
-        <ChevronRight className={cn(
-          "w-3.5 h-3.5 text-slate-300 transition-transform duration-300",
-          isOpen ? "rotate-90 text-indigo-400" : "group-hover/acc:text-slate-400"
-        )} />
-      </button>
+      </div>
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -496,7 +539,12 @@ export const PreviewSidebar = () => {
 
                 {/* Hierarchy Selection Pilihan untuk masuk ke hirarky */}
                 {isLayoutBlock && (
-                  <ConfigAccordion title="Layers & Hierarchy" icon={Layers} defaultOpen={childNodes.length > 0}>
+                  <ConfigAccordion 
+                    title="Layers & Hierarchy" 
+                    icon={Layers} 
+                    defaultOpen={childNodes.length > 0}
+                    description="Kelola susunan elemen di dalam container ini. Anda bisa menarik (drag) item untuk mengatur urutan atau masuk ke mode drill-down untuk fokus mengedit satu bagian."
+                  >
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
                         <div className="flex items-center justify-between">
                           <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic">Nested Elements</span>
@@ -565,15 +613,27 @@ export const PreviewSidebar = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <ConfigAccordion title="Content Settings" icon={Settings2}>
+                        <ConfigAccordion 
+                          title="Content Settings" 
+                          icon={Settings2}
+                          description="Ubah teks dasar seperti Judul, Subjudul, dan Deskripsi untuk section ini."
+                        >
                           {renderBlockConfig()}
                         </ConfigAccordion>
 
-                        <ConfigAccordion title="Style & Background" icon={Palette}>
+                        <ConfigAccordion 
+                          title="Style & Background" 
+                          icon={Palette}
+                          description="Atur tampilan visual container, termasuk warna latar belakang, gambar background, overlay, dan border."
+                        >
                           <BackgroundConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
                         </ConfigAccordion>
 
-                        <ConfigAccordion title="Layout & Dimensions" icon={Layout}>
+                        <ConfigAccordion 
+                          title="Layout & Dimensions" 
+                          icon={Layout}
+                          description="Konfigurasi sistem grid, jumlah kolom, perataan konten (alignment), serta lebar dan tinggi container."
+                        >
                           <div className="space-y-8">
                             {(nodeType.toLowerCase().includes('row') || nodeType === 'sectionGrid' || nodeType === 'layoutColumn') && (
                               <RowGridConfig value={targetAttrs} onChange={updateAttribute} elementPath="" nodeType={nodeType} />
@@ -582,7 +642,11 @@ export const PreviewSidebar = () => {
                           </div>
                         </ConfigAccordion>
 
-                        <ConfigAccordion title="Vertical Spacing" icon={ArrowUpDown}>
+                        <ConfigAccordion 
+                          title="Vertical Spacing" 
+                          icon={ArrowUpDown}
+                          description="Atur jarak luar (Margin) dan jarak dalam (Padding). Anda bisa menggunakan standar global Design System atau mengaturnya secara kustom."
+                        >
                           <div className="space-y-6">
                             {/* Margin Control - Only for blocks that support it (Row, Section) */}
                             {(nodeType === 'layoutRow' || nodeType.toLowerCase().includes('section')) && (
@@ -659,7 +723,11 @@ export const PreviewSidebar = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <ConfigAccordion title="Basic Settings" icon={Settings2}>
+                        <ConfigAccordion 
+                          title="Basic Settings" 
+                          icon={Settings2}
+                          description="Konfigurasi utama elemen, seperti konten teks, ukuran ikon, atau sumber media."
+                        >
                           {['heroHeadline', 'heroSubheadline', 'heroBadge', 'sectionHeading', 'featureCard'].includes(nodeType) && (
                             <HeadingConfig 
                               value={targetAttrs} 
@@ -707,12 +775,20 @@ export const PreviewSidebar = () => {
                           )}
                         </ConfigAccordion>
 
-                        <ConfigAccordion title="Advanced Positioning" icon={MousePointer2}>
+                        <ConfigAccordion 
+                          title="Advanced Positioning" 
+                          icon={MousePointer2}
+                          description="Kontrol tingkat lanjut untuk posisi elemen, rotasi, skew (kemiringan), dan animasi transisi."
+                        >
                           <AdvancedConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
                         </ConfigAccordion>
 
                         {nodeType === 'heroMedia' && (
-                          <ConfigAccordion title="Media Background" icon={Palette}>
+                          <ConfigAccordion 
+                            title="Media Background" 
+                            icon={Palette}
+                            description="Tambahkan efek visual ekstra di belakang media Hero Anda."
+                          >
                             <BackgroundConfig value={targetAttrs} onChange={updateAttribute} elementPath="" />
                           </ConfigAccordion>
                         )}

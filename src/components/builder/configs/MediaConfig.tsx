@@ -3,14 +3,14 @@ import { Plus } from 'lucide-react';
 import { useUIStore } from '../../../store/useUIStore';
 import { ElementConfigProps } from './types';
 
-export const MediaConfig = ({ value, onChange }: ElementConfigProps) => {
+export const MediaConfig = ({ value, onChange, mediaKey = 'url' }: ElementConfigProps) => {
   const isObject = typeof value === 'object' && value !== null;
   const attributes = isObject ? value : {};
   const openMediaModal = useUIStore(state => state.openMediaModal);
 
   const handleOpenModal = () => {
     openMediaModal(attributes.id || 'media-edit', (newUrl: string) => {
-      onChange('url', newUrl);
+      onChange(mediaKey, newUrl);
     });
   };
 
@@ -28,8 +28,8 @@ export const MediaConfig = ({ value, onChange }: ElementConfigProps) => {
             <input 
               type="text" 
               className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
-              value={attributes.url || ''}
-              onChange={(e) => onChange('url', e.target.value)}
+              value={attributes[mediaKey] || ''}
+              onChange={(e) => onChange(mediaKey, e.target.value)}
               placeholder="https://..."
             />
             <button 

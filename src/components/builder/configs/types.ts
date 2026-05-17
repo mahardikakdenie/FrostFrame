@@ -3,4 +3,5 @@ export interface ElementConfigProps {
   onChange: (key: string, val: any) => void;
   elementPath: string;
   activeFormatting?: any;
+  mediaKey?: string;
 }

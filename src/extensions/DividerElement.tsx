@@ -17,13 +17,6 @@ const DividerComponent = (props: any) => {
     }
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this divider?')) {
@@ -34,12 +27,11 @@ const DividerComponent = (props: any) => {
     }
   };
 
-  const currentMarginTop = (typeof marginTop === 'object' && marginTop !== null) ? (marginTop[activeDevice] || '20px') : (marginTop || '20px');
+  const currentMarginTop = (typeof marginTop === 'object' && marginTop !== null) ? (marginTop[activeDevice] || '0px') : (marginTop || '0px');
 
   return (
     <NodeViewWrapper 
-      className="group/divider relative w-full py-4"
-      onDoubleClick={handleDoubleClick}
+      className="group/divider relative my-4 w-full"
     >
       {/* Visual Indicator & Drag Handle */}
       <div 

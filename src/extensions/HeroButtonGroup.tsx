@@ -16,13 +16,6 @@ const ButtonGroupComponent = (props: any) => {
     }
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this button group?')) {
@@ -40,7 +33,7 @@ const ButtonGroupComponent = (props: any) => {
       return (
         <button 
           key={index}
-          style={{ backgroundColor: btn.color || '#0f172a' }}
+          style={{ backgroundColor: btn.color || 'var(--primary-color)' }}
           className="text-white font-black text-[10px] px-8 py-4 rounded-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 active:translate-y-0 text-center uppercase italic tracking-widest skew-x--10"
         >
           <div className="skew-x-10">{btn.text || 'BUTTON'}</div>
@@ -51,8 +44,8 @@ const ButtonGroupComponent = (props: any) => {
     return (
       <button 
         key={index}
-        style={{ borderColor: btn.color || '#e2e8f0', color: btn.color || '#0f172a' }}
-        className="bg-white border-2 text-[10px] px-8 py-4 rounded-xl font-black hover:bg-slate-50 transition-all uppercase italic tracking-widest skew-x--10 hover:border-indigo-500 hover:text-indigo-600 shadow-xl"
+        style={{ borderColor: btn.color || 'var(--primary-color)', color: btn.color || 'var(--primary-color)' }}
+        className="bg-white border-2 text-[10px] px-8 py-4 rounded-xl font-black hover:bg-slate-50 transition-all uppercase italic tracking-widest skew-x--10 shadow-xl"
       >
         <div className="skew-x-10">{btn.text || 'BUTTON'}</div>
       </button>
@@ -83,7 +76,6 @@ const ButtonGroupComponent = (props: any) => {
         "flex flex-wrap gap-4 relative transition-all duration-300 p-2",
         selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-xl"
       )}
-      onDoubleClick={handleDoubleClick}
       >
         {/* Badge Label & Actions */}
         <div className={cn(
@@ -124,8 +116,8 @@ export const HeroButtonGroup = Node.create({
       id: { default: null },
       buttons: { 
         default: [
-          { text: 'GET STARTED', link: '#', color: '#0f172a', variant: 'primary' },
-          { text: 'VIEW DEMO', link: '#', color: '#0f172a', variant: 'secondary' }
+          { text: 'GET STARTED', link: '#', color: null, variant: 'primary' },
+          { text: 'VIEW DEMO', link: '#', color: null, variant: 'secondary' }
         ],
         parseHTML: element => {
           const val = element.getAttribute('data-buttons');

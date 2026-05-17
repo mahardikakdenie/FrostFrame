@@ -17,13 +17,6 @@ const VideoComponent = (props: any) => {
     }
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this video?')) {
@@ -50,7 +43,6 @@ const VideoComponent = (props: any) => {
   return (
     <NodeViewWrapper 
       className="group/video relative my-4 w-full"
-      onDoubleClick={handleDoubleClick}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 

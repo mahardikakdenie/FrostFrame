@@ -1,6 +1,6 @@
 import React from 'react';
 import { useThemeStore } from '../../store/useThemeStore';
-import { Palette, Type, Square, RefreshCcw } from 'lucide-react';
+import { Palette, Type, Square, RefreshCcw, Maximize } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export const ThemeSettings = () => {
@@ -79,6 +79,44 @@ export const ThemeSettings = () => {
           <ColorInput label="Primary Brand Color" value={theme.primaryColor} onChange={theme.setPrimaryColor} />
           <ColorInput label="Secondary Color" value={theme.secondaryColor} onChange={theme.setSecondaryColor} />
           <ColorInput label="Accent Color" value={theme.accentColor} onChange={theme.setAccentColor} />
+        </div>
+      </div>
+
+      {/* Spacing Section */}
+      <div className="space-y-6 pt-6 border-t border-slate-100 text-left">
+        <div className="flex items-center gap-2 mb-4">
+          <Maximize className="w-3.5 h-3.5 text-indigo-500" />
+          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest italic text-left">Section Spacing</h4>
+        </div>
+
+        <div className="space-y-6">
+           <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">Vertical Margin</label>
+                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{theme.sectionMargin}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="100" step="4"
+                className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                value={parseInt(theme.sectionMargin) || 0}
+                onChange={(e) => theme.setSectionMargin(`${e.target.value}px`)}
+              />
+           </div>
+
+           <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">Vertical Padding</label>
+                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{theme.sectionPadding}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="200" step="8"
+                className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                value={parseInt(theme.sectionPadding) || 0}
+                onChange={(e) => theme.setSectionPadding(`${e.target.value}px 1.5rem`)}
+              />
+           </div>
         </div>
       </div>
 

@@ -17,13 +17,6 @@ const SpacerComponent = (props: any) => {
     }
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this spacer?')) {
@@ -40,7 +33,6 @@ const SpacerComponent = (props: any) => {
   return (
     <NodeViewWrapper 
       className="group/spacer relative w-full"
-      onDoubleClick={handleDoubleClick}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 

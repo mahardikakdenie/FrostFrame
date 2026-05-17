@@ -9,6 +9,8 @@ interface ThemeState {
   headingFont: string;
   bodyFont: string;
   borderRadius: string;
+  sectionMargin: string;
+  sectionPadding: string;
   
   setPrimaryColor: (color: string) => void;
   setSecondaryColor: (color: string) => void;
@@ -16,6 +18,8 @@ interface ThemeState {
   setHeadingFont: (font: string) => void;
   setBodyFont: (font: string) => void;
   setBorderRadius: (radius: string) => void;
+  setSectionMargin: (margin: string) => void;
+  setSectionPadding: (padding: string) => void;
   setActiveTheme: (theme: string) => void;
   applyThemePreset: (themeName: string) => void;
   resetTheme: () => void;
@@ -29,6 +33,8 @@ export const THEME_PRESETS: Record<string, any> = {
     accentColor: '#10b981',
     headingFont: 'Inter, sans-serif',
     borderRadius: '0.75rem',
+    sectionMargin: '1rem',
+    sectionPadding: '6rem 1.5rem',
   },
   bootstrap: {
     activeTheme: 'bootstrap',
@@ -37,6 +43,8 @@ export const THEME_PRESETS: Record<string, any> = {
     accentColor: '#198754',
     headingFont: 'system-ui, sans-serif',
     borderRadius: '0.375rem',
+    sectionMargin: '0rem',
+    sectionPadding: '4rem 1rem',
   },
   material: {
     activeTheme: 'material',
@@ -45,6 +53,8 @@ export const THEME_PRESETS: Record<string, any> = {
     accentColor: '#03dac6',
     headingFont: '"Roboto", sans-serif',
     borderRadius: '0.25rem',
+    sectionMargin: '0.5rem',
+    sectionPadding: '5rem 2rem',
   },
   flat: {
     activeTheme: 'flat',
@@ -53,6 +63,8 @@ export const THEME_PRESETS: Record<string, any> = {
     accentColor: '#1abc9c',
     headingFont: '"Lato", sans-serif',
     borderRadius: '0px',
+    sectionMargin: '0rem',
+    sectionPadding: '3rem 1.5rem',
   }
 };
 
@@ -64,6 +76,8 @@ const defaultTheme = {
   headingFont: 'Inter, sans-serif',
   bodyFont: 'Inter, sans-serif',
   borderRadius: '0.75rem', // 12px
+  sectionMargin: '1rem',
+  sectionPadding: '6rem 1.5rem',
 };
 
 export const useThemeStore = create<ThemeState>()(
@@ -77,6 +91,8 @@ export const useThemeStore = create<ThemeState>()(
       setHeadingFont: (headingFont) => set({ headingFont }),
       setBodyFont: (bodyFont) => set({ bodyFont }),
       setBorderRadius: (borderRadius) => set({ borderRadius }),
+      setSectionMargin: (sectionMargin) => set({ sectionMargin }),
+      setSectionPadding: (sectionPadding) => set({ sectionPadding }),
       setActiveTheme: (activeTheme) => set({ activeTheme }),
       applyThemePreset: (name) => {
         const preset = THEME_PRESETS[name];

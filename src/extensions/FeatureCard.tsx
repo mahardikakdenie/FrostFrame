@@ -16,9 +16,20 @@ const FeatureCardView = ({ node, selected }: any) => {
     <NodeViewWrapper>
       <motion.div 
         whileHover={{ y: -5 }}
-        className={`group/item p-8 rounded-[2rem] border-2 border-slate-100 bg-white transition-all hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 ${selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : ''}`}
+        className={`group/item p-8 bg-white transition-all hover:shadow-2xl hover:shadow-indigo-100 ${selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : ''}`}
+        style={{ 
+          borderRadius: 'var(--border-radius)',
+          borderWidth: '2px',
+          borderColor: 'var(--color-slate-100)',
+        }}
       >
-        <div className="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center mb-8 group-hover/item:bg-indigo-600 transition-all shadow-xl skew-x--10">
+        <div 
+          className="w-14 h-14 text-white flex items-center justify-center mb-8 transition-all shadow-xl skew-x--10"
+          style={{ 
+            backgroundColor: 'var(--secondary-color)',
+            borderRadius: '1rem', // Smaller fixed radius for icon container or use theme?
+          }}
+        >
           <div className="skew-x-10">
             <Icon className="w-7 h-7" />
           </div>

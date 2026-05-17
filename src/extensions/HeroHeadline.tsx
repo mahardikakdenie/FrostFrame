@@ -14,13 +14,6 @@ const HeroHeadlineComponent = (props: any) => {
     return {};
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof props.getPos === 'function') {
-      props.editor.commands.setNodeSelection(props.getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this headline?')) {
@@ -34,7 +27,6 @@ const HeroHeadlineComponent = (props: any) => {
   return (
     <NodeViewWrapper 
       className="group/headline relative my-4"
-      onDoubleClick={handleDoubleClick}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 
@@ -82,7 +74,8 @@ const HeroHeadlineComponent = (props: any) => {
 
         <div 
           style={{ 
-            color: color || 'inherit',
+            color: color || 'var(--secondary-color)',
+            fontFamily: 'var(--font-heading)',
             letterSpacing: letterSpacing || 'normal',
             ...getFontSize()
           }}
@@ -122,7 +115,7 @@ export const HeroHeadline = Node.create({
       fontWeight: { default: 'font-black' },
       lineHeight: { default: 'leading-[0.95]' },
       textAlign: { default: 'text-left' },
-      color: { default: '#0f172a' },
+      color: { default: null },
       letterSpacing: { default: null },
       fontSizeScale: { default: null }
     };

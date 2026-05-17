@@ -14,11 +14,6 @@ const FeaturesSectionNodeView = (props: any) => {
   const isDrilledDown = drillDownId === sectionId;
   const isFocused = selected || useUIStore.getState().focusedId === sectionId;
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDrillDownId(sectionId);
-  };
-  
   const handleClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       if (!isDrilledDown) {
@@ -33,9 +28,12 @@ const FeaturesSectionNodeView = (props: any) => {
     <NodeViewWrapper className="group relative">
       <div 
         onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
+        style={{ 
+          margin: 'var(--section-margin)',
+          padding: 'var(--section-padding)'
+        }}
         className={cn(
-          "py-24 px-6 bg-white transition-all m-4 rounded overflow-hidden relative",
+          "bg-white transition-all rounded overflow-hidden relative",
           isFocused ? "ring-2 ring-indigo-500 border-2 border-indigo-500 border-dashed" : "hover:ring-2 hover:ring-slate-100 shadow-sm",
           isDrilledDown ? "cursor-default" : "cursor-pointer"
         )}

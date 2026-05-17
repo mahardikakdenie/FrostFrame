@@ -18,13 +18,6 @@ const IconComponent = (props: any) => {
     }
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this icon?')) {
@@ -45,7 +38,6 @@ const IconComponent = (props: any) => {
         textAlign === 'text-center' ? 'justify-center' : textAlign === 'text-right' ? 'justify-end' : 'justify-start'
       )}
       onClick={handleSelectNode}
-      onDoubleClick={handleDoubleClick}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 
@@ -90,7 +82,7 @@ const IconComponent = (props: any) => {
 
         <Icon 
           size={size || 48} 
-          color={color || 'currentColor'} 
+          color={color || 'var(--primary-color)'} 
           className="transition-all duration-500"
         />
       </div>

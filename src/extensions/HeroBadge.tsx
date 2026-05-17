@@ -14,13 +14,6 @@ const HeroBadgeComponent = (props: any) => {
     return {};
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof props.getPos === 'function') {
-      props.editor.commands.setNodeSelection(props.getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this badge?')) {
@@ -37,7 +30,6 @@ const HeroBadgeComponent = (props: any) => {
         "w-full group/badge relative my-2 z-10",
         textAlign === 'text-center' ? 'flex justify-center' : 'flex justify-start'
       )}
-      onDoubleClick={handleDoubleClick}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 

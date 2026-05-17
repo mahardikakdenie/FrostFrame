@@ -16,7 +16,10 @@ const SectionComponent = (props: any) => {
   };
 
   return (
-    <NodeViewWrapper className="group/section relative w-full">
+    <NodeViewWrapper 
+      className="group/section relative w-full"
+      style={{ margin: 'var(--section-margin)' }}
+    >
       {selected && (
         <div 
           onClick={handleSelectNode}
@@ -28,10 +31,11 @@ const SectionComponent = (props: any) => {
       
       <section 
         onClick={handleSelectNode}
+        style={{ padding: padding === 'py-24' ? 'var(--section-padding)' : undefined }}
         className={cn(
           "w-full transition-all duration-300 relative",
           background || 'bg-white',
-          padding || 'py-24',
+          padding !== 'py-24' && padding,
           selected ? "ring-4 ring-indigo-500 ring-inset" : "hover:ring-2 hover:ring-indigo-100 ring-inset"
         )}
       >

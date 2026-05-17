@@ -10,13 +10,6 @@ const HeroMediaComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
   const { bgImage, bgOverlay, bgOpacity, bgPosition, bgSize, borderRadius, minHeight } = node.attrs;
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this media container?')) {
@@ -45,7 +38,6 @@ const HeroMediaComponent = (props: any) => {
       </div>
 
       <div 
-        onDoubleClick={handleDoubleClick}
         className={cn(
           "relative transition-all duration-300 overflow-hidden cursor-pointer min-h-[300px] flex items-center justify-center p-12",
           selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-[1.5rem]" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4"

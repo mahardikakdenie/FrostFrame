@@ -8,27 +8,19 @@ const ParagraphElementComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
   const { textAlign, color, fontSizeScale, lineHeight } = node.attrs;
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this paragraph?')) {
-      const pos = getPos();
+      const pos = props.getPos();
       if (typeof pos === 'number') {
-        editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+        props.editor.view.dispatch(props.editor.view.state.tr.delete(pos, pos + node.nodeSize));
       }
     }
   };
 
   return (
     <NodeViewWrapper 
-      className="group/paragraph relative my-4"
-      onDoubleClick={handleDoubleClick}
+      className="group/para relative my-4"
     >
       {/* Visual Indicator & Drag Handle */}
       <div 

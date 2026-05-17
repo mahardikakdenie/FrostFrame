@@ -46,8 +46,12 @@ export const SectionWrapper = ({
     >
       <div 
         onClick={handleSectionClick}
+        style={{ 
+          margin: 'var(--section-margin)',
+          padding: 'var(--section-padding)'
+        }}
         className={cn(
-          "relative transition-all cursor-pointer m-4 rounded overflow-hidden",
+          "relative transition-all cursor-pointer rounded overflow-hidden",
           isActive ? "ring-2 ring-indigo-500 border-2 border-indigo-500 border-dashed" : "hover:ring-2 hover:ring-slate-300 shadow-sm",
           className
         )}

@@ -14,7 +14,7 @@ export const Features = (props: NodeViewProps) => {
   const { title, subtitle, columns, features } = node.attrs;
 
   return (
-    <SectionWrapper {...props} sectionName="FEATURES_SECTION.NODE" className="py-24 px-6 bg-white">
+    <SectionWrapper {...props} sectionName="FEATURES_SECTION.NODE" className="bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20 relative">
             <div className="absolute -left-8 top-0 bottom-0 w-1.5 bg-indigo-600 rounded-full skew-x--10 opacity-20" />
@@ -46,7 +46,7 @@ export const Features = (props: NodeViewProps) => {
                         <Icon className="w-7 h-7" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-black text-slate-900 mb-3 theme-headline !text-lg">{feature.title}</h3>
+                    <h3 className="text-xl font-black text-slate-900 mb-3 theme-headline">{feature.title}</h3>
                     <p className="text-slate-500 text-sm leading-relaxed font-medium">{feature.description}</p>
                   </div>
                 </motion.div>

@@ -10,7 +10,7 @@ export const Pricing = (props: NodeViewProps) => {
   const { title, subtitle, billingCycle, tiers } = node.attrs;
 
   return (
-    <SectionWrapper {...props} sectionName="PRICING_SECTION.NODE" className="py-24 px-6 bg-slate-50">
+    <SectionWrapper {...props} sectionName="PRICING_SECTION.NODE" className="bg-slate-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-black text-slate-900 mb-4 theme-headline">{title}</h2>
@@ -48,7 +48,7 @@ export const Pricing = (props: NodeViewProps) => {
                         {tier.badge}
                     </div>
                   )}
-                  <h3 className="text-xl font-black text-slate-900 mb-2 theme-headline !text-lg">{tier.name}</h3>
+                  <h3 className="text-xl font-black text-slate-900 mb-2 theme-headline">{tier.name}</h3>
                   <div className="flex items-baseline mb-8">
                     <span className="text-5xl font-black text-slate-900 theme-headline">{tier.price}</span>
                     <span className="text-slate-400 text-[10px] font-black ml-2 uppercase tracking-widest italic">/ Mo</span>

@@ -8,7 +8,7 @@ export const Footer = (props: NodeViewProps) => {
   const { logo, description, links, copyright } = node.attrs;
 
   return (
-    <SectionWrapper {...props} sectionName="FOOTER_SECTION.NODE" showAddPricing={false} className="py-20 px-12 bg-white border-t border-slate-100">
+    <SectionWrapper {...props} sectionName="FOOTER_SECTION.NODE" showAddPricing={false} className="bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
             <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black italic shadow-2xl skew-x--10 text-xl mb-8">L</div>

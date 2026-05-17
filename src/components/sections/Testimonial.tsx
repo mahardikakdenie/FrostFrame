@@ -9,7 +9,7 @@ export const Testimonial = (props: NodeViewProps) => {
   const { quote, author, rating, logos } = node.attrs;
 
   return (
-    <SectionWrapper {...props} sectionName="TESTIMONIAL.NODE" className="py-32 px-6 bg-slate-900 text-white">
+    <SectionWrapper {...props} sectionName="TESTIMONIAL.NODE" className="bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-10 transform -translate-y-4">
              <Quote className="w-32 h-32 text-indigo-400 rotate-180" />

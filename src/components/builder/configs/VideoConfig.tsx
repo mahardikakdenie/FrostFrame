@@ -3,10 +3,12 @@ import { Plus, Maximize2, Play } from 'lucide-react';
 import { useUIStore } from '../../../store/useUIStore';
 import { cn } from '../../../lib/utils';
 import { ElementConfigProps } from './types';
+import { updateResponsiveValue } from '../ResponsiveConfig';
 
 export const VideoConfig = ({ value, onChange }: ElementConfigProps) => {
   const isObject = typeof value === 'object' && value !== null;
   const attributes = isObject ? value : {};
+  const activeDevice = useUIStore(state => state.activeDevice);
   const openMediaModal = useUIStore(state => state.openMediaModal);
 
   const sourceType = attributes.sourceType || 'link';
@@ -15,13 +17,18 @@ export const VideoConfig = ({ value, onChange }: ElementConfigProps) => {
     openMediaModal(attributes.id || 'video-src', (newUrl: string) => {
       onChange('src', newUrl);
       onChange('sourceType', 'upload');
-    });
+    }, 'video');
   };
 
   const handleOpenPosterModal = () => {
     openMediaModal(attributes.id || 'video-poster', (newUrl: string) => {
       onChange('poster', newUrl);
-    });
+    }, 'image');
+  };
+
+  const handleResponsiveChange = (key: string, val: string) => {
+    const newVal = updateResponsiveValue(attributes[key], activeDevice, val);
+    onChange(key, newVal);
   };
 
   return (
@@ -120,7 +127,7 @@ export const VideoConfig = ({ value, onChange }: ElementConfigProps) => {
                 )}>
                   <div className={cn(
                     "absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all duration-300",
-                    attributes.autoplay ? "left-4.5" : "left-0.5"
+                    attributes.autoplay ? "left-4" : "left-0.5"
                   )} style={{ left: attributes.autoplay ? '1.125rem' : '0.125rem' }} />
                 </div>
               </button>
@@ -143,7 +150,7 @@ export const VideoConfig = ({ value, onChange }: ElementConfigProps) => {
                 )}>
                   <div className={cn(
                     "absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all duration-300",
-                    attributes.loop ? "left-4.5" : "left-0.5"
+                    attributes.loop ? "left-4" : "left-0.5"
                   )} style={{ left: attributes.loop ? '1.125rem' : '0.125rem' }} />
                 </div>
               </button>

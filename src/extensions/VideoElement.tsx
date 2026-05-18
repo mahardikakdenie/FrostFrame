@@ -2,13 +2,16 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
 import React from 'react';
 import { cn } from '../lib/utils';
-import { Trash2, GripVertical, Play, Video as VideoIcon } from 'lucide-react';
+import { Trash2, GripVertical, Play } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
+import { normalizeResponsive } from '../lib/responsive';
 
 const VideoComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { src, sourceType, poster, borderRadius, minHeight, marginTop, autoplay, loop } = node.attrs;
+  const { src, sourceType, poster, borderRadius, minHeight, marginTop, padding, autoplay, loop } = node.attrs;
+  
   const activeDevice = useUIStore(state => state.activeDevice);
+  const openConfirmModal = useUIStore(state => state.openConfirmModal);
 
   const handleSelectNode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -17,14 +20,26 @@ const VideoComponent = (props: any) => {
     }
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof getPos === 'function') {
+      editor.commands.setNodeSelection(getPos());
+    }
+  };
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Delete this video?')) {
-      const pos = getPos();
-      if (typeof pos === 'number') {
-        editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+    openConfirmModal({
+      title: 'Delete Video',
+      message: 'Are you sure you want to remove this video element?',
+      variant: 'danger',
+      onConfirm: () => {
+        const pos = getPos();
+        if (typeof pos === 'number') {
+          editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+        }
       }
-    }
+    });
   };
 
   const getYoutubeEmbedUrl = (url: string) => {
@@ -32,17 +47,34 @@ const VideoComponent = (props: any) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     if (match && match[2].length === 11) {
-      return `https://www.youtube.com/embed/${match[2]}?autoplay=${autoplay ? 1 : 0}&loop=${loop ? 1 : 0}&mute=1&playlist=${match[2]}`;
+      const videoId = match[2];
+      const params = new URLSearchParams({
+        autoplay: autoplay ? '1' : '0',
+        loop: loop ? '1' : '0',
+        mute: '1',
+        playlist: videoId,
+        rel: '0',
+        modestbranding: '1'
+      });
+      return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
     }
     return url;
   };
 
-  const currentMinHeight = (typeof minHeight === 'object' && minHeight !== null) ? (minHeight[activeDevice] || 'auto') : (minHeight || 'auto');
-  const currentMarginTop = (typeof marginTop === 'object' && marginTop !== null) ? (marginTop[activeDevice] || '0px') : (marginTop || '0px');
+  const getResponsiveVal = (attr: any, defaultValue: string) => {
+    const normalized = normalizeResponsive(attr, defaultValue);
+    return normalized[activeDevice] || normalized.desktop || defaultValue;
+  };
+
+  const currentMinHeight = getResponsiveVal(minHeight, sourceType === 'youtube' ? 'auto' : '300px');
+  const currentMarginTop = getResponsiveVal(marginTop, '0px');
+  const currentPadding = getResponsiveVal(padding, '0');
+  const currentBorderRadius = getResponsiveVal(borderRadius, '1.5rem');
 
   return (
     <NodeViewWrapper 
       className="group/video relative my-4 w-full"
+      onDoubleClick={handleDoubleClick}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 
@@ -61,18 +93,19 @@ const VideoComponent = (props: any) => {
 
       <div className={cn(
         "relative transition-all duration-300 overflow-hidden bg-slate-900 flex items-center justify-center",
-        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-xl shadow-2xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-xl shadow-lg"
+        selected ? "ring-2 ring-indigo-500 ring-offset-4 shadow-2xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 shadow-lg"
       )}
       style={{ 
-        borderRadius: borderRadius || '0.75rem',
+        borderRadius: currentBorderRadius,
         aspectRatio: sourceType === 'youtube' ? '16/9' : undefined,
-        minHeight: currentMinHeight !== 'auto' ? currentMinHeight : (sourceType === 'youtube' ? 'auto' : '300px'),
-        marginTop: currentMarginTop !== '0px' ? currentMarginTop : undefined
+        minHeight: currentMinHeight !== 'auto' ? currentMinHeight : undefined,
+        marginTop: currentMarginTop !== '0px' ? currentMarginTop : undefined,
+        padding: currentPadding !== '0' ? currentPadding : undefined
       }}>
         {/* Badge Label & Actions */}
         <div className={cn(
-          "absolute -top-10 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300",
-          (selected || editor.isActive('videoElement')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          "absolute -top-10 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-40",
+          selected ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
           <button 
             onClick={handleDelete}
@@ -93,7 +126,7 @@ const VideoComponent = (props: any) => {
           sourceType === 'youtube' ? (
             <iframe 
               src={getYoutubeEmbedUrl(src)}
-              className="w-full h-full absolute inset-0"
+              className="w-full h-full absolute inset-0 border-0"
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
             />
@@ -105,6 +138,7 @@ const VideoComponent = (props: any) => {
               autoPlay={autoplay}
               loop={loop}
               muted
+              playsInline
               className="w-full h-full object-cover"
               controls
             />
@@ -128,6 +162,7 @@ export const VideoElement = Node.create({
   name: 'videoElement',
   group: 'block',
   draggable: true,
+  isolating: true,
 
   addAttributes() {
     return {
@@ -135,16 +170,62 @@ export const VideoElement = Node.create({
       src: { default: null },
       sourceType: { default: 'link' }, // 'link' | 'upload' | 'youtube'
       poster: { default: null },
-      borderRadius: { default: '1.5rem' },
-      minHeight: { default: null },
-      marginTop: { default: '0px' },
+      borderRadius: { 
+        default: '1.5rem',
+        keepAttributes: true,
+        parseHTML: element => {
+          const val = element.getAttribute('data-border-radius');
+          try { return JSON.parse(val || '"1.5rem"'); } catch(e) { return val || '1.5rem'; }
+        },
+        renderHTML: attributes => ({ 'data-border-radius': typeof attributes.borderRadius === 'object' ? JSON.stringify(attributes.borderRadius) : attributes.borderRadius })
+      },
+      minHeight: { 
+        default: null,
+        keepAttributes: true,
+        parseHTML: element => {
+          const val = element.getAttribute('data-min-height');
+          try { return JSON.parse(val || 'null'); } catch(e) { return val; }
+        },
+        renderHTML: attributes => ({ 'data-min-height': typeof attributes.minHeight === 'object' ? JSON.stringify(attributes.minHeight) : attributes.minHeight })
+      },
+      marginTop: { 
+        default: '0px',
+        keepAttributes: true,
+        parseHTML: element => {
+          const val = element.getAttribute('data-margin-top');
+          try { return JSON.parse(val || '"0px"'); } catch(e) { return val || '0px'; }
+        },
+        renderHTML: attributes => ({ 'data-margin-top': typeof attributes.marginTop === 'object' ? JSON.stringify(attributes.marginTop) : attributes.marginTop })
+      },
+      padding: { 
+        default: '0',
+        keepAttributes: true,
+        parseHTML: element => {
+          const val = element.getAttribute('data-padding');
+          try { return JSON.parse(val || '"0"'); } catch(e) { return val || '0'; }
+        },
+        renderHTML: attributes => ({ 'data-padding': typeof attributes.padding === 'object' ? JSON.stringify(attributes.padding) : attributes.padding })
+      },
       autoplay: { default: false },
       loop: { default: true }
     };
   },
 
   parseHTML() {
-    return [{ tag: 'div[data-type="video-element"]' }];
+    return [{ 
+      tag: 'div[data-type="video-element"]',
+      getAttrs: dom => {
+        let borderRadius = dom.getAttribute('data-border-radius');
+        let minHeight = dom.getAttribute('data-min-height');
+        let marginTop = dom.getAttribute('data-margin-top');
+        let padding = dom.getAttribute('data-padding');
+        try { borderRadius = JSON.parse(borderRadius || '"1.5rem"'); } catch(e) {}
+        try { minHeight = JSON.parse(minHeight || 'null'); } catch(e) {}
+        try { marginTop = JSON.parse(marginTop || '"0px"'); } catch(e) {}
+        try { padding = JSON.parse(padding || '"0"'); } catch(e) {}
+        return { borderRadius, minHeight, marginTop, padding };
+      }
+    }];
   },
 
   renderHTML({ HTMLAttributes }) {

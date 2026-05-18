@@ -16,7 +16,12 @@ interface UIState {
   activeDevice: 'desktop' | 'tablet' | 'mobile';
   drillDownId: string | null; 
   activeSidebarTab: 'library' | 'design';
-  mediaModal: { isOpen: boolean; targetNodeId: string | null; onSelect: ((url: string) => void) | null };
+  mediaModal: { 
+    isOpen: boolean; 
+    targetNodeId: string | null; 
+    onSelect: ((url: string) => void) | null;
+    type: 'image' | 'video';
+  };
   confirmModal: { 
     isOpen: boolean; 
     title: string; 
@@ -31,7 +36,7 @@ interface UIState {
   setActiveDevice: (device: 'desktop' | 'tablet' | 'mobile') => void;
   setDrillDownId: (id: string | null) => void;
   setActiveSidebarTab: (tab: 'library' | 'design') => void;
-  openMediaModal: (targetId: string, onSelect: (url: string) => void) => void;
+  openMediaModal: (targetId: string, onSelect: (url: string) => void, type?: 'image' | 'video') => void;
   closeMediaModal: () => void;
   openConfirmModal: (config: { title: string; message: string; onConfirm: () => void; variant?: 'danger' | 'warning' | 'info' }) => void;
   closeConfirmModal: () => void;
@@ -47,7 +52,7 @@ export const useUIStore = create<UIState>((set) => ({
   activeDevice: 'desktop',
   drillDownId: null,
   activeSidebarTab: 'library',
-  mediaModal: { isOpen: false, targetNodeId: null, onSelect: null },
+  mediaModal: { isOpen: false, targetNodeId: null, onSelect: null, type: 'image' },
   confirmModal: { 
     isOpen: false, 
     title: '', 
@@ -65,8 +70,8 @@ export const useUIStore = create<UIState>((set) => ({
   setActiveDevice: (device) => set({ activeDevice: device }),
   setDrillDownId: (id) => set({ drillDownId: id }),
   setActiveSidebarTab: (tab) => set({ activeSidebarTab: tab }),
-  openMediaModal: (id, onSelect) => set({ mediaModal: { isOpen: true, targetNodeId: id, onSelect } }),
-  closeMediaModal: () => set({ mediaModal: { isOpen: false, targetNodeId: null, onSelect: null } }),
+  openMediaModal: (id, onSelect, type = 'image') => set({ mediaModal: { isOpen: true, targetNodeId: id, onSelect, type } }),
+  closeMediaModal: () => set((state) => ({ mediaModal: { ...state.mediaModal, isOpen: false, targetNodeId: null, onSelect: null } })),
   openConfirmModal: ({ title, message, onConfirm, variant = 'danger' }) => 
     set({ confirmModal: { isOpen: true, title, message, onConfirm, variant } }),
   closeConfirmModal: () => set((state) => ({ confirmModal: { ...state.confirmModal, isOpen: false } })),

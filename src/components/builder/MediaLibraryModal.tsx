@@ -14,10 +14,15 @@ export const MediaLibraryModal = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (mediaModal.isOpen && activeTab === 'unsplash') {
-      fetchUnsplashImages('landscape');
+    if (mediaModal.isOpen) {
+       if (mediaModal.type === 'image') {
+          setActiveTab('unsplash');
+          fetchUnsplashImages('landscape');
+       } else {
+          setActiveTab('upload');
+       }
     }
-  }, [mediaModal.isOpen]);
+  }, [mediaModal.isOpen, mediaModal.type]);
 
   const fetchUnsplashImages = async (query: string) => {
     if (!UNSPLASH_ACCESS_KEY) {
@@ -97,18 +102,20 @@ export const MediaLibraryModal = () => {
              </div>
 
              <div className="flex bg-slate-100 p-1 rounded-xl">
-                <button 
-                  onClick={() => setActiveTab('unsplash')}
-                  className={cn(
-                    "px-6 py-2 rounded-lg text-[10px] font-black uppercase italic transition-all",
-                    activeTab === 'unsplash' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"
-                  )}
-                >Unsplash</button>
+                {mediaModal.type === 'image' && (
+                  <button 
+                    onClick={() => setActiveTab('unsplash')}
+                    className={cn(
+                      "px-6 py-2 rounded-lg text-[10px] font-black uppercase italic transition-all",
+                      activeTab === 'unsplash' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"
+                    )}
+                  >Unsplash</button>
+                )}
                 <button 
                   onClick={() => setActiveTab('upload')}
                   className={cn(
                     "px-6 py-2 rounded-lg text-[10px] font-black uppercase italic transition-all",
-                    activeTab === 'upload' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"
+                    (activeTab === 'upload' || mediaModal.type === 'video') ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"
                   )}
                 >Upload Local</button>
              </div>
@@ -176,10 +183,17 @@ export const MediaLibraryModal = () => {
                       </div>
                       <div>
                          <h4 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Upload from Computer</h4>
-                         <p className="text-xs font-bold text-slate-400 mt-2 tracking-wide">JPG, PNG, WEBP or SVG (Max 5MB)</p>
+                         <p className="text-xs font-bold text-slate-400 mt-2 tracking-wide">
+                           {mediaModal.type === 'video' ? 'MP4, WEBM or OGG (Max 20MB)' : 'JPG, PNG, WEBP or SVG (Max 5MB)'}
+                         </p>
                       </div>
                       <label className="cursor-pointer group relative">
-                         <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+                         <input 
+                           type="file" 
+                           className="hidden" 
+                           accept={mediaModal.type === 'video' ? "video/*" : "image/*"} 
+                           onChange={handleFileUpload} 
+                         />
                          <div className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase italic tracking-widest shadow-2xl hover:bg-black transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3">
                             <Download className="w-4 h-4" />
                             Select File
@@ -192,7 +206,9 @@ export const MediaLibraryModal = () => {
 
           {/* Footer Info */}
           <div className="px-8 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
-             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">Powered by Unsplash API</span>
+             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">
+               {mediaModal.type === 'image' ? 'Powered by Unsplash API' : 'Direct File Upload'}
+             </span>
              <p className="text-[9px] font-bold text-slate-400">Selected: {mediaModal.targetNodeId || 'None'}</p>
           </div>
         </motion.div>

@@ -14,7 +14,8 @@ import {
   Type,
   Smile,
   Minus,
-  Maximize
+  Maximize,
+  Square
 } from 'lucide-react';
 
 export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: any, image?: string, generatePayload: () => any }[]> = {
@@ -80,50 +81,28 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
   heroSections: [
     {
       id: "hero-split",
-      name: "Split Hero",
+      name: "Split Brutalist",
       icon: Columns2,
-      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23f8fafc'/%3E%3Crect x='30' y='80' width='80' height='15' rx='4' fill='%23818cf8'/%3E%3Crect x='30' y='110' width='160' height='30' rx='4' fill='%23334155'/%3E%3Crect x='30' y='150' width='140' height='10' rx='2' fill='%23cbd5e1'/%3E%3Crect x='30' y='165' width='120' height='10' rx='2' fill='%23cbd5e1'/%3E%3Crect x='30' y='195' width='60' height='25' rx='6' fill='%234f46e5'/%3E%3Crect x='100' y='195' width='60' height='25' rx='6' fill='%23fff' stroke='%23cbd5e1' stroke-width='2'/%3E%3Crect x='220' y='50' width='150' height='200' rx='12' fill='%23e2e8f0'/%3E%3C/svg%3E",
+      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23ffffff'/%3E%3Cg transform='skewX(-10) translate(40, 60)'%3E%3Crect width='80' height='15' fill='%234f46e5'/%3E%3C/g%3E%3Crect x='40' y='95' width='180' height='35' fill='%230f172a'/%3E%3Crect x='40' y='140' width='180' height='35' fill='%230f172a'/%3E%3Crect x='40' y='190' width='160' height='10' fill='%2364748b'/%3E%3Crect x='40' y='205' width='140' height='10' fill='%2364748b'/%3E%3Crect x='40' y='235' width='70' height='25' fill='%234f46e5'/%3E%3Crect x='120' y='235' width='70' height='25' fill='%23ffffff' stroke='%230f172a' stroke-width='2'/%3E%3Crect x='240' y='50' width='130' height='200' fill='%23f1f5f9' stroke='%23e2e8f0' stroke-width='1'/%3E%3Cpath d='M250 70 L360 230' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cpath d='M360 70 L250 230' stroke='%23cbd5e1' stroke-width='2'/%3E%3C/svg%3E",
       generatePayload: () => ({
         type: 'layoutRow',
-        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 2, padding: 'py-20' },
+        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 2, padding: 'py-24' },
         content: [
           {
             type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID() },
+            attrs: { id: crypto.randomUUID(), displayType: 'flex', flexDirection: 'col', alignItems: 'start', justifyContent: 'center', gap: '1.5rem' },
             content: [
-              {
-                type: 'layoutRow',
-                attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 1 },
-                content: [
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroBadge', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'NEW RELEASE' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroHeadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Build Your Future' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'The fastest way to build beautiful landing pages.' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroButtonGroup', attrs: { id: crypto.randomUUID() } }]
-                  }
-                ]
-              }
+              { type: 'heroBadge', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'NEW RELEASE 2024' }] },
+              { type: 'heroHeadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'DESIGN WITHOUT LIMITS' }] },
+              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'The most powerful brutalist editor for professional teams.' }] },
+              { type: 'heroButtonGroup', attrs: { id: crypto.randomUUID() } }
             ]
           },
           {
             type: 'layoutColumn',
             attrs: { id: crypto.randomUUID() },
             content: [
-              { type: 'heroMedia', attrs: { id: crypto.randomUUID() } }
+              { type: 'heroMedia', attrs: { id: crypto.randomUUID(), minHeight: '500px' } }
             ]
           }
         ]
@@ -131,94 +110,44 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
     },
     {
       id: "hero-centered",
-      name: "Hero Centered",
+      name: "Centered Impact",
       icon: LayoutPanelTop,
-      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23f8fafc'/%3E%3Crect x='160' y='80' width='80' height='15' rx='4' fill='%23818cf8'/%3E%3Crect x='80' y='110' width='240' height='30' rx='4' fill='%23334155'/%3E%3Crect x='100' y='150' width='200' height='10' rx='2' fill='%23cbd5e1'/%3E%3Crect x='120' y='165' width='160' height='10' rx='2' fill='%23cbd5e1'/%3E%3Crect x='135' y='195' width='60' height='25' rx='6' fill='%234f46e5'/%3E%3Crect x='205' y='195' width='60' height='25' rx='6' fill='%23fff' stroke='%23cbd5e1' stroke-width='2'/%3E%3C/svg%3E",
+      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23ffffff'/%3E%3Cg transform='translate(200, 80)'%3E%3Cg transform='skewX(-10) translate(-40, 0)'%3E%3Crect width='80' height='15' fill='%234f46e5'/%3E%3C/g%3E%3Crect x='-120' y='30' width='240' height='40' fill='%230f172a'/%3E%3Crect x='-100' y='80' width='200' height='10' fill='%2364748b'/%3E%3Crect x='-80' y='95' width='160' height='10' fill='%2364748b'/%3E%3Crect x='-75' y='125' width='70' height='25' fill='%234f46e5'/%3E%3Crect x='5' y='125' width='70' height='25' fill='%23ffffff' stroke='%230f172a' stroke-width='2'/%3E%3C/g%3E%3Crect x='50' y='240' width='300' height='40' fill='%23f1f5f9' rx='4'/%3E%3C/svg%3E",
       generatePayload: () => ({
         type: 'layoutRow',
         attrs: { id: crypto.randomUUID(), displayType: 'flex', justifyContent: 'center', alignItems: 'center', padding: 'py-32' },
         content: [
           {
             type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID(), width: '800px', flexSizing: 'flex-none' },
+            attrs: { id: crypto.randomUUID(), width: '900px', displayType: 'flex', flexDirection: 'col', alignItems: 'center', justifyContent: 'center', gap: '2rem' },
             content: [
-              {
-                type: 'layoutRow',
-                attrs: { id: crypto.randomUUID(), displayType: 'flex', flexDirection: 'col', alignItems: 'center', justifyContent: 'center', gap: '2rem' },
-                content: [
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID(), width: 'auto', flexSizing: 'flex-none' },
-                    content: [{ type: 'heroBadge', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'WELCOME TO LANDO' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID(), width: '100%' },
-                    content: [{ type: 'heroHeadline', attrs: { id: crypto.randomUUID(), textAlign: 'center' }, content: [{ type: 'text', text: 'The Ultimate Web Builder for Modern Teams' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID(), width: '100%' },
-                    content: [{ type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textAlign: 'center' }, content: [{ type: 'text', text: 'Create high-converting landing pages with our brutalist aesthetic and lightning-fast editor.' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID(), width: 'auto', flexSizing: 'flex-none' },
-                    content: [{ type: 'heroButtonGroup', attrs: { id: crypto.randomUUID() } }]
-                  }
-                ]
-              }
+              { type: 'heroBadge', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' }, content: [{ type: 'text', text: 'WELCOME TO THE FUTURE' }] },
+              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' }, content: [{ type: 'text', text: 'ULTIMATE WEB BUILDER' }] },
+              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' }, content: [{ type: 'text', text: 'Create high-converting landing pages with our brutalist aesthetic.' }] },
+              { type: 'heroButtonGroup', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' } },
+              { type: 'heroMedia', attrs: { id: crypto.randomUUID(), minHeight: '300px', bgOpacity: 10 } }
             ]
           }
         ]
       })
     },
     {
-      id: "hero-split-reversed",
-      name: "Split Hero (Rev)",
-      icon: LayoutTemplate,
-      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23f8fafc'/%3E%3Crect x='30' y='50' width='150' height='200' rx='12' fill='%23e2e8f0'/%3E%3Crect x='210' y='80' width='80' height='15' rx='4' fill='%23818cf8'/%3E%3Crect x='210' y='110' width='160' height='30' rx='4' fill='%23334155'/%3E%3Crect x='210' y='150' width='140' height='10' rx='2' fill='%23cbd5e1'/%3E%3Crect x='210' y='165' width='120' height='10' rx='2' fill='%23cbd5e1'/%3E%3Crect x='210' y='195' width='60' height='25' rx='6' fill='%234f46e5'/%3E%3Crect x='280' y='195' width='60' height='25' rx='6' fill='%23fff' stroke='%23cbd5e1' stroke-width='2'/%3E%3C/svg%3E",
+      id: "hero-full-width",
+      name: "Brutalist Banner",
+      icon: Maximize,
+      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%230f172a'/%3E%3Crect x='40' y='100' width='100' height='15' fill='%234f46e5' transform='skewX(-10)'/%3E%3Crect x='40' y='130' width='320' height='50' fill='%23ffffff'/%3E%3Crect x='40' y='200' width='200' height='10' fill='%2394a3b8'/%3E%3Crect x='40' y='230' width='100' height='30' fill='%234f46e5'/%3E%3C/svg%3E",
       generatePayload: () => ({
         type: 'layoutRow',
-        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 2, padding: 'py-20' },
+        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 1, padding: 'py-0', background: '#0f172a' },
         content: [
           {
             type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID() },
+            attrs: { id: crypto.randomUUID(), padding: 'p-32', minHeight: '100vh', displayType: 'flex', flexDirection: 'col', alignItems: 'start', justifyContent: 'center', gap: '2.5rem' },
             content: [
-              { type: 'heroMedia', attrs: { id: crypto.randomUUID() } }
-            ]
-          },
-          {
-            type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID() },
-            content: [
-              {
-                type: 'layoutRow',
-                attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 1 },
-                content: [
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroBadge', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'SECURE & SCALABLE' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroHeadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Infrastructure that Scales with You' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Focus on your business while we handle the technical complexity of modern web hosting.' }] }]
-                  },
-                  { 
-                    type: 'layoutColumn', 
-                    attrs: { id: crypto.randomUUID() },
-                    content: [{ type: 'heroButtonGroup', attrs: { id: crypto.randomUUID() } }]
-                  }
-                ]
-              }
+              { type: 'heroBadge', attrs: { id: crypto.randomUUID(), color: '#ffffff' }, content: [{ type: 'text', text: 'UNLEASH CREATIVITY' }] },
+              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), color: '#ffffff' }, content: [{ type: 'text', text: 'REDEFINING DIGITAL SPACES' }] },
+              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), color: '#94a3b8' }, content: [{ type: 'text', text: 'A new era of web design is here. Bold, raw, and unapologetically fast.' }] },
+              { type: 'heroButtonGroup', attrs: { id: crypto.randomUUID() } }
             ]
           }
         ]
@@ -350,6 +279,12 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
       name: "Badge",
       icon: Star,
       generatePayload: () => ({ type: 'heroBadge', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'NEW RELEASE' }] })
+    },
+    {
+      id: "el-button",
+      name: "Button",
+      icon: Square,
+      generatePayload: () => ({ type: 'buttonElement', attrs: { id: crypto.randomUUID() } })
     },
     {
       id: "el-buttons",

@@ -26,6 +26,7 @@ import { DividerElement } from './DividerElement';
 import { SpacerElement } from './SpacerElement';
 import { ParagraphElement } from './ParagraphElement';
 import { IconElement } from './IconElement';
+import { ButtonElement } from './ButtonElement';
 
 export const BuilderExtensions = [
   StarterKit.configure({
@@ -74,4 +75,5 @@ export const BuilderExtensions = [
   FooterSection,
   ParagraphElement,
   IconElement,
+  ButtonElement,
 ];

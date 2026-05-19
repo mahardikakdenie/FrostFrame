@@ -7,7 +7,7 @@ import { useUIStore } from '../store/useUIStore';
 
 const ButtonComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { id, text, link, variant, color, size, borderRadius, width, marginTop } = node.attrs;
+  const { id, text, link, variant, color, size, borderRadius, width, marginTop, transform, fontStyle, textTransform, fontFamily } = node.attrs;
   
   const openConfirmModal = useUIStore(state => state.openConfirmModal);
   const hoveredId = useUIStore(state => state.hoveredId);
@@ -62,6 +62,13 @@ const ButtonComponent = (props: any) => {
   };
 
   const isPrimary = variant === 'primary';
+  
+  const buttonTransform = transform || 'skew-x--10';
+  const innerTransform = buttonTransform.includes('skew-x--') 
+    ? buttonTransform.replace('skew-x--', 'skew-x-') 
+    : buttonTransform.includes('skew-x-') 
+      ? buttonTransform.replace('skew-x-', 'skew-x--') 
+      : '';
 
   return (
     <NodeViewWrapper 
@@ -126,15 +133,19 @@ const ButtonComponent = (props: any) => {
           <button 
             style={{ 
               backgroundColor: color || 'var(--primary-color)',
-              borderRadius: borderRadius || '0.75rem'
+              borderRadius: borderRadius || '0.75rem',
+              fontFamily: fontFamily || 'var(--font-heading)'
             }}
             className={cn(
-              "text-white font-black uppercase italic tracking-widest transition-all hover:-translate-y-1 active:translate-y-0 text-center skew-x--10 shadow-xl",
+              "text-white font-black transition-all hover:-translate-y-1 active:translate-y-0 text-center shadow-xl",
+              buttonTransform,
+              fontStyle || 'italic',
+              textTransform || 'uppercase',
               size === 'sm' ? 'px-6 py-2.5 text-[8px]' : size === 'lg' ? 'px-12 py-5 text-[12px]' : 'px-9 py-4 text-[10px]',
               width === 'full' ? 'w-full' : 'w-auto'
             )}
           >
-            <div className="skew-x-10 flex items-center justify-center gap-2">
+            <div className={cn("flex items-center justify-center gap-2", innerTransform)}>
               {text || 'BUTTON'}
               {link && <ExternalLink className="w-3 h-3 opacity-50" />}
             </div>
@@ -144,15 +155,19 @@ const ButtonComponent = (props: any) => {
             style={{ 
               borderColor: color || 'var(--primary-color)', 
               color: color || 'var(--primary-color)',
-              borderRadius: borderRadius || '0.75rem'
+              borderRadius: borderRadius || '0.75rem',
+              fontFamily: fontFamily || 'var(--font-heading)'
             }}
             className={cn(
-              "bg-white border-2 font-black uppercase italic tracking-widest transition-all hover:bg-slate-50 hover:-translate-y-1 active:translate-y-0 text-center skew-x--10 shadow-xl",
+              "bg-white border-2 font-black transition-all hover:bg-slate-50 hover:-translate-y-1 active:translate-y-0 text-center shadow-xl",
+              buttonTransform,
+              fontStyle || 'italic',
+              textTransform || 'uppercase',
               size === 'sm' ? 'px-6 py-2.5 text-[8px]' : size === 'lg' ? 'px-12 py-5 text-[12px]' : 'px-9 py-4 text-[10px]',
               width === 'full' ? 'w-full' : 'w-auto'
             )}
           >
-            <div className="skew-x-10 flex items-center justify-center gap-2">
+            <div className={cn("flex items-center justify-center gap-2", innerTransform)}>
               {text || 'BUTTON'}
               {link && <ExternalLink className="w-3 h-3 opacity-50" />}
             </div>
@@ -179,7 +194,11 @@ export const ButtonElement = Node.create({
       size: { default: 'md' },
       borderRadius: { default: '0.75rem' },
       width: { default: 'auto' },
-      marginTop: { default: '0px' }
+      marginTop: { default: '0px' },
+      transform: { default: null }, // default 'skew-x--10' handled in component
+      fontStyle: { default: null }, // default 'italic' handled in component
+      textTransform: { default: null }, // default 'uppercase' handled in component
+      fontFamily: { default: null } // default 'var(--font-heading)' handled in component
     };
   },
 

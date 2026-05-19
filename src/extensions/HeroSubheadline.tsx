@@ -8,7 +8,7 @@ import { useUIStore } from '../store/useUIStore';
 
 const HeroSubheadlineComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { id, fontWeight, lineHeight, textAlign, color, letterSpacing, fontSizeScale } = node.attrs;
+  const { id, fontWeight, lineHeight, textAlign, color, letterSpacing, fontSizeScale, textTransform, opacity } = node.attrs;
 
   const hoveredId = useUIStore(state => state.hoveredId);
   const isHovered = hoveredId === id;
@@ -45,7 +45,7 @@ const HeroSubheadlineComponent = (props: any) => {
   };
 
   return (
-    <NodeViewWrapper className="group/subheadline relative my-4" onClick={(e) => e.stopPropagation()}>
+    <NodeViewWrapper className="group/subheadline relative my-4" onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}>
       <div className={cn(
         "relative transition-all duration-300",
         selected ? "ring-2 ring-indigo-500 ring-offset-6 rounded-lg shadow-2xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-6 rounded-lg",
@@ -110,10 +110,12 @@ const HeroSubheadlineComponent = (props: any) => {
             ...getFontSize()
           }}
           className={cn(
-            "text-sm leading-relaxed font-black max-w-lg transition-all duration-300 outline-none min-h-[1.5em] uppercase opacity-80",
-            fontWeight,
+            "text-sm leading-relaxed max-w-lg transition-all duration-300 outline-none min-h-[1.5em]",
+            fontWeight || 'font-black',
             lineHeight,
-            textAlign
+            textAlign,
+            textTransform || 'uppercase',
+            opacity || 'opacity-80'
           )}
         >
           <NodeViewContent />
@@ -139,7 +141,9 @@ export const HeroSubheadline = Node.create({
       textAlign: { default: 'text-left' },
       color: { default: '#64748b' },
       letterSpacing: { default: '0.1em' },
-      fontSizeScale: { default: null }
+      fontSizeScale: { default: null },
+      textTransform: { default: null }, // default 'uppercase' handled in component
+      opacity: { default: null } // default 'opacity-80' handled in component
     };
   },
 

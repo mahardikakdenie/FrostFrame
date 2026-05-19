@@ -8,7 +8,7 @@ import { useUIStore } from '../store/useUIStore';
 
 const HeroHeadlineComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { id, level, fontWeight, lineHeight, textAlign, color, letterSpacing, fontSizeScale } = node.attrs;
+  const { id, level, fontWeight, lineHeight, textAlign, color, letterSpacing, fontSizeScale, fontStyle, transform, textTransform, fontFamily } = node.attrs;
 
   const hoveredId = useUIStore(state => state.hoveredId);
   const isHovered = hoveredId === id;
@@ -111,18 +111,21 @@ const HeroHeadlineComponent = (props: any) => {
           onClick={(e) => e.stopPropagation()}
           style={{ 
             color: color || 'var(--secondary-color)',
-            fontFamily: 'var(--font-heading)',
+            fontFamily: fontFamily || 'var(--font-heading)',
             letterSpacing: letterSpacing || 'normal',
             ...getFontSize()
           }}
           className={cn(
-            "outline-none transition-all duration-300 min-h-[1em] italic",
+            "outline-none transition-all duration-300 min-h-[1em]",
+            fontStyle || 'italic',
+            transform || ( (level === 'h1' || level === 'h2') ? 'skew-x-[-2deg]' : '' ),
+            textTransform || ( (level === 'h1' || level === 'h2') ? 'uppercase' : '' ),
             fontWeight || 'font-black',
             lineHeight || 'leading-tight',
             textAlign || 'text-left',
-            level === 'h1' && !fontSizeScale && "text-6xl tracking-tight uppercase skew-x-[-2deg]",
-            level === 'h2' && !fontSizeScale && "text-5xl tracking-tight uppercase skew-x-[-2deg]",
-            level === 'h3' && !fontSizeScale && "text-4xl tracking-tight uppercase",
+            level === 'h1' && !fontSizeScale && "text-6xl tracking-tight",
+            level === 'h2' && !fontSizeScale && "text-5xl tracking-tight",
+            level === 'h3' && !fontSizeScale && "text-4xl tracking-tight",
             level === 'h4' && !fontSizeScale && "text-3xl tracking-tight",
             level === 'h5' && !fontSizeScale && "text-2xl tracking-normal",
             level === 'h6' && !fontSizeScale && "text-xl tracking-normal",
@@ -153,7 +156,11 @@ export const HeroHeadline = Node.create({
       textAlign: { default: 'text-left' },
       color: { default: null },
       letterSpacing: { default: null },
-      fontSizeScale: { default: null }
+      fontSizeScale: { default: null },
+      fontStyle: { default: null }, // default 'italic' handled in component
+      transform: { default: null }, // default 'skew-x-[-2deg]' handled in component
+      textTransform: { default: null }, // default 'uppercase' handled in component
+      fontFamily: { default: null } // default 'var(--font-heading)' handled in component
     };
   },
 

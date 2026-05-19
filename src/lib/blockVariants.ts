@@ -15,7 +15,14 @@ import {
   Smile,
   Minus,
   Maximize,
-  Square
+  Square,
+  Heart,
+  Phone,
+  Briefcase,
+  PlayCircle,
+  ShieldCheck,
+  Smartphone,
+  CheckCircle2
 } from 'lucide-react';
 
 export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: any, image?: string, generatePayload: () => any }[]> = {
@@ -109,45 +116,204 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
       })
     },
     {
-      id: "hero-centered",
-      name: "Centered Impact",
-      icon: LayoutPanelTop,
-      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23ffffff'/%3E%3Cg transform='translate(200, 80)'%3E%3Cg transform='skewX(-10) translate(-40, 0)'%3E%3Crect width='80' height='15' fill='%234f46e5'/%3E%3C/g%3E%3Crect x='-120' y='30' width='240' height='40' fill='%230f172a'/%3E%3Crect x='-100' y='80' width='200' height='10' fill='%2364748b'/%3E%3Crect x='-80' y='95' width='160' height='10' fill='%2364748b'/%3E%3Crect x='-75' y='125' width='70' height='25' fill='%234f46e5'/%3E%3Crect x='5' y='125' width='70' height='25' fill='%23ffffff' stroke='%230f172a' stroke-width='2'/%3E%3C/g%3E%3Crect x='50' y='240' width='300' height='40' fill='%23f1f5f9' rx='4'/%3E%3C/svg%3E",
+      id: "hero-wedding",
+      name: "Wedding Elegant",
+      icon: Heart,
       generatePayload: () => ({
         type: 'layoutRow',
-        attrs: { id: crypto.randomUUID(), displayType: 'flex', justifyContent: 'center', alignItems: 'center', padding: 'py-32' },
+        attrs: { id: crypto.randomUUID(), displayType: 'flex', justifyContent: 'center', alignItems: 'center', padding: 'py-32', background: '#fff9f9' },
         content: [
           {
             type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID(), width: '900px', displayType: 'flex', flexDirection: 'col', alignItems: 'center', justifyContent: 'center', gap: '2rem' },
+            attrs: { id: crypto.randomUUID(), width: '800px', displayType: 'flex', flexDirection: 'col', alignItems: 'center', justifyContent: 'center', gap: '2rem' },
             content: [
-              { type: 'heroBadge', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' }, content: [{ type: 'text', text: 'WELCOME TO THE FUTURE' }] },
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' }, content: [{ type: 'text', text: 'ULTIMATE WEB BUILDER' }] },
-              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' }, content: [{ type: 'text', text: 'Create high-converting landing pages with our brutalist aesthetic.' }] },
-              { type: 'heroButtonGroup', attrs: { id: crypto.randomUUID(), textAlign: 'text-center' } },
-              { type: 'heroMedia', attrs: { id: crypto.randomUUID(), minHeight: '300px', bgOpacity: 10 } }
+              { type: 'heroBadge', attrs: { id: crypto.randomUUID(), textAlign: 'text-center', color: '#db2777' }, content: [{ type: 'text', text: 'SAVE THE DATE' }] },
+              { 
+                type: 'heroHeadline', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  textAlign: 'text-center', 
+                  color: '#831843', 
+                  fontStyle: 'normal', 
+                  transform: 'none', 
+                  textTransform: 'normal',
+                  fontFamily: 'serif'
+                }, 
+                content: [{ type: 'text', text: 'Romeo & Juliet' }] 
+              },
+              { 
+                type: 'heroSubheadline', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  textAlign: 'text-center', 
+                  color: '#9d174d', 
+                  textTransform: 'normal',
+                  opacity: 'opacity-100',
+                  fontWeight: 'font-medium'
+                }, 
+                content: [{ type: 'text', text: 'Join us for a celebration of love, laughter, and a happily ever after.' }] 
+              },
+              { 
+                type: 'buttonElement', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  text: 'RSVP NOW', 
+                  color: '#db2777', 
+                  transform: 'none', 
+                  fontStyle: 'normal', 
+                  borderRadius: '9999px' 
+                } 
+              }
             ]
           }
         ]
       })
     },
     {
-      id: "hero-full-width",
-      name: "Brutalist Banner",
-      icon: Maximize,
-      image: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='400' height='300' fill='%230f172a'/%3E%3Crect x='40' y='100' width='100' height='15' fill='%234f46e5' transform='skewX(-10)'/%3E%3Crect x='40' y='130' width='320' height='50' fill='%23ffffff'/%3E%3Crect x='40' y='200' width='200' height='10' fill='%2394a3b8'/%3E%3Crect x='40' y='230' width='100' height='30' fill='%234f46e5'/%3E%3C/svg%3E",
+      id: "hero-cicilan",
+      name: "Cicilan Fintech",
+      icon: Smartphone,
       generatePayload: () => ({
         type: 'layoutRow',
-        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 1, padding: 'py-0', background: '#0f172a' },
+        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 2, padding: 'py-24', background: '#f8fafc' },
         content: [
           {
             type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID(), padding: 'p-32', minHeight: '100vh', displayType: 'flex', flexDirection: 'col', alignItems: 'start', justifyContent: 'center', gap: '2.5rem' },
+            attrs: { id: crypto.randomUUID(), displayType: 'flex', flexDirection: 'col', alignItems: 'start', justifyContent: 'center', gap: '1.5rem' },
             content: [
-              { type: 'heroBadge', attrs: { id: crypto.randomUUID(), color: '#ffffff' }, content: [{ type: 'text', text: 'UNLEASH CREATIVITY' }] },
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), color: '#ffffff' }, content: [{ type: 'text', text: 'REDEFINING DIGITAL SPACES' }] },
-              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), color: '#94a3b8' }, content: [{ type: 'text', text: 'A new era of web design is here. Bold, raw, and unapologetically fast.' }] },
-              { type: 'heroButtonGroup', attrs: { id: crypto.randomUUID() } }
+              { type: 'heroBadge', attrs: { id: crypto.randomUUID(), color: '#0f172a' }, content: [{ type: 'text', text: 'CICILAN TANPA KARTU' }] },
+              { 
+                type: 'heroHeadline', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  color: '#0f172a', 
+                  fontStyle: 'normal', 
+                  transform: 'none',
+                  fontWeight: 'font-bold'
+                }, 
+                content: [{ type: 'text', text: 'BELI SEKARANG, BAYAR NANTI' }] 
+              },
+              { 
+                type: 'heroSubheadline', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  color: '#475569', 
+                  textTransform: 'normal',
+                  opacity: 'opacity-100'
+                }, 
+                content: [{ type: 'text', text: 'Dapatkan limit hingga Rp 50.000.000 dengan proses verifikasi hanya 5 menit.' }] 
+              },
+              { 
+                type: 'buttonElement', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  text: 'AJUKAN SEKARANG', 
+                  color: '#2563eb', 
+                  transform: 'none', 
+                  fontStyle: 'normal',
+                  borderRadius: '0.5rem'
+                } 
+              }
+            ]
+          },
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID() },
+            content: [
+              { type: 'heroMedia', attrs: { id: crypto.randomUUID(), minHeight: '400px' } }
+            ]
+          }
+        ]
+      })
+    },
+    {
+      id: "hero-funnel",
+      name: "Funnel VSL",
+      icon: PlayCircle,
+      generatePayload: () => ({
+        type: 'layoutRow',
+        attrs: { id: crypto.randomUUID(), displayType: 'flex', justifyContent: 'center', alignItems: 'center', padding: 'py-20' },
+        content: [
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID(), width: '1000px', displayType: 'flex', flexDirection: 'col', alignItems: 'center', gap: '2rem' },
+            content: [
+              { 
+                type: 'heroHeadline', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  textAlign: 'text-center', 
+                  transform: 'none', 
+                  fontStyle: 'normal' 
+                }, 
+                content: [{ type: 'text', text: 'STRATEGI RAHASIA MELEDAKKAN OMSET 10X LIPAT' }] 
+              },
+              { type: 'videoElement', attrs: { id: crypto.randomUUID(), width: '100%', aspectRatio: 'video' } },
+              { 
+                type: 'buttonElement', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  text: 'SAYA MAU AKSES SEKARANG!', 
+                  color: '#ea580c', 
+                  size: 'lg', 
+                  width: 'full',
+                  transform: 'none', 
+                  fontStyle: 'normal' 
+                } 
+              }
+            ]
+          }
+        ]
+      })
+    },
+    {
+      id: "hero-corporate",
+      name: "Corporate Clean",
+      icon: Briefcase,
+      generatePayload: () => ({
+        type: 'layoutRow',
+        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 2, padding: 'py-24' },
+        content: [
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID(), displayType: 'flex', flexDirection: 'col', alignItems: 'start', justifyContent: 'center', gap: '1.5rem' },
+            content: [
+              { 
+                type: 'heroHeadline', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  fontStyle: 'normal', 
+                  transform: 'none', 
+                  textTransform: 'normal'
+                }, 
+                content: [{ type: 'text', text: 'Professional Solutions for Your Business' }] 
+              },
+              { 
+                type: 'heroSubheadline', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  textTransform: 'normal', 
+                  opacity: 'opacity-100'
+                }, 
+                content: [{ type: 'text', text: 'We help leading companies build robust digital products and scale their operations.' }] 
+              },
+              { 
+                type: 'buttonElement', 
+                attrs: { 
+                  id: crypto.randomUUID(), 
+                  text: 'LEARN MORE', 
+                  color: '#0f172a', 
+                  transform: 'none', 
+                  fontStyle: 'normal' 
+                } 
+              }
+            ]
+          },
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID() },
+            content: [
+              { type: 'imageElement', attrs: { id: crypto.randomUUID() } }
             ]
           }
         ]
@@ -156,9 +322,9 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
   ],
   features: [
     {
-      id: "features-3-col",
-      name: "3 Column Features",
-      icon: Zap,
+      id: "features-cicilan-steps",
+      name: "Cicilan Process",
+      icon: Smartphone,
       generatePayload: () => ({
         type: 'layoutRow',
         attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 3, padding: 'py-20' },
@@ -169,10 +335,10 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
             content: [
               {
                 type: 'featureCard',
-                attrs: { id: crypto.randomUUID(), icon: 'Zap' },
+                attrs: { id: crypto.randomUUID(), icon: 'Smartphone', iconTransform: 'none' },
                 content: [
-                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'ULTRA-FAST' }] },
-                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'ZERO LATENCY RENDERING ENGINE.' }] }
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3', transform: 'none', fontStyle: 'normal' }, content: [{ type: 'text', text: '1. DAFTAR' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textTransform: 'normal' }, content: [{ type: 'text', text: 'Isi data diri dan unggah foto KTP Anda.' }] }
                 ]
               }
             ]
@@ -183,10 +349,10 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
             content: [
               {
                 type: 'featureCard',
-                attrs: { id: crypto.randomUUID(), icon: 'Shield' },
+                attrs: { id: crypto.randomUUID(), icon: 'Shield', iconTransform: 'none' },
                 content: [
-                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'IRONCLAD' }] },
-                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'MILITARY GRADE INFRASTRUCTURE.' }] }
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3', transform: 'none', fontStyle: 'normal' }, content: [{ type: 'text', text: '2. VERIFIKASI' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textTransform: 'normal' }, content: [{ type: 'text', text: 'Tim kami akan memverifikasi data Anda dalam 5 menit.' }] }
                 ]
               }
             ]
@@ -197,10 +363,49 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
             content: [
               {
                 type: 'featureCard',
-                attrs: { id: crypto.randomUUID(), icon: 'Smartphone' },
+                attrs: { id: crypto.randomUUID(), icon: 'Zap', iconTransform: 'none' },
                 content: [
-                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'RESPONSIVE' }] },
-                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'PERFECT ON EVERY DEVICE.' }] }
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3', transform: 'none', fontStyle: 'normal' }, content: [{ type: 'text', text: '3. CAIR' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textTransform: 'normal' }, content: [{ type: 'text', text: 'Limit aktif dan siap digunakan untuk belanja.' }] }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    },
+    {
+      id: "features-wedding-details",
+      name: "Wedding Details",
+      icon: Heart,
+      generatePayload: () => ({
+        type: 'layoutRow',
+        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 2, padding: 'py-20', background: '#fff9f9' },
+        content: [
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID() },
+            content: [
+              {
+                type: 'featureCard',
+                attrs: { id: crypto.randomUUID(), icon: 'Heart', iconTransform: 'none' },
+                content: [
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3', transform: 'none', fontStyle: 'normal' }, content: [{ type: 'text', text: 'AKAD NIKAH' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textTransform: 'normal' }, content: [{ type: 'text', text: 'Pukul 09:00 - 11:00 WIB di Masjid Agung.' }] }
+                ]
+              }
+            ]
+          },
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID() },
+            content: [
+              {
+                type: 'featureCard',
+                attrs: { id: crypto.randomUUID(), icon: 'Smile', iconTransform: 'none' },
+                content: [
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3', transform: 'none', fontStyle: 'normal' }, content: [{ type: 'text', text: 'RESEPSI' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textTransform: 'normal' }, content: [{ type: 'text', text: 'Pukul 12:00 - 15:00 WIB di Ballroom Hotel.' }] }
                 ]
               }
             ]
@@ -211,38 +416,22 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
   ],
   pricing: [
     {
-      id: "pricing-basic",
-      name: "Standard Pricing",
+      id: "pricing-wedding-gift",
+      name: "Wedding Gift",
       icon: CreditCard,
       generatePayload: () => ({
         type: 'layoutRow',
-        attrs: { id: crypto.randomUUID(), displayType: 'grid', gridCols: 3, padding: 'py-20' },
+        attrs: { id: crypto.randomUUID(), displayType: 'flex', justifyContent: 'center', padding: 'py-20', background: '#fff9f9' },
         content: [
           {
             type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID(), padding: 'p-8', background: 'bg-white' },
+            attrs: { id: crypto.randomUUID(), width: '600px', padding: 'p-12', background: 'white' },
             content: [
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'STARTER' }] },
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h2' }, content: [{ type: 'text', text: '$0' }] },
-              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'PERFECT FOR EXPLORATION.' }] }
-            ]
-          },
-          {
-            type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID(), padding: 'p-8', background: 'bg-indigo-50' },
-            content: [
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'PRO' }] },
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h2' }, content: [{ type: 'text', text: '$29' }] },
-              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'FOR SERIOUS CREATORS.' }] }
-            ]
-          },
-          {
-            type: 'layoutColumn',
-            attrs: { id: crypto.randomUUID(), padding: 'p-8', background: 'bg-white' },
-            content: [
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'ULTIMATE' }] },
-              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h2' }, content: [{ type: 'text', text: 'CUSTOM' }] },
-              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'SCALE WITHOUT LIMITS.' }] }
+              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3', textAlign: 'text-center', transform: 'none', fontStyle: 'normal' }, content: [{ type: 'text', text: 'KIRIM HADIAH' }] },
+              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textAlign: 'text-center', textTransform: 'normal' }, content: [{ type: 'text', text: 'Doa Restu Anda merupakan karunia terindah bagi kami. Namun jika ingin memberikan hadiah, silakan melalui:' }] },
+              { type: 'dividerElement', attrs: { id: crypto.randomUUID() } },
+              { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h4', textAlign: 'text-center', transform: 'none', fontStyle: 'normal' }, content: [{ type: 'text', text: 'BANK BCA: 123456789' }] },
+              { type: 'heroSubheadline', attrs: { id: crypto.randomUUID(), textAlign: 'text-center', textTransform: 'normal' }, content: [{ type: 'text', text: 'A/N: ROMEO' }] }
             ]
           }
         ]

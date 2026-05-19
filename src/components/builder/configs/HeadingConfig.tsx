@@ -14,25 +14,17 @@ export const HeadingConfig = ({ value, onChange, elementPath, activeFormatting }
   const currentColor = activeFormatting?.color || attributes.color || "#0f172a";
   const getPath = (key: string) => elementPath ? `${elementPath}.${key}` : key;
 
-  const isSpecialNode = ['heroHeadline', 'heroSubheadline', 'heroBadge', 'paragraphElement'].some(t => 
-    elementPath.toLowerCase().includes(t.toLowerCase()) || 
-    activeFormatting?.nodeType === t ||
-    (value?.type === t)
-  );
-
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-left-2 duration-300">
-      {(isSpecialNode || !elementPath.includes('title')) && (
-        <div className="space-y-4">
-          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">Body Content</label>
-          <textarea 
-            value={attributes.textContent || value?.textContent || (isObject ? value.text : value) || ''}
-            onChange={(e) => onChange(isObject ? getPath('textContent') : 'textContent', e.target.value)}
-            className="w-full p-4 text-xs font-bold border border-slate-200 rounded-2xl bg-white shadow-inner focus:ring-2 focus:ring-indigo-100 outline-none min-h-[100px] resize-none transition-all leading-relaxed"
-            placeholder="Type your content here..."
-          />
-        </div>
-      )}
+      <div className="space-y-4">
+        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">Body Content</label>
+        <textarea 
+          value={attributes.textContent || value?.textContent || (isObject ? value.text : value) || ''}
+          onChange={(e) => onChange(isObject ? getPath('textContent') : 'textContent', e.target.value)}
+          className="w-full p-4 text-xs font-bold border border-slate-200 rounded-2xl bg-white shadow-inner focus:ring-2 focus:ring-indigo-100 outline-none min-h-[100px] resize-none transition-all leading-relaxed"
+          placeholder="Type your content here..."
+        />
+      </div>
 
       <div className="space-y-6 pt-6 border-t border-slate-100">
         <div className="flex items-center gap-2 mb-4">

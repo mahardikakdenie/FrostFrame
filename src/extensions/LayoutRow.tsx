@@ -30,6 +30,14 @@ const LayoutRowComponent = (props: any) => {
   } = node.attrs;
 
   const activeDevice = useUIStore(state => state.activeDevice);
+  const focusedId = useUIStore(state => state.focusedId);
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const selectionPath = useUIStore(state => state.selectionPath);
+  
+  const isFocused = focusedId === id;
+  const isHovered = hoveredId === id;
+  const isAncestorOfFocus = selectionPath.some(item => item.id === id) && !isFocused;
+  
   const [isResizing, setIsResizing] = React.useState(false);
 
   const handleSelectNode = (e: React.MouseEvent) => {
@@ -158,8 +166,10 @@ const LayoutRowComponent = (props: any) => {
     className={cn(
       "group/row relative w-full my-6 cursor-pointer transition-all duration-300",
       getResponsiveSpacing(padding, 'py'),
-      // Subtle indicator always visible
-      "border-2 border-dashed border-slate-200/60 rounded-[2.5rem] hover:border-indigo-300/50"
+      // 🚀 ADAPTIVE FOCUS: Dampen border if child is focused
+      "border-2 border-dashed rounded-[2.5rem] transition-colors",
+      isFocused ? "border-indigo-400 bg-indigo-50/5 shadow-2xl z-[100]" : (isAncestorOfFocus ? "z-10 border-transparent" : "z-10 border-slate-200/60 hover:border-indigo-300/50"),
+      isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-[200] shadow-2xl transition-all duration-300"
     )}
     style={{
       minHeight: currentMinHeight !== 'auto' ? currentMinHeight : undefined,
@@ -167,80 +177,84 @@ const LayoutRowComponent = (props: any) => {
       backgroundColor: background || 'transparent',
     }}
   >
-    {/* Background Image Layer */}
-    {bgImage && (
-      <div 
-        className="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-[2.5rem]"
-        style={{
-          backgroundImage: `url(${bgImage})`,
-          backgroundPosition: bgPosition || 'center',
-          backgroundSize: bgSize || 'cover',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-    )}
+    {/* Background & Overlay Layer (Handles Clipping for visuals only) */}
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-[2.5rem]">
+      {bgImage && (
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${bgImage})`,
+            backgroundPosition: bgPosition || 'center',
+            backgroundSize: bgSize || 'cover',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+      )}
+      {bgOverlay && (
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundColor: bgOverlay,
+            opacity: bgOpacity !== undefined ? bgOpacity / 100 : 0.4
+          }}
+        />
+      )}
+    </div>
 
-    {/* Overlay Layer */}
-    {bgOverlay && (
-      <div 
-        className="absolute inset-0 z-1 pointer-events-none rounded-[2.5rem]"
-        style={{
-          backgroundColor: bgOverlay,
-          opacity: bgOpacity !== undefined ? bgOpacity / 100 : 0.4
-        }}
-      />
-    )}
-
-    {/* Hierarchy Indicator Tag (Always Visible but Subtle) */}
-    <div className="absolute -top-3 left-8 flex items-center gap-2 z-30 pointer-events-none">
+    {/* Hierarchy Indicator Tag (Dampened if child is focused) */}
+    <div className={cn(
+      "absolute -top-3 left-8 flex items-center gap-2 z-30 pointer-events-none transition-opacity duration-500",
+      isAncestorOfFocus ? "opacity-0" : "opacity-100"
+    )}>
       <div className={cn(
         "px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-[0.2em] transition-all",
-        selected ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400 group-hover/row:bg-indigo-100 group-hover/row:text-indigo-500"
+        selected ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400 group-hover/row:bg-indigo-100 group-hover/row:text-indigo-500 opacity-40 group-hover/row:opacity-100"
       )}>
         {selected ? 'Active Row' : 'Level 1: Row'}
       </div>
     </div>
     {/* Empty Row Placeholder */}
     {isRowEmpty && (
-      <div className="absolute inset-0 m-6 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/30 flex items-center justify-center pointer-events-none z-10">
-        <div className="flex flex-col items-center gap-2 opacity-40">
-          <Layout className="w-8 h-8 text-slate-400" />
-          <span className="text-[10px] font-black uppercase tracking-widest italic">Empty Row - Drop Columns Here</span>
+      <div className="absolute inset-0 m-6 border-2 border-dashed border-indigo-200 rounded-[2.5rem] bg-indigo-50/10 flex items-center justify-center pointer-events-none z-10 shadow-inner">
+        <div className="flex flex-col items-center gap-3 opacity-40 group-hover/row:opacity-100 transition-all duration-500">
+          <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-indigo-500 animate-pulse">
+            <Layout className="w-6 h-6" />
+          </div>
+          <span className="text-[12px] font-black uppercase tracking-0.4em italic text-indigo-600">DROP HERE</span>
         </div>
       </div>
     )}
-    {/* Drag Handle */}
+    {/* Drag Handle (Dampened if child is focused) */}
     <div className={cn(
-      "absolute -left-10 top-0 bottom-0 flex flex-col items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity z-50",
-      selected && "opacity-100"
+      "absolute -left-10 top-0 bottom-0 flex flex-col items-center justify-center transition-opacity z-50",
+      (isFocused && !isAncestorOfFocus) ? "opacity-100" : (isAncestorOfFocus ? "opacity-0" : "opacity-0 group-hover/row:opacity-100")
     )}>
       <div 
         data-drag-handle 
         onClick={handleSelectNode}
-        className="bg-slate-800 text-white p-1.5 rounded-lg cursor-grab active:cursor-grabbing shadow-lg"
+        className="bg-slate-900/60 backdrop-blur-md text-white p-1.5 rounded-full cursor-grab active:cursor-grabbing shadow-lg border border-white/10"
       >
         <GripVertical className="w-4 h-4" />
       </div>
     </div>
 
-    {/* Label & Actions */}
+    {/* Label & Actions (Dampened if child is focused) */}
     <div 
       className={cn(
-        "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-all z-40",
-        selected && "opacity-100 translate-y-0",
-        !selected && "translate-y-2"
+        "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all z-50 pointer-events-none",
+        (isFocused && !isAncestorOfFocus) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
       )}
     >
       <button 
         onClick={handleDelete}
-        className="bg-rose-500 text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+        className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
         title="Delete Row"
       >
-         <Trash2 className="w-2.5 h-2.5" />
+         <Trash2 className="w-3 h-3" />
       </button>
       <div 
         onClick={handleSelectNode}
-        className="bg-indigo-600 text-[8px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest cursor-pointer shadow-xl"
+        className="bg-slate-900/40 backdrop-blur-md text-[9px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest cursor-pointer shadow-xl border border-white/10"
       >
         STRUCTURE: {displayType.toUpperCase()} {displayType === 'grid' ? `(${targetCols} COLS)` : ''}
       </div>
@@ -249,7 +263,7 @@ const LayoutRowComponent = (props: any) => {
     <div 
       className={cn(
         "transition-all duration-500 ease-out px-6 w-full relative z-10",
-        selected ? "ring-4 ring-indigo-500/20 ring-offset-4 rounded-[2rem] border-2 border-indigo-100" : "hover:ring-2 hover:ring-indigo-100 hover:rounded-2xl"
+        isFocused ? "ring-4 ring-indigo-500/20 ring-offset-4 rounded-[2rem] border-2 border-indigo-100 shadow-2xl" : (isAncestorOfFocus ? "" : "hover:ring-2 hover:ring-indigo-100 hover:rounded-2xl")
       )}
       style={{ 
         maxWidth: maxWidth === 'w-full' ? '100%' : '1280px',
@@ -481,7 +495,8 @@ const LayoutRowComponent = (props: any) => {
             ...rowNode.attrs, 
             gridCols: newGridCols 
           });
-          tr.insert(rowPos + rowNode.nodeSize - 1, state.schema.nodes.layoutColumn.createAndFill()!);
+          tr.setMeta('isSidebarUpdate', true);
+          tr.insert(rowPos + rowNode.nodeSize - 1, state.schema.nodes.layoutColumn.createAndFill({ id: crypto.randomUUID() })!);
         }
         
         return true;
@@ -515,12 +530,13 @@ const LayoutRowComponent = (props: any) => {
             const currentCount = rowNode.childCount;
     
             tr.setNodeMarkup(rowPos, undefined, { ...rowNode.attrs, gridCols: newCols });
+            tr.setMeta('isSidebarUpdate', true);
     
             if (targetCount > currentCount) {
               const colsToAdd = targetCount - currentCount;
               const newColsArr = [];
               for (let i = 0; i < colsToAdd; i++) {
-                newColsArr.push(state.schema.nodes.layoutColumn.createAndFill()!);
+                newColsArr.push(state.schema.nodes.layoutColumn.createAndFill({ id: crypto.randomUUID() })!);
               }
               tr.insert(rowPos + rowNode.nodeSize - 1, newColsArr);
             } else if (targetCount < currentCount) {
@@ -565,7 +581,7 @@ const LayoutRowComponent = (props: any) => {
     }];
   },
 
-  renderHTML({ node, HTMLAttributes }) {
+  renderHTML({ HTMLAttributes }) {
     return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'layout-row' }), 0];
   },
 

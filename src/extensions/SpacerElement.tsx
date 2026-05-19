@@ -7,8 +7,10 @@ import { useUIStore } from '../store/useUIStore';
 
 const SpacerComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { height, marginTop } = node.attrs;
+  const { id, height, marginTop } = node.attrs;
   const activeDevice = useUIStore(state => state.activeDevice);
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
 
   const handleSelectNode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -33,6 +35,7 @@ const SpacerComponent = (props: any) => {
   return (
     <NodeViewWrapper 
       className="group/spacer relative w-full"
+      onClick={handleSelectNode}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 
@@ -51,7 +54,8 @@ const SpacerComponent = (props: any) => {
 
       <div className={cn(
         "relative transition-all duration-300 flex items-center justify-center border-2 border-transparent",
-        selected ? "ring-2 ring-indigo-500 ring-offset-2 rounded-lg bg-indigo-50/20 border-dashed border-indigo-200" : "hover:bg-slate-50/50 hover:border-dashed hover:border-slate-200 rounded-lg"
+        selected ? "ring-2 ring-indigo-500 ring-offset-2 rounded-lg bg-indigo-50/20 border-dashed border-indigo-200" : "hover:bg-slate-50/50 hover:border-dashed hover:border-slate-200 rounded-lg",
+        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
       )}
       style={{ 
         height: currentHeight,

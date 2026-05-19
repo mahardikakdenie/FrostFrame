@@ -2,13 +2,15 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
 import React from 'react';
 import { cn } from '../lib/utils';
-import { Trash2, GripVertical, Minus } from 'lucide-react';
+import { Trash2, GripVertical } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
 
 const DividerComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { color, thickness, width, marginTop } = node.attrs;
+  const { id, color, thickness, width, marginTop } = node.attrs;
   const activeDevice = useUIStore(state => state.activeDevice);
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
 
   const handleSelectNode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -32,6 +34,7 @@ const DividerComponent = (props: any) => {
   return (
     <NodeViewWrapper 
       className="group/divider relative my-4 w-full"
+      onClick={handleSelectNode}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 
@@ -50,7 +53,8 @@ const DividerComponent = (props: any) => {
 
       <div className={cn(
         "relative transition-all duration-300 flex items-center justify-center min-h-[20px]",
-        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-lg" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-lg"
+        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-lg" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-lg",
+        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
       )}>
         {/* Badge Label & Actions */}
         <div className={cn(

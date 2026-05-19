@@ -79,17 +79,17 @@ const ButtonGroupComponent = (props: any) => {
       >
         {/* Badge Label & Actions */}
         <div className={cn(
-          "absolute -top-10 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-20",
+          "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-50",
           (selected || editor.isActive('heroButtonGroup')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
           <button 
             onClick={handleDelete}
-            className="bg-rose-500 text-white p-0.5 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
             title="Delete Group"
           >
-             <Trash2 className="w-2.5 h-2.5" />
+             <Trash2 className="w-3 h-3" />
           </button>
-          <span className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20">
+          <span className="bg-slate-900/40 backdrop-blur-md text-[10px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20">
             BUTTON GROUP
           </span>
         </div>

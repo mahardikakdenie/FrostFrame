@@ -55,19 +55,34 @@ export const resolveSmartDropPosition = (view: EditorView, pos: number, type: st
   let ancestorNode = null;
   let ancestorPos = -1;
   let ancestorDepth = -1;
+  let side: 'top' | 'bottom' | 'inside' = 'inside';
 
   for (let depth = resolvedPos.depth; depth >= 0; depth--) {
     const node = resolvedPos.node(depth);
     const name = node.type.name.toLowerCase();
     if (name.includes('column') || name.includes('row') || name.includes('section') || name.includes('media') || name === 'doc') {
       ancestorNode = node;
-      ancestorPos = depth === resolvedPos.depth ? pos : resolvedPos.after(depth + 1);
+      
+      if (depth === resolvedPos.depth) {
+        ancestorPos = pos;
+        side = 'inside';
+      } else {
+        // Measure distance to start and end of the targeted child node
+        const childStart = resolvedPos.before(depth + 1);
+        const childEnd = resolvedPos.after(depth + 1);
+        const isCloserToStart = (pos - childStart) < (childEnd - pos);
+        
+        // If mouse is closer to top half, insert before; otherwise insert after
+        ancestorPos = isCloserToStart ? childStart : childEnd;
+        side = isCloserToStart ? 'top' : 'bottom';
+      }
+
       ancestorDepth = depth;
       break;
     }
   }
 
-  if (!ancestorNode) return { parentType: 'doc', insertPos: pos };
+  if (!ancestorNode) return { parentType: 'doc', insertPos: pos, side: 'inside' as const };
 
   let parentType = ancestorNode.type.name;
   let insertPos = ancestorPos;
@@ -80,7 +95,9 @@ export const resolveSmartDropPosition = (view: EditorView, pos: number, type: st
   ].includes(type);
 
   // 🚀 SMART DROP REDIRECT
-  if ((isElement || isRow) && (parentType === 'layoutRow' || parentType === 'layoutSection')) {
+  // Only redirect to an empty column if dropping *inside* a container.
+  // If we are dropping top/bottom (sibling), respect the exact position.
+  if (side === 'inside' && (isElement || isRow) && (parentType === 'layoutRow' || parentType === 'layoutSection')) {
       let targetRowNode = null;
       let targetRowPos = -1;
 
@@ -111,5 +128,5 @@ export const resolveSmartDropPosition = (view: EditorView, pos: number, type: st
       }
   }
 
-  return { parentType, insertPos };
+  return { parentType, insertPos, side };
 };

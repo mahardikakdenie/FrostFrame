@@ -8,8 +8,10 @@ import { useUIStore } from '../store/useUIStore';
 
 const IconComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { iconName, size, color, marginTop, textAlign } = node.attrs;
+  const { id, iconName, size, color, marginTop, textAlign } = node.attrs;
   const activeDevice = useUIStore(state => state.activeDevice);
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
 
   const handleSelectNode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -56,7 +58,8 @@ const IconComponent = (props: any) => {
 
       <div className={cn(
         "relative transition-all duration-300 p-2",
-        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-xl"
+        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-xl",
+        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
       )}
       style={{ marginTop: currentMarginTop !== '0px' ? currentMarginTop : undefined }}
       >

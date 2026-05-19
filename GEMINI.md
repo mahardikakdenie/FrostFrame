@@ -20,5 +20,5 @@
 
 ## 4. Development Workflow
 - **Linting:** Always run `npm run lint` (TypeScript check) after making changes to the UI or extensions.
-- **Persistence:** Ensure all critical editor state is synced to `LocalStorage` via the "Save as Draft" mechanism in `App.tsx`.
+- **Persistence:** Ensure all critical editor state is synced to `IndexedDB` (via Dexie.js) to handle large JSON payloads and binary assets. Use the "Save as Draft" mechanism in `App.tsx` and auto-save in `Editor.tsx`.
 - **Smart Drops:** The `handleDrop` logic in `Editor.tsx` is the brain of the builder; all drops (external or internal) must pass through the "Smart Redirect" logic to ensure correct nesting within Columns.

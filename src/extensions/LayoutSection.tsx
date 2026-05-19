@@ -4,9 +4,19 @@ import React from 'react';
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { cn } from '../lib/utils';
 
+import { useUIStore } from '../store/useUIStore';
+
 const SectionComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
   const { background, padding, id } = node.attrs;
+
+  const focusedId = useUIStore(state => state.focusedId);
+  const selectionPath = useUIStore(state => state.selectionPath);
+  const hoveredId = useUIStore(state => state.hoveredId);
+  
+  const isFocused = focusedId === id;
+  const isHovered = hoveredId === id;
+  const isAncestorOfFocus = selectionPath.some(item => item.id === id) && !isFocused;
 
   const handleSelectNode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -20,12 +30,13 @@ const SectionComponent = (props: any) => {
       className="group/section relative w-full"
       style={{ margin: 'var(--section-margin)' }}
     >
-      {selected && (
+      {/* 🚀 ADAPTIVE FOCUS: Hide section label if child is focused */}
+      {(selected && !isAncestorOfFocus) && (
         <div 
           onClick={handleSelectNode}
-          className="absolute -top-8 left-4 bg-indigo-500 text-[10px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest z-50 shadow-xl border-2 border-white cursor-pointer"
+          className="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-900/60 backdrop-blur-md text-[9px] text-white px-4 py-1 rounded-full font-black uppercase tracking-[0.2em] z-50 shadow-xl border border-white/10 cursor-pointer"
         >
-          Section
+          Layout Section
         </div>
       )}
       
@@ -36,7 +47,9 @@ const SectionComponent = (props: any) => {
           "w-full transition-all duration-300 relative",
           background || 'bg-white',
           padding !== 'py-24' && padding,
-          selected ? "ring-4 ring-indigo-500 ring-inset" : "hover:ring-2 hover:ring-indigo-100 ring-inset"
+          // 🚀 ADAPTIVE FOCUS: Dampen rings if child is focused
+          isFocused ? "ring-4 ring-indigo-500/20 ring-inset shadow-2xl" : (isAncestorOfFocus ? "" : "hover:ring-2 hover:ring-indigo-100 ring-inset"),
+          isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl"
         )}
       >
         <div className="w-full h-full">
@@ -56,7 +69,11 @@ export const LayoutSection = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null },
+      id: { 
+        default: null,
+        parseHTML: element => element.getAttribute('data-id') || crypto.randomUUID(),
+        renderHTML: attributes => ({ 'data-id': attributes.id })
+      },
       background: { default: 'bg-white' },
       padding: { default: 'py-24' },
       layout: { default: 'full-width' }

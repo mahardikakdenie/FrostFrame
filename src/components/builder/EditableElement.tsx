@@ -26,20 +26,23 @@ export const EditableElement = React.memo(({
   
   const setHoveredId = useUIStore((state) => state.setHoveredId);
   const setFocusedId = useUIStore((state) => state.setFocusedId);
+  const inspectMode = useUIStore((state) => state.inspectMode);
 
   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
+    if (inspectMode) return;
     e.stopPropagation();
     setHoveredId(fullId);
-  }, [fullId, setHoveredId]);
+  }, [fullId, setHoveredId, inspectMode]);
 
   const handleMouseLeave = useCallback(() => {
     setHoveredId(null);
   }, [setHoveredId]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
+    if (inspectMode) return;
     e.stopPropagation();
     setFocusedId(fullId, 'element');
-  }, [fullId, setFocusedId]);
+  }, [fullId, setFocusedId, inspectMode]);
 
   return (
     <div 
@@ -48,17 +51,17 @@ export const EditableElement = React.memo(({
       onMouseLeave={handleMouseLeave}
       className={cn(
         "relative transition-all duration-300 cursor-pointer rounded-lg",
-        "before:absolute before:-inset-2 before:border-2 before:border-transparent before:rounded-xl before:transition-all before:pointer-events-none before:z-[5]",
-        isHovered && !isFocused && "before:border-indigo-400/30",
-        isFocused && "before:border-indigo-500 before:shadow-[0_0_20px_-5px_rgba(79,70,229,0.4)]",
+        !inspectMode && "before:absolute before:-inset-2 before:border-2 before:border-transparent before:rounded-xl before:transition-all before:pointer-events-none before:z-[5]",
+        !inspectMode && isHovered && !isFocused && "before:border-indigo-400/30",
+        !inspectMode && isFocused && "before:border-indigo-500 before:shadow-[0_0_20px_-5px_rgba(79,70,229,0.4)]",
         className,
-        isFocused && activeClassName
+        !inspectMode && isFocused && activeClassName
       )}
     >
       {children}
       
       <AnimatePresence>
-        {(isHovered || isFocused) && (
+        {!inspectMode && (isHovered || isFocused) && (
           <motion.div 
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}

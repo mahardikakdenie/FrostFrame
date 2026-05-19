@@ -4,10 +4,14 @@ import React from 'react';
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { cn } from '../lib/utils';
 import { GripVertical, Trash2 } from 'lucide-react';
+import { useUIStore } from '../store/useUIStore';
 
 const HeroBadgeComponent = (props: any) => {
-  const { node, selected } = props;
-  const { color, textAlign, letterSpacing, fontSizeScale } = node.attrs;
+  const { node, selected, editor, getPos } = props;
+  const { id, color, textAlign, letterSpacing, fontSizeScale } = node.attrs;
+
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
 
   const getFontSize = () => {
     if (fontSizeScale) return { fontSize: `${fontSizeScale}rem` };
@@ -17,9 +21,9 @@ const HeroBadgeComponent = (props: any) => {
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this badge?')) {
-      const pos = props.getPos();
+      const pos = getPos();
       if (typeof pos === 'number') {
-        props.editor.view.dispatch(props.editor.view.state.tr.delete(pos, pos + node.nodeSize));
+        editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
       }
     }
   };
@@ -30,6 +34,7 @@ const HeroBadgeComponent = (props: any) => {
         "w-full group/badge relative my-2 z-10",
         textAlign === 'text-center' ? 'flex justify-center' : 'flex justify-start'
       )}
+      onClick={(e) => e.stopPropagation()}
     >
       {/* Visual Indicator & Drag Handle */}
       <div 
@@ -48,23 +53,24 @@ const HeroBadgeComponent = (props: any) => {
       
       <div className={cn(
         "relative transition-all duration-300 py-1",
-        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-lg" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-lg"
+        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-lg" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-lg",
+        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
       )}>
         {/* Badge Label & Actions */}
         <div className={cn(
-          "absolute -top-10 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300",
-          (selected || props.editor.isActive('heroBadge')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-50",
+          (selected || editor.isActive('heroBadge')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
           <button 
             onClick={handleDelete}
-            className="bg-rose-500 text-white p-0.5 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
             title="Delete Badge"
           >
-             <Trash2 className="w-2.5 h-2.5" />
+             <Trash2 className="w-3 h-3" />
           </button>
           <div 
-            onClick={() => { if (typeof props.getPos === 'function') props.editor.commands.setNodeSelection(props.getPos()); }}
-            className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer"
+            onClick={() => { if (typeof getPos === 'function') editor.commands.setNodeSelection(getPos()); }}
+            className="bg-slate-900/40 backdrop-blur-md text-[10px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer pointer-events-auto"
           >
             TOP BADGE
           </div>

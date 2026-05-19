@@ -1,2 +1,1 @@
-bisa ga sih di previewSidebar 
-ada sections ![alt text](image-9.png), ini bisa di atur posisi nya sesuai dengan keinginan user dan berpengaruh ke canvas editor
+tolong dong untuk ICON ![alt text](image-17.png) DRAG END DROP ATAU konfigurasi Elements janga sampe Terpotong zindex issue ini

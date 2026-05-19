@@ -2,16 +2,18 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
 import React from 'react';
 import { cn } from '../lib/utils';
-import { Trash2, GripVertical, Play } from 'lucide-react';
+import { Trash2, GripVertical, Play, ArrowUp, ArrowDown, Move } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
 import { normalizeResponsive } from '../lib/responsive';
 
 const VideoComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { src, sourceType, poster, borderRadius, minHeight, marginTop, padding, autoplay, loop } = node.attrs;
+  const { id, src, sourceType, poster, borderRadius, minHeight, marginTop, padding, autoplay, loop } = node.attrs;
   
   const activeDevice = useUIStore(state => state.activeDevice);
   const openConfirmModal = useUIStore(state => state.openConfirmModal);
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
 
   const handleSelectNode = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,6 +42,32 @@ const VideoComponent = (props: any) => {
         }
       }
     });
+  };
+
+  const handleMove = (direction: 'up' | 'down') => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const pos = getPos();
+    if (typeof pos !== 'number') return;
+
+    const { doc } = editor.state;
+    const $pos = doc.resolve(pos);
+    const parent = $pos.parent;
+    const index = $pos.index();
+
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= parent.childCount) return;
+
+    const otherNode = parent.child(targetIndex);
+    const targetPos = direction === 'up' 
+      ? pos - otherNode.nodeSize 
+      : pos + node.nodeSize;
+
+    editor.chain()
+      .deleteRange({ from: pos, to: pos + node.nodeSize })
+      .insertContentAt(targetPos, node.toJSON())
+      .setNodeSelection(targetPos)
+      .focus()
+      .run();
   };
 
   const getYoutubeEmbedUrl = (url: string) => {
@@ -73,14 +101,18 @@ const VideoComponent = (props: any) => {
 
   return (
     <NodeViewWrapper 
-      className="group/video relative my-4 w-full"
+      className={cn(
+        "group/video relative my-4 w-full transition-all",
+        (isHovered || selected) ? "z-[300]" : "z-10"
+      )}
+      onClick={handleSelectNode}
       onDoubleClick={handleDoubleClick}
     >
-      {/* Visual Indicator & Drag Handle */}
+      {/* Visual Indicator & Drag Handle (Left Side) */}
       <div 
         className={cn(
           "absolute -left-12 top-0 bottom-0 flex flex-col items-center justify-center opacity-0 group-hover/video:opacity-100 transition-opacity z-50",
-          selected && "opacity-100"
+          (selected || isHovered) && "opacity-100"
         )}
       >
         <div 
@@ -92,8 +124,9 @@ const VideoComponent = (props: any) => {
       </div>
 
       <div className={cn(
-        "relative transition-all duration-300 overflow-hidden bg-slate-900 flex items-center justify-center",
-        selected ? "ring-2 ring-indigo-500 ring-offset-4 shadow-2xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 shadow-lg"
+        "relative transition-all duration-300 bg-slate-900 flex items-center justify-center",
+        selected ? "ring-2 ring-indigo-500 ring-offset-4 shadow-2xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 shadow-lg",
+        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-[301] shadow-2xl transition-all duration-300"
       )}
       style={{ 
         borderRadius: currentBorderRadius,
@@ -102,22 +135,40 @@ const VideoComponent = (props: any) => {
         marginTop: currentMarginTop !== '0px' ? currentMarginTop : undefined,
         padding: currentPadding !== '0' ? currentPadding : undefined
       }}>
-        {/* Badge Label & Actions */}
+        {/* Badge Label & Actions (Top-Right Standard) */}
         <div className={cn(
-          "absolute -top-10 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-40",
-          selected ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-[400]",
+          (selected || isHovered) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
         )}>
           <button 
             onClick={handleDelete}
-            className="bg-rose-500 text-white p-0.5 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
             title="Delete Video"
           >
-             <Trash2 className="w-2.5 h-2.5" />
+             <Trash2 className="w-3 h-3" />
           </button>
+          
+          <button 
+            onClick={handleMove('down')}
+            className="bg-slate-700/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-slate-900 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            title="Move Down"
+          >
+             <ArrowDown className="w-3 h-3" />
+          </button>
+          
+          <button 
+            onClick={handleMove('up')}
+            className="bg-slate-700/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-slate-900 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            title="Move Up"
+          >
+             <ArrowUp className="w-3 h-3" />
+          </button>
+
           <div 
             onClick={handleSelectNode}
-            className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer"
+            className="bg-indigo-600 text-[10px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer pointer-events-auto flex items-center gap-1.5"
           >
+            <Move className="w-2.5 h-2.5" />
             {sourceType?.toUpperCase() || 'VIDEO'}
           </div>
         </div>

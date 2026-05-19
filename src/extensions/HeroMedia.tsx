@@ -3,12 +3,14 @@ import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap
 import React from 'react';
 import { cn } from '../lib/utils';
 import { GripVertical, Image as ImageIcon, Trash } from 'lucide-react';
-
 import { useUIStore } from '../store/useUIStore';
 
 const HeroMediaComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { bgImage, bgOverlay, bgOpacity, bgPosition, bgSize, borderRadius, minHeight } = node.attrs;
+  const { id, bgImage, bgOverlay, bgOpacity, bgPosition, bgSize, borderRadius, minHeight } = node.attrs;
+
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -21,7 +23,7 @@ const HeroMediaComponent = (props: any) => {
   };
 
   return (
-    <NodeViewWrapper className="group/media relative my-8">
+    <NodeViewWrapper className="group/media relative my-8" onClick={(e) => e.stopPropagation()}>
        {/* Visual Indicator & Drag Handle */}
       <div 
         className={cn(
@@ -40,7 +42,8 @@ const HeroMediaComponent = (props: any) => {
       <div 
         className={cn(
           "relative transition-all duration-300 overflow-hidden cursor-pointer min-h-[300px] flex items-center justify-center p-12",
-          selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-[1.5rem]" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4"
+          selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-[1.5rem]" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4",
+          isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
         )} 
         style={{ 
           borderRadius: borderRadius || '1.5rem',
@@ -73,17 +76,17 @@ const HeroMediaComponent = (props: any) => {
 
         {/* Badge Label & Actions */}
         <div className={cn(
-          "absolute top-4 right-4 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-20",
+          "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-50",
           (selected || editor.isActive('heroMedia')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         )}>
           <button 
             onClick={handleDelete}
-            className="bg-rose-500 text-white p-0.5 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
+            className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
             title="Delete Media"
           >
-             <Trash className="w-2.5 h-2.5" />
+             <Trash className="w-3 h-3" />
           </button>
-          <span className="bg-indigo-600 text-[10px] text-white px-2.5 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20">
+          <span className="bg-slate-900/40 backdrop-blur-md text-[10px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20">
             BANNER CONTAINER
           </span>
         </div>

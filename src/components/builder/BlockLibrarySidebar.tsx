@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, ChevronRight, Layout, Grid, Type, Image as ImageIcon, CreditCard, Zap, Star, Rows3, Columns2, Sparkles, LayoutTemplate, Grid3X3, AlignLeft, Smile, Minus } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Layout, Grid, Type, Image as ImageIcon, CreditCard, Zap, Star, Rows3, Columns2, Sparkles, LayoutTemplate, Grid3X3, AlignLeft, Smile, Minus, Plus } from 'lucide-react';
 import { BLOCK_VARIANTS } from '../../lib/blockVariants';
 import { cn } from '../../lib/utils';
+import { useUIStore } from '../../store/useUIStore';
 
 interface VariantPickerProps {
   onAddSection: (type: string, payload?: any) => void;
@@ -9,6 +10,7 @@ interface VariantPickerProps {
 
 export function BlockLibrarySidebar({ onAddSection }: VariantPickerProps) {
   const [expandedCategory, setExpandedCategory] = useState<string | null>('basicElements');
+  const setDragState = useUIStore((state) => state.setDragState);
 
   const categories = [
     { label: 'Basic Elements', type: 'basicElements', icon: Sparkles },
@@ -24,13 +26,13 @@ export function BlockLibrarySidebar({ onAddSection }: VariantPickerProps) {
 
   const handleDragStartVariant = (e: React.DragEvent, type: string, payload: any) => {
     // For Tiptap drag and drop, we pass the node type and optional payload
-    // If it's a layoutRow variant, the 'type' is 'layoutRow'
-    const baseType = type === 'layoutRow' ? 'layoutRow' : 
-                    ['heroSections', 'features', 'pricing'].includes(type) ? 'layoutRow' : type;
+    // Use the actual node type from payload if available, otherwise fallback to category type
+    const baseType = payload?.type || (type === 'layoutRow' ? 'layoutRow' : 
+                    ['heroSections', 'features', 'pricing'].includes(type) ? 'layoutRow' : type);
     
     e.dataTransfer.setData('tiptap-node-type', baseType);
     e.dataTransfer.setData('tiptap-variant-payload', JSON.stringify(payload));
-    document.body.classList.add('is-dragging-' + baseType);
+    setDragState(true, baseType);
   };
 
   return (
@@ -56,31 +58,31 @@ export function BlockLibrarySidebar({ onAddSection }: VariantPickerProps) {
               <div 
                 onClick={() => toggleCategory(cat.type)}
                 className={cn(
-                  "flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer group",
-                  isExpanded ? "border-indigo-500 bg-indigo-50" : "border-slate-100 bg-white hover:border-indigo-200"
+                  "flex items-center justify-between p-4 rounded-[2rem] transition-all cursor-pointer group skew-x-[-2deg]",
+                  isExpanded 
+                    ? "bg-indigo-600 text-white shadow-[0_15px_40px_rgba(79,70,229,0.25)]" 
+                    : "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-900 hover:-translate-y-1"
                 )}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4 skew-x-[2deg]">
                   <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center transition-colors skew-x--10",
-                    isExpanded ? "bg-indigo-500 text-white shadow-lg shadow-indigo-200" : "bg-slate-100 text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600"
+                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
+                    isExpanded ? "bg-white text-indigo-600" : "bg-white text-slate-400 group-hover:bg-indigo-600 group-hover:text-white shadow-sm"
                   )}>
-                    <div className="skew-x-10">
-                      <CategoryIcon className="w-4 h-4" />
-                    </div>
+                    <CategoryIcon className="w-5 h-5" />
                   </div>
-                  <span className={cn("text-[10px] font-black uppercase tracking-widest italic", isExpanded ? "text-indigo-700" : "text-slate-600")}>
+                  <span className={cn("text-[11px] font-black uppercase tracking-[0.2em] italic", isExpanded ? "text-white" : "text-slate-500 group-hover:text-slate-900")}>
                     {cat.label}
                   </span>
                 </div>
-                <div className="text-slate-400">
-                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                <div className={cn("skew-x-[2deg] pr-2", isExpanded ? "text-white" : "text-slate-300")}>
+                  {isExpanded ? <ChevronDown className="w-5 h-5 animate-bounce-subtle" /> : <ChevronRight className="w-5 h-5" />}
                 </div>
               </div>
 
               {/* Variants Grid */}
               {isExpanded && variants && (
-                <div className="grid grid-cols-2 gap-3 pl-2 pr-2 animate-in fade-in slide-in-from-top-2">
+                <div className="grid grid-cols-2 gap-3 pt-3 pb-6 animate-in fade-in slide-in-from-top-4 duration-500">
                   {variants.map(variant => {
                     const TargetIcon = variant.icon;
                     return (
@@ -89,29 +91,41 @@ export function BlockLibrarySidebar({ onAddSection }: VariantPickerProps) {
                         onClick={() => onAddSection('layoutRow', variant.generatePayload())}
                         draggable
                         onDragStart={(e) => handleDragStartVariant(e, cat.type, variant.generatePayload())}
-                        onDragEnd={() => document.body.className = document.body.className.replace(/\bis-dragging-\S+/g, '')}
+                        onDragEnd={() => setDragState(false, null)}
                         className={cn(
-                          "bg-slate-50 border-2 border-slate-100 hover:border-indigo-500 rounded-2xl flex flex-col items-center justify-center transition-all group scale-100 active:scale-95 cursor-grab active:cursor-grabbing hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1",
-                          variant.image ? "p-2 min-h-[140px]" : "aspect-square gap-3"
+                          "bg-white rounded-2xl flex flex-col transition-all group scale-100 active:scale-95 cursor-grab active:cursor-grabbing hover:shadow-lg border border-slate-100 hover:border-indigo-100 overflow-hidden relative",
+                          variant.image ? "min-h-[140px]" : "aspect-square items-center justify-center gap-3"
                         )}
                       >
                         {variant.image ? (
-                          <div className="w-full h-24 mb-3 overflow-hidden rounded-xl border border-slate-200 group-hover:border-indigo-200 transition-all shadow-sm bg-white relative">
+                          <div className="w-full h-24 overflow-hidden transition-all bg-slate-50 relative">
                             <img 
                               src={variant.image} 
                               alt={variant.name} 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
                             />
                             <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-colors" />
                           </div>
                         ) : (
-                          <div className="w-12 h-12 bg-white border-2 border-slate-200 group-hover:border-indigo-100 rounded-xl transition-all shadow-sm flex items-center justify-center group-hover:rotate-6 group-hover:scale-110">
+                          <div className="w-12 h-12 bg-slate-50 rounded-xl transition-all flex items-center justify-center group-hover:bg-indigo-50 shadow-sm">
                             <TargetIcon className="w-6 h-6 text-slate-400 group-hover:text-indigo-600 transition-colors" />
                           </div>
                         )}
-                        <span className="text-[8px] font-black justify-center items-center text-center uppercase tracking-[0.1em] text-slate-500 group-hover:text-indigo-600 italic leading-tight px-1">
-                          {variant.name}
-                        </span>
+                        <div className="p-3 flex items-center justify-between w-full bg-white relative z-10 border-t border-slate-50">
+                          <div className="flex flex-col text-left min-w-0">
+                            <span className="text-[9px] font-black uppercase tracking-tight text-slate-900 italic leading-none mb-1 truncate">
+                              {variant.name}
+                            </span>
+                            <span className="text-[7px] font-bold text-slate-300 uppercase tracking-widest leading-none truncate">
+                              {cat.label.replace('Elements', 'Ele')}
+                            </span>
+                          </div>
+                          {!variant.image && (
+                            <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all">
+                              <Plus className="w-3 h-3" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )
                   })}

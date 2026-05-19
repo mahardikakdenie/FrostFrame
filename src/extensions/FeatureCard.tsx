@@ -3,20 +3,23 @@ import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Search, Smartphone, Layout, Shield, Heart } from 'lucide-react';
+import { useUIStore } from '../store/useUIStore';
 
 const iconMap: Record<string, any> = {
   Zap, Search, Smartphone, Layout, Shield, Heart
 };
 
 const FeatureCardView = ({ node, selected }: any) => {
-  const { icon, title } = node.attrs;
+  const { id, icon, title } = node.attrs;
   const Icon = iconMap[icon] || Zap;
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
 
   return (
-    <NodeViewWrapper>
+    <NodeViewWrapper onClick={(e) => e.stopPropagation()}>
       <motion.div 
         whileHover={{ y: -5 }}
-        className={`group/item p-8 bg-white transition-all hover:shadow-2xl hover:shadow-indigo-100 ${selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : ''}`}
+        className={`group/item p-8 bg-white transition-all hover:shadow-2xl hover:shadow-indigo-100 ${selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : ''} ${isHovered ? 'ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl' : ''}`}
         style={{ 
           borderRadius: 'var(--border-radius)',
           borderWidth: '2px',

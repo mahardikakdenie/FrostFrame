@@ -2,9 +2,12 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import React from 'react';
 import { cn } from '../lib/utils';
+import { useUIStore } from '../store/useUIStore';
 
 const SectionGridView = ({ node }: any) => {
-  const { columns, displayType, flexWrap } = node.attrs;
+  const { id, columns, displayType, flexWrap } = node.attrs;
+  const hoveredId = useUIStore(state => state.hoveredId);
+  const isHovered = hoveredId === id;
   
   let colsClass = '';
   if (displayType === 'grid') {
@@ -14,7 +17,10 @@ const SectionGridView = ({ node }: any) => {
   const baseDisplayClass = displayType === 'flex' ? `flex ${flexWrap === 'wrap' ? 'flex-wrap' : 'flex-nowrap'}` : 'grid';
 
   return (
-    <NodeViewWrapper>
+    <NodeViewWrapper className={cn(
+      "transition-all duration-300 rounded-2xl",
+      isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
+    )}>
       <NodeViewContent 
         className={cn(
           "gap-12",
@@ -34,6 +40,7 @@ export const SectionGrid = Node.create({
 
   addAttributes() {
     return {
+      id: { default: null },
       columns: { default: 3 },
       displayType: { default: 'grid' },
       flexWrap: { default: 'wrap' },

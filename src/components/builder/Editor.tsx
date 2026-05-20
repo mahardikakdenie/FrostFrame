@@ -17,6 +17,7 @@ export const Editor = () => {
   const isDragging = useUIStore((state) => state.isDragging);
   const draggedType = useUIStore((state) => state.draggedType);
   const setDragState = useUIStore((state) => state.setDragState);
+  const inspectMode = useUIStore((state) => state.inspectMode);
 
   // 🚀 UX IMPROVEMENT: Visual Drop Indicator State
   const [dropIndicator, setDropIndicator] = useState<{ 
@@ -293,6 +294,15 @@ export const Editor = () => {
     if (editor) {
       (window as any).editor = editor;
       
+      // 🚀 SYNC: Toggle contenteditable based on inspectMode
+      editor.setOptions({
+        editorProps: {
+          attributes: {
+            contenteditable: (!inspectMode).toString(),
+          }
+        }
+      });
+      
       // Load initial content from DB (includes migration)
       const loadInitialContent = async () => {
         await migrateFromLocalStorage();
@@ -341,7 +351,7 @@ export const Editor = () => {
 
   return (
     <div className="w-full h-full bg-white relative">
-      <FloatingToolbar editor={editor} />
+      {!inspectMode && <FloatingToolbar editor={editor} />}
       <EditorContent editor={editor} />
       
       {/* 🚀 REFINED VISUAL DROP INDICATOR (Border Style using Portal) */}

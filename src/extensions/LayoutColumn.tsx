@@ -199,21 +199,21 @@ const LayoutColumnComponent = (props: any) => {
         "group/column relative transition-all duration-500 flex flex-col",
         getWidthClass(),
         // 🚀 ADAPTIVE FOCUS: Only show ring if directly selected and not an ancestor of a deeper focus
-        isFocused ? "ring-2 ring-indigo-500 z-30 shadow-2xl" : "hover:ring-1 hover:ring-indigo-100",
-        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-[100] shadow-2xl",
+        !inspectMode && (isFocused ? "ring-2 ring-indigo-500 z-30 shadow-2xl" : "hover:ring-1 hover:ring-indigo-100"),
+        !inspectMode && (isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-[100] shadow-2xl"),
         isAncestorOfFocus && "ring-0 ring-transparent shadow-none hover:ring-0",
         
         // Subtle indicator always visible, but hidden if child is focused
-        "border-2 border-dashed transition-colors",
-        (isFocused || isEmpty) ? "border-indigo-200" : (isAncestorOfFocus ? "border-transparent" : "border-slate-200/40 hover:border-indigo-200/50"),
+        !inspectMode && ("border-2 border-dashed transition-colors"),
+        !inspectMode && ((isFocused || isEmpty) ? "border-indigo-200" : (isAncestorOfFocus ? "border-transparent" : "border-slate-200/40 hover:border-indigo-200/50")),
         
         // 🚀 Drag Over Highlight
-        "dragging-over:bg-indigo-50/50 dragging-over:border-indigo-400 dragging-over:ring-2 dragging-over:ring-indigo-100",
+        !inspectMode && "dragging-over:bg-indigo-50/50 dragging-over:border-indigo-400 dragging-over:ring-2 dragging-over:ring-indigo-100",
         textAlign
       )}
       style={{ 
         backgroundColor: background || 'transparent',
-        minHeight: currentMinHeight,
+        minHeight: !inspectMode ? currentMinHeight : 'auto',
         marginTop: currentMarginTop !== '0px' ? currentMarginTop : undefined
       }}
     >
@@ -244,7 +244,7 @@ const LayoutColumnComponent = (props: any) => {
       {/* Level Indicator Tag (Dampened if child is focused) */}
       <div className={cn(
         "absolute top-0 right-4 z-40 pointer-events-none transition-opacity duration-500",
-        isAncestorOfFocus ? "opacity-0" : "opacity-100"
+        (isAncestorOfFocus || inspectMode) ? "opacity-0" : "opacity-100"
       )}>
         <div className={cn(
           "px-1.5 py-0.5 rounded-b-md text-[6px] font-black uppercase tracking-tighter transition-all",
@@ -257,14 +257,14 @@ const LayoutColumnComponent = (props: any) => {
           {/* Label & Actions (Dampened if child is focused) */}
           <div className={cn(
             "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all z-50 pointer-events-none",
-            (isFocused && !isAncestorOfFocus) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            (!inspectMode && isFocused && !isAncestorOfFocus) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
           )}>
             <button 
               onClick={handleDelete}
               className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto ml-1"
               title="Delete Column"
             >
-               <Trash2 className="w-3 h-3" />
+               <Trash2 className="w-3.5 h-3.5" />
             </button>
             <button 
               onClick={handleMove('down')}
@@ -303,7 +303,7 @@ const LayoutColumnComponent = (props: any) => {
           </div>
 
           <div className="relative w-full h-full min-h-[120px]">
-            {isEmpty && (
+            {isEmpty && !inspectMode && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none z-0">
                 <div className="w-12 h-12 rounded-full bg-indigo-50/50 border-2 border-dashed border-indigo-200 flex items-center justify-center text-indigo-400 transition-all duration-500 group-hover/column:scale-110 group-hover/column:border-indigo-400 group-hover/column:bg-indigo-100/50 shadow-inner">
                   <Plus className="w-6 h-6 animate-pulse" />

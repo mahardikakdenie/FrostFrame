@@ -224,7 +224,10 @@ export default function App() {
 
       <main className="flex-1 flex overflow-hidden relative">
         {/* Left Sidebar: Unified Panel (Blocks or Properties) */}
-        <aside className="w-85 bg-white border-r border-slate-200 flex flex-col shrink-0 z-50">
+        <aside className={cn(
+          "w-85 bg-white border-r border-slate-200 flex flex-col shrink-0 z-50 transition-all duration-300",
+          inspectMode ? "w-0 opacity-0 overflow-hidden border-none" : "w-85"
+        )}>
           {/* Global Sidebar Tabs Navigation */}
           <div className="flex p-4 border-b border-slate-100 gap-2 bg-slate-50/50">
              <button 

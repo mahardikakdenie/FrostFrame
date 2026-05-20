@@ -33,6 +33,7 @@ const LayoutRowComponent = (props: any) => {
   const focusedId = useUIStore(state => state.focusedId);
   const hoveredId = useUIStore(state => state.hoveredId);
   const selectionPath = useUIStore(state => state.selectionPath);
+  const inspectMode = useUIStore(state => state.inspectMode);
   
   const isFocused = focusedId === id;
   const isHovered = hoveredId === id;
@@ -41,27 +42,30 @@ const LayoutRowComponent = (props: any) => {
   const [isResizing, setIsResizing] = React.useState(false);
 
   const handleSelectNode = (e: React.MouseEvent) => {
-  e.stopPropagation();
-  if (typeof getPos === 'function') {
-    editor.commands.setNodeSelection(getPos());
-  }
+    if (inspectMode) return;
+    e.stopPropagation();
+    if (typeof getPos === 'function') {
+      editor.commands.setNodeSelection(getPos());
+    }
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
-  e.stopPropagation();
-  if (typeof getPos === 'function') {
-    editor.commands.setNodeSelection(getPos());
-  }
+    if (inspectMode) return;
+    e.stopPropagation();
+    if (typeof getPos === 'function') {
+      editor.commands.setNodeSelection(getPos());
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
-  e.stopPropagation();
-  if (confirm('Delete this row and all its contents?')) {
-    const pos = getPos();
-    if (typeof pos === 'number') {
-      editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+    if (inspectMode) return;
+    e.stopPropagation();
+    if (confirm('Delete this row and all its contents?')) {
+      const pos = getPos();
+      if (typeof pos === 'number') {
+        editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+      }
     }
-  }
   };
 
   const startResizing = (e: React.MouseEvent) => {
@@ -167,9 +171,9 @@ const LayoutRowComponent = (props: any) => {
       "group/row relative w-full my-6 cursor-pointer transition-all duration-300",
       getResponsiveSpacing(padding, 'py'),
       // 🚀 ADAPTIVE FOCUS: Dampen border if child is focused
-      "border-2 border-dashed rounded-[2.5rem] transition-colors",
-      isFocused ? "border-indigo-400 bg-indigo-50/5 shadow-2xl z-[100]" : (isAncestorOfFocus ? "z-10 border-transparent" : "z-10 border-slate-200/60 hover:border-indigo-300/50"),
-      isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-[200] shadow-2xl transition-all duration-300"
+      !inspectMode && "border-2 border-dashed rounded-[2.5rem] transition-colors",
+      !inspectMode && (isFocused ? "border-indigo-400 bg-indigo-50/5 shadow-2xl z-[100]" : (isAncestorOfFocus ? "z-10 border-transparent" : "z-10 border-slate-200/60 hover:border-indigo-300/50")),
+      !inspectMode && isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-[200] shadow-2xl transition-all duration-300"
     )}
     style={{
       minHeight: currentMinHeight !== 'auto' ? currentMinHeight : undefined,
@@ -263,7 +267,7 @@ const LayoutRowComponent = (props: any) => {
     <div 
       className={cn(
         "transition-all duration-500 ease-out px-6 w-full relative z-10",
-        isFocused ? "ring-4 ring-indigo-500/20 ring-offset-4 rounded-[2rem] border-2 border-indigo-100 shadow-2xl" : (isAncestorOfFocus ? "" : "hover:ring-2 hover:ring-indigo-100 hover:rounded-2xl")
+        !inspectMode && (isFocused ? "ring-4 ring-indigo-500/20 ring-offset-4 rounded-[2rem] border-2 border-indigo-100 shadow-2xl" : (isAncestorOfFocus ? "" : "hover:ring-2 hover:ring-indigo-100 hover:rounded-2xl"))
       )}
       style={{ 
         maxWidth: maxWidth === 'w-full' ? '100%' : '1280px',
@@ -284,7 +288,7 @@ const LayoutRowComponent = (props: any) => {
         <NodeViewContent />
 
         {/* Clickable Empty Grid Slots */}
-        {displayType === 'grid' && emptySlots.map((_, i) => (
+        {displayType === 'grid' && !inspectMode && emptySlots.map((_, i) => (
           <div 
             key={`empty-${i}`}
             onClick={(e) => {
@@ -335,34 +339,38 @@ const LayoutRowComponent = (props: any) => {
     </div>
 
     {/* 🚀 NEW: Floating Add Column Button (Right Side) */}
-    <div className={cn(
-      "absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 transition-all z-50",
-      selected && "opacity-100 translate-x-2"
-    )}>
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          editor.commands.addLayoutColumn();
-        }}
-        className="bg-indigo-600 text-white w-10 h-10 rounded-full shadow-2xl hover:bg-indigo-700 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white group/btn"
-        title="Add New Column to Row"
-      >
-        <Plus className="w-5 h-5 group-hover/btn:rotate-90 transition-transform duration-300" />
-      </button>
-    </div>
+    {!inspectMode && (
+      <div className={cn(
+        "absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 transition-all z-50",
+        selected && "opacity-100 translate-x-2"
+      )}>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            editor.commands.addLayoutColumn();
+          }}
+          className="bg-indigo-600 text-white w-10 h-10 rounded-full shadow-2xl hover:bg-indigo-700 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white group/btn"
+          title="Add New Column to Row"
+        >
+          <Plus className="w-5 h-5 group-hover/btn:rotate-90 transition-transform duration-300" />
+        </button>
+      </div>
+    )}
 
     {/* Visual Resize Handle */}
-    <div 
-      onMouseDown={startResizing}
-      className={cn(
-        "absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-slate-200 rounded-full cursor-ns-resize z-50 transition-all opacity-0 group-hover/row:opacity-100 hover:bg-indigo-500 hover:h-2 hover:w-32 active:bg-indigo-600 shadow-sm flex items-center justify-center gap-1",
-        isResizing && "opacity-100 bg-indigo-600 h-2 w-32"
-      )}
-    >
-      <div className="w-1 h-1 bg-white/40 rounded-full" />
-      <div className="w-1 h-1 bg-white/40 rounded-full" />
-      <div className="w-1 h-1 bg-white/40 rounded-full" />
-    </div>
+    {!inspectMode && (
+      <div 
+        onMouseDown={startResizing}
+        className={cn(
+          "absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-slate-200 rounded-full cursor-ns-resize z-50 transition-all opacity-0 group-hover/row:opacity-100 hover:bg-indigo-500 hover:h-2 hover:w-32 active:bg-indigo-600 shadow-sm flex items-center justify-center gap-1",
+          isResizing && "opacity-100 bg-indigo-600 h-2 w-32"
+        )}
+      >
+        <div className="w-1 h-1 bg-white/40 rounded-full" />
+        <div className="w-1 h-1 bg-white/40 rounded-full" />
+        <div className="w-1 h-1 bg-white/40 rounded-full" />
+      </div>
+    )}
   </NodeViewWrapper>
   );
   };

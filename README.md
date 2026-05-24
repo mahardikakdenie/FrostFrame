@@ -15,6 +15,16 @@
   <img src="https://img.shields.io/badge/Architecture-Tiptap%20React-blue?style=for-the-badge" alt="Architecture" />
 </p>
 
+<p align="center">
+  <br />
+  <b>🖥️ THE INTERFACE PREVIEW</b><br />
+  <i>Experience the raw power of Brutalist Web Building</i>
+</p>
+
+<p align="center">
+  <img src="public/preview.png" width="100%" alt="Lando Studio Interface Preview" style="border-radius: 24px; border: 1px solid rgba(0,0,0,0.1); margin: 1rem 0;" />
+</p>
+
 ---
 
 ## 🚀 The Vision: Why Lando Studio?

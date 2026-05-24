@@ -33,6 +33,7 @@ import { InputElement, TextAreaElement, CheckboxElement } from './FormElements';
 export const BuilderExtensions = [
   StarterKit.configure({
     document: false,
+    paragraph: false,
     bulletList: false,
     orderedList: false,
     listItem: false,
@@ -42,7 +43,7 @@ export const BuilderExtensions = [
     width: 2,
   }),
   Document.extend({
-    content: 'block+', // Allow any block at root to prevent strict schema crashes
+    content: '(layoutRow | layoutSection)+',
   }),
   TextStyle,
   Color,

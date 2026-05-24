@@ -60,6 +60,16 @@ export default function Page() {
       const editor = (window as any).editor;
       if (editor && pageData) {
         editor.commands.setContent(pageData.content);
+      } else if (editor) {
+        // New page with no saved data — set clean empty canvas
+        editor.commands.setContent({
+          type: 'doc',
+          content: [{
+            type: 'layoutRow',
+            attrs: { id: crypto.randomUUID(), gridCols: 1, displayType: 'flex' },
+            content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() } }]
+          }]
+        });
       }
     };
     loadPage();
@@ -144,11 +154,14 @@ export default function Page() {
       <MediaLibraryModal />
       {/* Top Navigation Bar */}
       <nav className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-40 shrink-0">
-        <div className="flex items-center gap-6">
-          <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50">L</div>
-          <div className="flex flex-col text-left">
-            <span className="font-extrabold text-xs tracking-tight leading-none text-slate-900 dark:text-white">Lando Studio</span>
-            <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-4">
+          <img 
+            src={colorMode === 'dark' ? '/logo-dark.svg' : '/logo.svg'} 
+            alt="FrostUI Logo" 
+            className="h-10 w-auto" 
+          />
+          <div className="flex flex-col text-left border-l border-slate-200 dark:border-slate-800 pl-4 ml-1">
+            <div className="flex items-center gap-2">
                <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Version 2.0 Frosted</span>
             </div>
@@ -241,7 +254,14 @@ export default function Page() {
                       onConfirm: async () => {
                         const editor = (window as any).editor;
                         if (editor) {
-                          editor.commands.clearContent();
+                          editor.commands.setContent({
+                            type: 'doc',
+                            content: [{
+                              type: 'layoutRow',
+                              attrs: { id: crypto.randomUUID(), gridCols: 1, displayType: 'flex' },
+                              content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() } }]
+                            }]
+                          });
                           if (activePageId) await db.pages.delete(activePageId);
                           setSaveStatus('idle');
                         }

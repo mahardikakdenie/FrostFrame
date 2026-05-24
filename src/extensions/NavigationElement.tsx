@@ -13,6 +13,7 @@ import { useProjectStore } from '../store/useProjectStore';
 import { ElementToolbar } from './utils/ElementToolbar';
 import { createMoveHandler } from './utils/nodeMove';
 import { Menu, Zap, Globe } from 'lucide-react';
+import { useThemeStore } from '../store/useThemeStore';
 
 const NavigationComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;

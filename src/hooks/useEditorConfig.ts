@@ -61,10 +61,7 @@ export const useEditorConfig = () => {
           content: [
             { 
               type: 'layoutColumn', 
-              attrs: { id: crypto.randomUUID() },
-              content: [
-                { type: 'paragraphElement', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: ' ' }] }
-              ]
+              attrs: { id: crypto.randomUUID() }
             }
           ]
         }

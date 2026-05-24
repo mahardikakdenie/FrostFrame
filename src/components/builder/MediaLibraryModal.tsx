@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Upload, Image as ImageIcon, Loader2, Download } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
+import { useThemeStore } from '../../store/useThemeStore';
 import { cn } from '../../lib/utils';
 
 const UNSPLASH_ACCESS_KEY = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '';
 
 export const MediaLibraryModal = () => {
   const { mediaModal, closeMediaModal } = useUIStore();
+  const colorMode = useThemeStore(state => state.colorMode);
   const [activeTab, setActiveTab] = useState<'unsplash' | 'upload'>('unsplash');
   const [searchQuery, setSearchQuery] = useState('');
   const [images, setImages] = useState<any[]>([]);
@@ -92,12 +94,14 @@ export const MediaLibraryModal = () => {
           {/* Header */}
           <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                   <ImageIcon className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                   <h3 className="text-lg font-black uppercase italic tracking-tighter text-slate-900 dark:text-white leading-none">Media Library</h3>
-                   <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic">Lando Studio Assets</span>
+                <img 
+                  src={colorMode === 'dark' ? '/logo-dark.svg' : '/logo.svg'} 
+                  alt="FrostUI Logo" 
+                  className="h-10 w-auto" 
+                />
+                <div className="flex flex-col text-left border-l border-slate-200 dark:border-slate-800 pl-4 ml-1">
+                   <h3 className="text-sm font-black uppercase italic tracking-tighter text-slate-900 dark:text-white leading-none">Media Library</h3>
+                   <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic mt-1">Digital Assets</span>
                 </div>
              </div>
 

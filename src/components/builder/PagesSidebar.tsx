@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import { FileText, Plus, Trash2, Edit3, Check, X, ExternalLink } from 'lucide-react';
 import { useProjectStore } from '../../store/useProjectStore';
+import { useUIStore } from '../../store/useUIStore';
 import { cn } from '../../lib/utils';
 
 export function PagesSidebar() {
   const { pages, activePageId, addPage, deletePage, setActivePageId, updatePageMetadata } = useProjectStore();
+  const openConfirmModal = useUIStore((state) => state.openConfirmModal);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
@@ -153,7 +155,15 @@ export function PagesSidebar() {
                   </button>
                   {pages.length > 1 && (
                     <button 
-                      onClick={(e) => { e.stopPropagation(); deletePage(page.id); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        openConfirmModal({
+                          title: 'Delete Page',
+                          message: `Are you sure you want to delete the page "${page.name}"? This will permanently remove all content on this page. This action cannot be undone.`,
+                          variant: 'danger',
+                          onConfirm: () => deletePage(page.id)
+                        });
+                      }}
                       className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg text-slate-400 hover:text-rose-500 transition-all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings2, MousePointer2, Palette, Layout, ChevronRight, Sparkles, ArrowUpDown, ArrowLeft, Info, Trash2, Type, Square, Image as ImageIcon, Play, Minus, GripHorizontal, MessageSquare, AlignLeft, LucideIcon, FormInput, AlignJustify, CheckSquare } from 'lucide-react';
+import { X, Settings2, MousePointer2, Palette, Layout, ChevronRight, Sparkles, ArrowUpDown, ArrowLeft, Info, Trash2, Type, Square, Image as ImageIcon, Play, Minus, GripHorizontal, MessageSquare, AlignLeft, AlignCenter, LucideIcon, FormInput, AlignJustify, CheckSquare } from 'lucide-react';
 import { Editor } from '@tiptap/core';
 import { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import { NodeSelection } from '@tiptap/pm/state';
@@ -18,7 +18,8 @@ import {
   SpacerConfig, 
   AdvancedConfig,
   TestimonialConfig,
-  BadgeConfig
+  BadgeConfig,
+  NavigationConfig
 } from './configs';
 import { FormConfig } from './configs/FormConfig';
 import { RowGridConfig } from './RowGridConfig';
@@ -552,6 +553,7 @@ export const PreviewSidebar = () => {
                       {nodeType === 'iconElement' && <IconConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" />}
                       {nodeType === 'dividerElement' && <DividerConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" />}
                       {nodeType === 'spacerElement' && <SpacerConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" />}
+                      {nodeType === 'navigationElement' && <NavigationConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" />}
                       {['inputElement', 'textareaElement', 'checkboxElement'].includes(nodeType) && <FormConfig value={{ ...targetAttrs, type: nodeType }} onChange={updateAttribute} elementPath="" />}
                     </ConfigAccordion>
 

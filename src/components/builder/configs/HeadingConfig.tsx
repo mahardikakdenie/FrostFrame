@@ -90,6 +90,88 @@ export const HeadingConfig = ({ value, onChange, elementPath, activeFormatting }
            </div>
         </div>
 
+        <div className="space-y-4">
+           <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic text-left">Letter Spacing</label>
+           <div className="flex gap-1.5 flex-wrap">
+             {[
+               { label: 'Tighter', value: 'tracking-tighter' },
+               { label: 'Tight', value: 'tracking-tight' },
+               { label: 'Normal', value: 'tracking-normal' },
+               { label: 'Wide', value: 'tracking-wide' },
+               { label: 'Widest', value: 'tracking-widest' }
+             ].map(opt => (
+               <button 
+                 key={opt.value}
+                 onClick={() => onChange(getPath('letterSpacing'), opt.value)}
+                 className={cn(
+                   "px-3 py-1.5 text-[9px] font-bold rounded-lg border transition-all uppercase",
+                   (attributes.letterSpacing || 'tracking-tight') === opt.value 
+                     ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100" 
+                     : "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:border-indigo-200 dark:hover:border-indigo-500/30"
+                 )}
+               >
+                 {opt.label}
+               </button>
+             ))}
+           </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic text-left">Text Transform & Style</label>
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              onClick={() => onChange(getPath('textTransform'), attributes.textTransform === 'uppercase' ? 'normal-case' : 'uppercase')}
+              className={cn(
+                "py-2 text-[10px] font-bold rounded-lg border transition-all uppercase tracking-widest",
+                attributes.textTransform === 'uppercase'
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30 shadow-sm" 
+                  : "bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-700"
+              )}
+            >
+              Uppercase
+            </button>
+            <button 
+              onClick={() => onChange(getPath('fontStyle'), attributes.fontStyle === 'italic' ? 'not-italic' : 'italic')}
+              className={cn(
+                "py-2 text-[10px] font-bold rounded-lg border transition-all italic",
+                attributes.fontStyle === 'italic' || (!attributes.fontStyle && attributes.level !== 'p')
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30 shadow-sm" 
+                  : "bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-700"
+              )}
+            >
+              Italic
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic text-left">Shape Transform</label>
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              onClick={() => onChange(getPath('transform'), attributes.transform === 'skew-x-[-2deg]' ? 'skew-x-0' : 'skew-x-[-2deg]')}
+              className={cn(
+                "py-2 text-[10px] font-bold rounded-lg border transition-all",
+                attributes.transform === 'skew-x-[-2deg]' || (!attributes.transform && (attributes.level === 'h1' || attributes.level === 'h2'))
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30 shadow-sm" 
+                  : "bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-700"
+              )}
+            >
+              Slanted (Skew)
+            </button>
+             <button 
+              onClick={() => onChange(getPath('transform'), 'skew-x-0')}
+              className={cn(
+                "py-2 text-[10px] font-bold rounded-lg border transition-all",
+                attributes.transform === 'skew-x-0' || (!attributes.transform && attributes.level !== 'h1' && attributes.level !== 'h2')
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30 shadow-sm" 
+                  : "bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-700"
+              )}
+            >
+              Flat (Normal)
+            </button>
+          </div>
+        </div>
+
         <div className="space-y-3">
           <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic text-left">Alignment</label>
           <div className="grid grid-cols-3 gap-2">

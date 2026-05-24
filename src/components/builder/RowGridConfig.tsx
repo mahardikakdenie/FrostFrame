@@ -89,17 +89,17 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
       {/* Display Type */}
       {!isColumn && (
         <div className="space-y-4">
-          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">
+          <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic">
             Display Mode
           </label>
-          <div className="flex bg-slate-100 p-1 rounded-xl">
+          <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
             <button
               onClick={() => handleDisplayTypeChange('grid')}
               className={cn(
                 "flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all",
                 currentDisplayType === 'grid' 
-                  ? "bg-white text-indigo-600 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
               )}
             >
               Grid Layout
@@ -109,8 +109,8 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
               className={cn(
                 "flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all",
                 currentDisplayType === 'flex' 
-                  ? "bg-white text-indigo-600 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
               )}
             >
               Flex Layout
@@ -125,9 +125,9 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
           Gap / Spacing
         </ResponsiveLabel>
         <div className="space-y-2">
-          <div className="flex justify-between text-[10px] font-bold text-slate-500">
+          <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
             <span>0px</span>
-            <span className="text-indigo-600 font-black">{currentGap}</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-black">{currentGap}</span>
             <span>64px</span>
           </div>
           <input 
@@ -135,7 +135,7 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
             min="0" 
             max="4" 
             step="0.25"
-            className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
             value={parseFloat(currentGap.replace('rem', '')) || 0}
             onChange={(e) => handleGapChange(`${e.target.value}rem`)}
           />
@@ -147,7 +147,7 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
         <div className="space-y-8 animate-in fade-in slide-in-from-top-2">
           {/* Direction */}
           <div className="space-y-3">
-            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">
+            <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic">
               {isColumn ? 'Inner Content Direction' : 'Direction (Flow)'}
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -156,8 +156,8 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
                 className={cn(
                   "p-3 rounded-xl border flex items-center justify-center gap-2 transition-all",
                   currentFlexDirection === 'row' 
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-600 shadow-sm" 
-                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                    ? "border-indigo-500 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
                 )}
               >
                 <ArrowRight className="w-4 h-4" />
@@ -168,8 +168,8 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
                 className={cn(
                   "p-3 rounded-xl border flex items-center justify-center gap-2 transition-all",
                   currentFlexDirection === 'col' 
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-600 shadow-sm" 
-                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                    ? "border-indigo-500 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
                 )}
               >
                 <ArrowDown className="w-4 h-4" />
@@ -180,10 +180,10 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
 
           {/* Justify Content */}
           <div className="space-y-3">
-            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">
+            <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic">
               {isColumn ? 'Content Distribution (Main Axis)' : 'Justify Content (Main Axis)'}
             </label>
-            <div className="flex bg-slate-100 p-1 rounded-xl">
+            <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
                {[
                  { id: 'start', label: 'Start' },
                  { id: 'center', label: 'Center' },
@@ -197,8 +197,8 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
                    className={cn(
                      "flex-1 py-1.5 text-[8px] font-black uppercase rounded-lg transition-all",
                      currentJustifyContent === item.id 
-                       ? "bg-white text-indigo-600 shadow-sm" 
-                       : "text-slate-400 hover:text-slate-600"
+                       ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                       : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                    )}
                  >
                    {item.label}
@@ -209,10 +209,10 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
 
           {/* Align Items */}
           <div className="space-y-3">
-            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">
+            <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic">
               {isColumn ? 'Content Alignment (Cross Axis)' : 'Align Items (Cross Axis)'}
             </label>
-            <div className="flex bg-slate-100 p-1 rounded-xl">
+            <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
                {[
                  { id: 'start', icon: AlignLeft, label: 'Start' },
                  { id: 'center', icon: AlignCenter, label: 'Center' },
@@ -225,8 +225,8 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
                    className={cn(
                      "flex-1 py-2 flex flex-col justify-center items-center rounded-lg transition-all gap-1",
                      currentAlignItems === item.id 
-                       ? "bg-white text-indigo-600 shadow-sm" 
-                       : "text-slate-400 hover:text-slate-600"
+                       ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                       : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                    )}
                    title={item.label}
                  >
@@ -239,10 +239,10 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
 
           {/* Align Content */}
           <div className="space-y-3">
-            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">
+            <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic">
               {isColumn ? 'Content Line Spacing' : 'Align Content (Line Spacing)'}
             </label>
-            <div className="flex bg-slate-100 p-1 rounded-xl">
+            <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
                {[
                  { id: 'start', label: 'Start' },
                  { id: 'center', label: 'Center' },
@@ -256,8 +256,8 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
                    className={cn(
                      "flex-1 py-1.5 text-[8px] font-black uppercase rounded-lg transition-all",
                      currentAlignContent === item.id 
-                       ? "bg-white text-indigo-600 shadow-sm" 
-                       : "text-slate-400 hover:text-slate-600"
+                       ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                       : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                    )}
                  >
                    {item.label}
@@ -283,8 +283,8 @@ export function RowGridConfig({ value, onChange, nodeType, isParentGrid }: RowGr
                 className={cn(
                   "p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all",
                   currentGridCols === cols 
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-600 shadow-sm" 
-                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                    ? "border-indigo-500 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
                 )}
               >
                 {cols === 1 ? <LayoutTemplate className="w-4 h-4" /> : 

@@ -34,17 +34,17 @@ export const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">{label}</label>
+        <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic">{label}</label>
         <div className="flex items-center gap-2">
           <div 
-            className="w-4 h-4 rounded-full border border-slate-200 shadow-sm transition-colors duration-100" 
+            className="w-4 h-4 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-100" 
             style={{ backgroundColor: localColor }}
           />
           <input 
             type="text" 
             value={localColor}
             onChange={(e) => handleChange(e.target.value)}
-            className="w-16 text-[10px] font-mono font-bold bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 outline-none focus:border-indigo-500"
+            className="w-16 text-[10px] font-mono font-bold bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded px-1.5 py-0.5 outline-none focus:border-indigo-500"
           />
         </div>
       </div>
@@ -55,8 +55,8 @@ export const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => {
             key={color}
             onClick={() => handleChange(color)}
             className={cn(
-              "w-5 h-5 rounded-full border border-slate-200 transition-transform active:scale-75",
-              localColor === color && "ring-2 ring-indigo-500 ring-offset-1 scale-110"
+              "w-5 h-5 rounded-full border border-slate-200 dark:border-slate-700 transition-transform active:scale-75",
+              localColor === color && "ring-2 ring-indigo-500 ring-offset-1 ring-offset-white dark:ring-offset-slate-900 scale-110"
             )}
             style={{ backgroundColor: color }}
           />
@@ -71,7 +71,7 @@ export const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => {
       />
       <label 
         htmlFor={`color-input-${label}`}
-        className="block w-full py-1.5 border border-slate-200 rounded-lg text-center text-[9px] font-black uppercase tracking-tighter text-slate-400 hover:bg-slate-50 cursor-pointer transition-colors"
+        className="block w-full py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-center text-[9px] font-black uppercase tracking-tighter text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
       >
         Custom Hex / RGB
       </label>

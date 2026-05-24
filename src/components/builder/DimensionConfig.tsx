@@ -50,17 +50,17 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
   };
 
   return (
-    <div className="space-y-8 pt-4 border-t border-slate-100">
+    <div className="space-y-8 pt-4 border-t border-slate-100 dark:border-slate-800">
       <div className="flex items-center gap-2 mb-2">
-        <Expand className="w-3.5 h-3.5 text-slate-400" />
-        <h4 className="text-[10px] font-black tracking-widest text-slate-800 uppercase">
+        <Expand className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+        <h4 className="text-[10px] font-black tracking-widest text-slate-800 dark:text-slate-200 uppercase">
           Dimensions & Sizing
         </h4>
       </div>
 
       {isRow && (
         <div className="space-y-4">
-          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">
+          <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic">
             Max Width
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -74,8 +74,8 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                 className={cn(
                   "py-2 px-1 text-[10px] font-semibold rounded-md transition-all border",
                   (value?.maxWidth || 'max-w-7xl mx-auto') === opt.id 
-                    ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
-                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400" 
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                 )}
               >
                 {opt.label}
@@ -88,7 +88,7 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
       {isColumn && (
         <>
           <div className="space-y-4">
-            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic text-left">
+            <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic text-left">
               Text Alignment
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -103,8 +103,8 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                   className={cn(
                     "py-2 px-1 text-[10px] font-semibold rounded-md transition-all border flex justify-center items-center",
                     (value?.textAlign || 'text-left') === opt.id 
-                      ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400" 
+                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                   )}
                 >
                   <opt.icon className="w-4 h-4" />
@@ -118,11 +118,11 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
               Width
             </ResponsiveLabel>
             {isParentGrid ? (
-              <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                 <span className="text-[9px] font-bold text-amber-700 leading-tight block uppercase">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-xl">
+                 <span className="text-[9px] font-bold text-amber-700 dark:text-amber-500 leading-tight block uppercase">
                    Width managed by Parent Grid
                  </span>
-                 <p className="text-[7px] text-amber-600/70 mt-1 italic leading-relaxed">
+                 <p className="text-[7px] text-amber-600/70 dark:text-amber-500/50 mt-1 italic leading-relaxed">
                    Lebar kolom ini dikontrol secara otomatis oleh sistem Grid pada baris (Row) induknya.
                  </p>
               </div>
@@ -140,8 +140,8 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                     className={cn(
                       "py-2 px-1 text-[10px] font-semibold rounded-md transition-all border",
                       currentWidth === opt.id 
-                        ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
-                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                        ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400" 
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                     )}
                   >
                     {opt.label}
@@ -156,9 +156,9 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
               Minimum Height (px)
             </ResponsiveLabel>
             <div className="space-y-2">
-              <div className="flex justify-between text-[10px] font-bold text-slate-500">
+              <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Auto</span>
-                <span className="text-indigo-600 font-black">
+                <span className="text-indigo-600 dark:text-indigo-400 font-black">
                   {typeof value?.minHeight === 'object' 
                     ? (value?.minHeight[activeDevice] || 'Auto') 
                     : (value?.minHeight || 'Auto')}
@@ -170,7 +170,7 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                 min="0" 
                 max="2000" 
                 step="10"
-                className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                 value={(() => {
                   const val = typeof value?.minHeight === 'object' 
                     ? (value?.minHeight[activeDevice] || '0') 
@@ -192,8 +192,8 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                    className={cn(
                      "py-1.5 text-[8px] font-black uppercase rounded-lg border transition-all",
                      (typeof value?.minHeight === 'object' ? value.minHeight[activeDevice] : value.minHeight) === '100vh'
-                       ? "bg-indigo-600 text-white border-indigo-600"
-                       : "bg-white text-slate-500 border-slate-200 hover:border-indigo-300"
+                       ? "bg-indigo-600 text-white border-indigo-600 shadow-lg"
+                       : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-800"
                    )}
                  >
                    Full Screen (100vh)
@@ -203,7 +203,7 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                      const newVal = updateResponsiveValue(value?.minHeight, activeDevice, 'auto');
                      onChange('minHeight', newVal);
                    }}
-                   className="py-1.5 text-[8px] font-black uppercase rounded-lg border bg-white text-slate-500 border-slate-200 hover:border-rose-300 hover:text-rose-600 transition-all"
+                   className="py-1.5 text-[8px] font-black uppercase rounded-lg border bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-900 hover:text-rose-600 dark:hover:text-rose-400 transition-all"
                  >
                    Reset / Auto
                  </button>
@@ -212,14 +212,14 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
           </div>
 
           {/* New Margin Section (Supports Minus) */}
-          <div className="space-y-4 pt-4 border-t border-slate-50">
+          <div className="space-y-4 pt-4 border-t border-slate-50 dark:border-slate-800">
             <ResponsiveLabel>
               Vertical Margin (px / Minus allowed)
             </ResponsiveLabel>
             <div className="space-y-2">
-              <div className="flex justify-between text-[10px] font-bold text-slate-500">
+              <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 <span>-200px</span>
-                <span className="text-emerald-600 font-black">
+                <span className="text-emerald-600 dark:text-emerald-400 font-black">
                   {(() => {
                     const val = typeof value?.marginTop === 'object' 
                       ? (value?.marginTop[activeDevice] || '0px') 
@@ -234,7 +234,7 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                 min="-200" 
                 max="200" 
                 step="5"
-                className="w-full h-1 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
                 value={(() => {
                   const val = typeof value?.marginTop === 'object' 
                     ? (value?.marginTop[activeDevice] || '0') 
@@ -246,7 +246,7 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                   onChange('marginTop', newVal);
                 }}
               />
-              <p className="text-[7px] text-slate-400 italic">Use negative values to overlap elements.</p>
+              <p className="text-[7px] text-slate-400 dark:text-slate-500 italic">Use negative values to overlap elements.</p>
             </div>
           </div>
 
@@ -267,8 +267,8 @@ export function DimensionConfig({ value, onChange, nodeType, isParentGrid }: Dim
                   className={cn(
                     "py-2 px-1 text-[10px] font-semibold rounded-md transition-all border",
                     currentPadding === opt.id 
-                      ? "bg-indigo-50 border-indigo-200 text-indigo-700" 
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400" 
+                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
                   )}
                 >
                   {opt.label}

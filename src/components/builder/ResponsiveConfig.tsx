@@ -24,7 +24,7 @@ export const DeviceSelector = () => {
   };
 
   return (
-    <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
+    <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl w-fit">
       {devices.map(device => (
         <button
           key={device.id}
@@ -32,8 +32,8 @@ export const DeviceSelector = () => {
           className={cn(
             "p-2 rounded-lg transition-all",
             activeDevice === device.id 
-              ? "bg-white text-indigo-600 shadow-sm" 
-              : "text-slate-400 hover:text-slate-600"
+              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+              : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
           )}
           title={`Edit ${device.id} settings`}
         >
@@ -54,12 +54,12 @@ export const ResponsiveLabel = ({ children, className }: { children: React.React
 
   return (
     <div className={cn("flex items-center justify-between group", className)}>
-      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block italic">
+      <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block italic">
         {children}
       </label>
       <div className="flex items-center gap-1.5 opacity-40 group-hover:opacity-100 transition-opacity">
-        <DeviceIcon className="w-3 h-3 text-indigo-500" />
-        <span className="text-[8px] font-black text-indigo-400 uppercase tracking-tighter">{activeDevice}</span>
+        <DeviceIcon className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+        <span className="text-[8px] font-black text-indigo-400 dark:text-indigo-500 uppercase tracking-tighter">{activeDevice}</span>
       </div>
     </div>
   );

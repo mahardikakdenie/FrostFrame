@@ -69,6 +69,29 @@ By moving to an **Open Source** model, we are not just building a product; we ar
 - **Animation:** Framer Motion (Smooth, physics-based interactions)
 - **Persistence:** IndexedDB via Dexie.js (Offline-first capability)
 
+## ✨ Core Features: The Lando Edge
+
+### 🎨 Next-Gen Visual Builder
+- **Smart Drag & Drop:** Context-aware placement with real-time visual indicators (Lines and Ghost Boxes).
+- **Responsive Mastery:** Instantly toggle between **Desktop, Tablet, and Mobile** viewports to ensure perfection across all devices.
+- **Inspect Mode:** A clean, distraction-free environment to preview your creation exactly as it will appear live.
+- **Glassmorphism Drag Ghost:** Premium visual feedback that makes building feel like a high-end experience.
+
+### 🧱 Brutalist Component Library
+- **Layout Engine:** Nested Row & Column system for infinite structural flexibility.
+- **Ready-to-Convert Sections:** Pre-built Hero sections, Feature grids, Pricing tables, Testimonials, and Footers.
+- **Atomic Elements:** Precision-tuned Buttons, Icons, Images, Videos, Forms, Dividers, and Spacers.
+
+### ⚡ Performance & Persistence
+- **Zero-Latency Engine:** Built on Tiptap 2.x for a fluid, lag-free editing experience.
+- **Offline-First Persistence:** Your work is automatically synced to **IndexedDB** (via Dexie.js), ensuring zero data loss even if the browser closes.
+- **Intelligent Auto-Save:** Debounced background syncing with real-time "System Status" notifications.
+
+### 🌈 Global Design System
+- **Theme Presets:** Instant visual pivots with presets like **Frosted, GenZ, Bootstrap, and Material**.
+- **Dark Mode Native:** Full support for Light and Dark modes with a single toggle.
+- **Variable-Driven:** Entirely powered by CSS variables for deep, effortless customization.
+
 ## 🚦 Getting Started for Contributors
 
 We believe in the power of the community. Here is how you can jump in:

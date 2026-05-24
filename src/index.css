@@ -20,9 +20,12 @@
   --color-slate-900: #0f172a;
 }
 
+/* 🚀 CONFIGURE DARK MODE SELECTOR (Tailwind v4) */
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased transition-colors duration-300;
   }
 }
 
@@ -62,44 +65,50 @@
   .theme-section {
     @apply transition-all duration-500 ease-out;
   }
-  [data-theme="lando"] .theme-section {
-    /* Lando default uses its own specific container logic in components */
-  }
 
   /* Theme Card (Feature cards, pricing tiers, testimonials) */
   .theme-card {
-    @apply bg-white transition-all duration-300;
+    @apply transition-all duration-300;
   }
 
-  /* Lando Brutalist */
-  [data-theme="lando"] .theme-card {
-    @apply rounded-[3rem] border-2 border-slate-100 shadow-2xl skew-x-[-2deg] hover:border-indigo-500 hover:shadow-indigo-100;
+  /* Frosted Glass UI */
+  [data-theme="frosted"] .theme-card {
+    @apply rounded-3xl border border-white/40 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md shadow-lg hover:shadow-2xl hover:-translate-y-1;
   }
-  [data-theme="lando"] .theme-card-inner {
-    @apply skew-x-[2deg];
+  
+  .shadow-glass {
+    @apply shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+  }
+
+  /* Gen-Z Modern */
+  [data-theme="genz"] .theme-card {
+    @apply rounded-[2.5rem] border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] hover:-translate-y-2;
   }
 
   /* Bootstrap Modern */
   [data-theme="bootstrap"] .theme-card {
-    @apply rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300;
+    @apply rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600;
   }
 
   /* Material Design */
   [data-theme="material"] .theme-card {
-    @apply rounded-lg shadow-lg hover:shadow-2xl border-none;
+    @apply rounded-lg shadow-lg dark:shadow-xl bg-white dark:bg-slate-900 hover:shadow-2xl border-none;
   }
 
   /* Flat Minimal */
   [data-theme="flat"] .theme-card {
-    @apply rounded-none border-4 border-slate-900 shadow-none hover:translate-x-1 hover:translate-y-1;
+    @apply rounded-none border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-900 shadow-none hover:translate-x-1 hover:translate-y-1;
   }
 
   /* Theme Badges / Buttons */
   .theme-badge {
     @apply px-3 py-1 font-black uppercase tracking-widest text-[9px] transition-all;
   }
-  [data-theme="lando"] .theme-badge {
-    @apply rounded-b-xl skew-x-[-10deg] shadow-2xl;
+  [data-theme="frosted"] .theme-badge {
+    @apply rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 backdrop-blur-sm;
+  }
+  [data-theme="genz"] .theme-badge {
+    @apply rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4;
   }
   [data-theme="bootstrap"] .theme-badge {
     @apply rounded-full;
@@ -108,15 +117,18 @@
     @apply rounded shadow-md;
   }
   [data-theme="flat"] .theme-badge {
-    @apply border-2 border-slate-900;
+    @apply border-2 border-slate-900 dark:border-white;
   }
 
   /* Theme Headlines */
   .theme-headline {
     @apply font-black tracking-tighter uppercase leading-none transition-all;
   }
-  [data-theme="lando"] .theme-headline {
-    @apply italic skew-x-[-2deg];
+  [data-theme="frosted"] .theme-headline {
+    @apply tracking-tight normal-case font-black;
+  }
+  [data-theme="genz"] .theme-headline {
+    @apply tracking-tight normal-case font-black;
   }
   [data-theme="flat"] .theme-headline {
     @apply tracking-normal;
@@ -222,12 +234,18 @@ body[class*="is-dragging-featureCard"] {
   outline-offset: 4px;
 }
 
+/* 🚀 FIX: Disable hover outlines during Drag & Drop to avoid "Edit Mode" confusion */
+body[class*="is-dragging"] .ProseMirror [data-type]:hover {
+  outline: none !important;
+}
+
 .ProseMirror [data-type]:has([data-type]:hover)::after {
   display: none;
 }
 
 .dragging-over {
-  background-color: rgba(99, 102, 241, 0.05) !important;
-  box-shadow: inset 0 0 0 2px #6366f1 !important;
+  background-color: rgba(99, 102, 241, 0.08) !important;
+  outline: 2px dashed #6366f1 !important;
+  outline-offset: -2px;
 }
 

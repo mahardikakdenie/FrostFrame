@@ -11,6 +11,7 @@ interface ThemeState {
   borderRadius: string;
   sectionMargin: string;
   sectionPadding: string;
+  colorMode: 'light' | 'dark';
   
   setPrimaryColor: (color: string) => void;
   setSecondaryColor: (color: string) => void;
@@ -22,19 +23,30 @@ interface ThemeState {
   setSectionPadding: (padding: string) => void;
   setActiveTheme: (theme: string) => void;
   applyThemePreset: (themeName: string) => void;
+  toggleColorMode: () => void;
   resetTheme: () => void;
 }
 
 export const THEME_PRESETS: Record<string, any> = {
-  lando: {
-    activeTheme: 'lando',
-    primaryColor: '#4f46e5',
-    secondaryColor: '#0f172a',
-    accentColor: '#10b981',
-    headingFont: 'Inter, sans-serif',
-    borderRadius: '0.75rem',
-    sectionMargin: '1rem',
-    sectionPadding: '6rem 1.5rem',
+  frosted: {
+    activeTheme: 'frosted',
+    primaryColor: '#6366f1',
+    secondaryColor: '#f472b6',
+    accentColor: '#34d399',
+    headingFont: 'Outfit, Inter, sans-serif',
+    borderRadius: '1.5rem',
+    sectionMargin: '0rem',
+    sectionPadding: '6rem 2rem',
+  },
+  genz: {
+    activeTheme: 'genz',
+    primaryColor: '#6366f1',
+    secondaryColor: '#f472b6',
+    accentColor: '#34d399',
+    headingFont: 'Plus Jakarta Sans, Inter, sans-serif',
+    borderRadius: '2rem',
+    sectionMargin: '0rem',
+    sectionPadding: '8rem 2rem',
   },
   bootstrap: {
     activeTheme: 'bootstrap',
@@ -69,15 +81,16 @@ export const THEME_PRESETS: Record<string, any> = {
 };
 
 const defaultTheme = {
-  activeTheme: 'lando',
-  primaryColor: '#4f46e5', // Indigo 600
-  secondaryColor: '#0f172a', // Slate 900
-  accentColor: '#10b981', // Emerald 500
-  headingFont: 'Inter, sans-serif',
+  activeTheme: 'frosted',
+  primaryColor: '#6366f1',
+  secondaryColor: '#f472b6',
+  accentColor: '#34d399',
+  headingFont: 'Outfit, Inter, sans-serif',
   bodyFont: 'Inter, sans-serif',
-  borderRadius: '0.75rem', // 12px
-  sectionMargin: '1rem',
-  sectionPadding: '6rem 1.5rem',
+  borderRadius: '1.5rem',
+  sectionMargin: '0rem',
+  sectionPadding: '6rem 2rem',
+  colorMode: 'light' as const,
 };
 
 export const useThemeStore = create<ThemeState>()(
@@ -100,6 +113,9 @@ export const useThemeStore = create<ThemeState>()(
            set({ ...preset });
         }
       },
+      toggleColorMode: () => set((state) => ({ 
+        colorMode: state.colorMode === 'light' ? 'dark' : 'light' 
+      })),
       resetTheme: () => set(defaultTheme),
     }),
     {

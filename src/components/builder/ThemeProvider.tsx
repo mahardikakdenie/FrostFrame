@@ -19,6 +19,13 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     // 🚀 OPTIMIZATION (Multi-Theme): Inject activeTheme attribute
     root.setAttribute('data-theme', theme.activeTheme || 'lando');
     
+    // 🌑 DARK MODE SUPPORT: Add/remove 'dark' class
+    if (theme.colorMode === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    
     // Add RGB variants for opacity support (Tailwind utility compatibility)
     const hexToRgb = (hex: string) => {
       const r = parseInt(hex.slice(1, 3), 16);

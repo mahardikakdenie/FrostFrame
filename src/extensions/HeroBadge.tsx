@@ -28,7 +28,10 @@ const HeroBadgeComponent = (props: any) => {
     shadow,
     blur,
     grayscale,
-    opacity
+    opacity,
+    floatingType,
+    floatingContent,
+    floatingPosition
   } = node.attrs;
 
   const hoveredId = useUIStore(state => state.hoveredId);
@@ -50,6 +53,8 @@ const HeroBadgeComponent = (props: any) => {
   };
 
   const IconComponent = icon ? (LucideIcons as any)[icon] : null;
+  const FloatingIconComponent = floatingType === 'icon' && floatingContent ? (LucideIcons as any)[floatingContent] : null;
+  
   const isItalic = fontStyle === 'italic' || (!fontStyle);
   const isUppercase = textTransform === 'uppercase' || (!textTransform);
   
@@ -129,13 +134,31 @@ const HeroBadgeComponent = (props: any) => {
             ...getFontSize()
           }}
           className={cn(
-            "inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-black outline-none min-w-[50px] min-h-[1.5em] transition-all duration-300",
+            "inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-black outline-none min-w-[50px] min-h-[1.5em] transition-all duration-300 relative",
             badgeTransform,
             isItalic ? 'italic' : 'not-italic',
             isUppercase ? 'uppercase' : 'normal-case',
             shadow
           )}
         >
+          {/* 🚀 FLOATING ELEMENT */}
+          {floatingType !== 'none' && floatingContent && (
+             <div 
+               className={cn(
+                  "absolute -top-2.5 z-20 flex items-center justify-center p-1 rounded-full bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 shadow-lg transition-all",
+                  floatingPosition === 'top-right' ? "-right-2" : "-left-2",
+                  innerTransform // Counter-skew the floating element
+               )}
+             >
+                {floatingType === 'icon' && FloatingIconComponent && <FloatingIconComponent className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />}
+                {floatingType === 'text' && (
+                  <span className="text-[7px] font-black uppercase tracking-tighter px-1 text-indigo-600 dark:text-indigo-400">
+                    {floatingContent}
+                  </span>
+                )}
+             </div>
+          )}
+
           <div className={cn("flex items-center gap-2", innerTransform)}>
             {IconComponent && iconPosition !== 'right' && <IconComponent className="w-3 h-3" />}
             <NodeViewContent />
@@ -174,7 +197,10 @@ export const HeroBadge = Node.create({
       shadow: { default: 'shadow-sm' },
       blur: { default: 0 },
       grayscale: { default: 0 },
-      opacity: { default: 100 }
+      opacity: { default: 100 },
+      floatingType: { default: 'none' },
+      floatingContent: { default: null },
+      floatingPosition: { default: 'top-right' }
     };
   },
 

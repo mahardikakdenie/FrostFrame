@@ -25,13 +25,14 @@ const ButtonGroupComponent = (props: any) => {
 
   const renderButton = (btn: any, index: number) => {
     const isPrimary = btn.variant === 'primary';
+    const baseColor = btn.color || 'var(--primary-color)';
 
     if (isPrimary) {
       return (
         <button
           key={index}
-          style={{ backgroundColor: btn.color || 'var(--primary-color)' }}
-          className="text-white font-black text-[10px] px-8 py-4 rounded-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 active:translate-y-0 text-center uppercase italic tracking-widest skew-x--10"
+          style={{ backgroundColor: baseColor, borderRadius: '0.75rem' }}
+          className="text-white font-black text-[10px] px-8 py-4 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] hover:shadow-indigo-500/20 transition-all hover:-translate-y-1 active:translate-y-0 text-center uppercase italic tracking-widest skew-x--10 border-2 border-transparent"
         >
           <div className="skew-x-10">{btn.text || 'BUTTON'}</div>
         </button>
@@ -41,8 +42,13 @@ const ButtonGroupComponent = (props: any) => {
     return (
       <button
         key={index}
-        style={{ borderColor: btn.color || 'var(--primary-color)', color: btn.color || 'var(--primary-color)' }}
-        className="bg-white border-2 text-[10px] px-8 py-4 rounded-xl font-black hover:bg-slate-50 transition-all uppercase italic tracking-widest skew-x--10 shadow-xl"
+        style={{ 
+          borderColor: baseColor, 
+          color: baseColor,
+          borderRadius: '0.75rem',
+          backgroundColor: 'transparent'
+        }}
+        className="bg-white dark:bg-slate-900/40 border-2 text-[10px] px-8 py-4 font-black hover:bg-slate-50 dark:hover:bg-slate-800 transition-all uppercase italic tracking-widest skew-x--10 shadow-xl"
       >
         <div className="skew-x-10">{btn.text || 'BUTTON'}</div>
       </button>

@@ -31,12 +31,32 @@ const ButtonComponent = (props: any) => {
   };
 
   const isPrimary = variant === 'primary';
-  const buttonTransform = transform || 'skew-x--10';
+  const buttonTransform = transform || 'skew-x-[-10deg]';
   const innerTransform = buttonTransform.includes('skew-x--')
     ? buttonTransform.replace('skew-x--', 'skew-x-')
     : buttonTransform.includes('skew-x-')
       ? buttonTransform.replace('skew-x-', 'skew-x--')
       : '';
+
+  const baseColor = color || 'var(--primary-color)';
+
+  const getButtonStyles = () => {
+    if (isPrimary) {
+      return {
+        backgroundColor: baseColor,
+        color: '#ffffff',
+        borderRadius: borderRadius || '0.75rem',
+        fontFamily: fontFamily || 'var(--font-heading)'
+      };
+    }
+    return {
+      backgroundColor: 'transparent',
+      borderColor: baseColor,
+      color: baseColor,
+      borderRadius: borderRadius || '0.75rem',
+      fontFamily: fontFamily || 'var(--font-heading)'
+    };
+  };
 
   return (
     <NodeViewWrapper
@@ -69,50 +89,24 @@ const ButtonComponent = (props: any) => {
           onSelect={() => { if (typeof getPos === 'function') editor.commands.setNodeSelection(getPos()); }}
         />
 
-        {isPrimary ? (
-          <button
-            style={{
-              backgroundColor: color || 'var(--primary-color)',
-              borderRadius: borderRadius || '0.75rem',
-              fontFamily: fontFamily || 'var(--font-heading)'
-            }}
-            className={cn(
-              'text-white font-black transition-all hover:-translate-y-1 active:translate-y-0 text-center shadow-xl',
-              buttonTransform,
-              fontStyle || 'italic',
-              textTransform || 'uppercase',
-              size === 'sm' ? 'px-6 py-2.5 text-[8px]' : size === 'lg' ? 'px-12 py-5 text-[12px]' : 'px-9 py-4 text-[10px]',
-              width === 'full' ? 'w-full' : 'w-auto'
-            )}
-          >
-            <div className={cn('flex items-center justify-center gap-2', innerTransform)}>
-              {text || 'BUTTON'}
-              {link && <ExternalLink className="w-3 h-3 opacity-50" />}
-            </div>
-          </button>
-        ) : (
-          <button
-            style={{
-              borderColor: color || 'var(--primary-color)',
-              color: color || 'var(--primary-color)',
-              borderRadius: borderRadius || '0.75rem',
-              fontFamily: fontFamily || 'var(--font-heading)'
-            }}
-            className={cn(
-              'bg-white border-2 font-black transition-all hover:bg-slate-50 hover:-translate-y-1 active:translate-y-0 text-center shadow-xl',
-              buttonTransform,
-              fontStyle || 'italic',
-              textTransform || 'uppercase',
-              size === 'sm' ? 'px-6 py-2.5 text-[8px]' : size === 'lg' ? 'px-12 py-5 text-[12px]' : 'px-9 py-4 text-[10px]',
-              width === 'full' ? 'w-full' : 'w-auto'
-            )}
-          >
-            <div className={cn('flex items-center justify-center gap-2', innerTransform)}>
-              {text || 'BUTTON'}
-              {link && <ExternalLink className="w-3 h-3 opacity-50" />}
-            </div>
-          </button>
-        )}
+        <button
+          style={getButtonStyles()}
+          className={cn(
+            'font-black transition-all hover:-translate-y-1 active:translate-y-0 text-center shadow-xl border-2',
+            isPrimary ? 'border-transparent' : '',
+            !isPrimary ? 'bg-white dark:bg-slate-900/40' : '',
+            buttonTransform,
+            fontStyle || 'italic',
+            textTransform || 'uppercase',
+            size === 'sm' ? 'px-6 py-2.5 text-[8px]' : size === 'lg' ? 'px-12 py-5 text-[12px]' : 'px-9 py-4 text-[10px]',
+            width === 'full' ? 'w-full' : 'w-auto'
+          )}
+        >
+          <div className={cn('flex items-center justify-center gap-2', innerTransform)}>
+            {text || 'BUTTON'}
+            {link && <ExternalLink className="w-3 h-3 opacity-50" />}
+          </div>
+        </button>
       </div>
     </NodeViewWrapper>
   );
@@ -135,9 +129,9 @@ export const ButtonElement = Node.create({
       borderRadius: { default: '0.75rem' },
       width: { default: 'auto' },
       marginTop: { default: '0px' },
-      transform: { default: null },
-      fontStyle: { default: null },
-      textTransform: { default: null },
+      transform: { default: 'skew-x-[-10deg]' },
+      fontStyle: { default: 'italic' },
+      textTransform: { default: 'uppercase' },
       fontFamily: { default: null }
     };
   },

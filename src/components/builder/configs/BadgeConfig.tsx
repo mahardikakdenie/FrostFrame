@@ -287,6 +287,14 @@ export const BadgeConfig = ({ value, onChange }: ElementConfigProps) => {
                        ))}
                     </div>
                  </div>
+
+                 <div className="pt-2">
+                    <ColorPicker 
+                      label="Decor Color" 
+                      value={attributes.floatingColor || '#6366f1'} 
+                      onChange={(color) => onChange('floatingColor', color)} 
+                    />
+                 </div>
               </div>
            )}
         </div>

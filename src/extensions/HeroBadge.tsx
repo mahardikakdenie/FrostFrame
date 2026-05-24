@@ -31,7 +31,8 @@ const HeroBadgeComponent = (props: any) => {
     opacity,
     floatingType,
     floatingContent,
-    floatingPosition
+    floatingPosition,
+    floatingColor
   } = node.attrs;
 
   const hoveredId = useUIStore(state => state.hoveredId);
@@ -150,9 +151,9 @@ const HeroBadgeComponent = (props: any) => {
                   innerTransform // Counter-skew the floating element
                )}
              >
-                {floatingType === 'icon' && FloatingIconComponent && <FloatingIconComponent className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />}
+                {floatingType === 'icon' && FloatingIconComponent && <FloatingIconComponent className="w-3 h-3" style={{ color: floatingColor || 'var(--primary-color)' }} />}
                 {floatingType === 'text' && (
-                  <span className="text-[7px] font-black uppercase tracking-tighter px-1 text-indigo-600 dark:text-indigo-400">
+                  <span className="text-[7px] font-black uppercase tracking-tighter px-1" style={{ color: floatingColor || 'var(--primary-color)' }}>
                     {floatingContent}
                   </span>
                 )}
@@ -200,7 +201,8 @@ export const HeroBadge = Node.create({
       opacity: { default: 100 },
       floatingType: { default: 'none' },
       floatingContent: { default: null },
-      floatingPosition: { default: 'top-right' }
+      floatingPosition: { default: 'top-right' },
+      floatingColor: { default: null }
     };
   },
 

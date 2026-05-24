@@ -6,10 +6,36 @@ import { ExternalLink } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
 import { ElementToolbar } from './utils/ElementToolbar';
 import { createMoveHandler } from './utils/nodeMove';
+import * as LucideIcons from 'lucide-react';
 
 const ButtonComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
-  const { id, text, link, variant, color, size, borderRadius, width, marginTop, transform, fontStyle, textTransform, fontFamily } = node.attrs;
+  const { 
+    id, 
+    text, 
+    link, 
+    variant, 
+    color, 
+    gradient,
+    size, 
+    borderRadius, 
+    width, 
+    marginTop, 
+    transform, 
+    fontStyle, 
+    textTransform, 
+    fontFamily,
+    fontWeight,
+    letterSpacing,
+    leadingIcon,
+    trailingIcon,
+    borderWidth,
+    borderColor,
+    shadow,
+    hoverEffect,
+    blur,
+    opacity
+  } = node.attrs;
 
   const openConfirmModal = useUIStore(state => state.openConfirmModal);
   const hoveredId = useUIStore(state => state.hoveredId);
@@ -30,7 +56,9 @@ const ButtonComponent = (props: any) => {
     });
   };
 
-  const isPrimary = variant === 'primary';
+  const LeadingIconComp = leadingIcon ? (LucideIcons as any)[leadingIcon] : null;
+  const TrailingIconComp = trailingIcon ? (LucideIcons as any)[trailingIcon] : null;
+
   const buttonTransform = transform || 'skew-x-[-10deg]';
   const innerTransform = buttonTransform.includes('skew-x--')
     ? buttonTransform.replace('skew-x--', 'skew-x-')
@@ -40,22 +68,51 @@ const ButtonComponent = (props: any) => {
 
   const baseColor = color || 'var(--primary-color)';
 
-  const getButtonStyles = () => {
-    if (isPrimary) {
-      return {
-        backgroundColor: baseColor,
-        color: '#ffffff',
-        borderRadius: borderRadius || '0.75rem',
-        fontFamily: fontFamily || 'var(--font-heading)'
-      };
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'secondary':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: borderColor || baseColor,
+          color: baseColor,
+        };
+      case 'ghost':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          color: baseColor,
+        };
+      case 'glass':
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: `blur(${blur || 8}px)`,
+          borderColor: borderColor || 'rgba(255, 255, 255, 0.2)',
+          color: color || '#ffffff',
+        };
+      case 'soft':
+        return {
+          backgroundColor: color ? `${color}15` : 'rgba(var(--primary-color-rgb), 0.1)',
+          borderColor: 'transparent',
+          color: baseColor,
+        };
+      case 'primary':
+      default:
+        return {
+          backgroundColor: gradient || baseColor,
+          backgroundImage: gradient ? gradient : undefined,
+          borderColor: 'transparent',
+          color: '#ffffff',
+        };
     }
-    return {
-      backgroundColor: 'transparent',
-      borderColor: baseColor,
-      color: baseColor,
-      borderRadius: borderRadius || '0.75rem',
-      fontFamily: fontFamily || 'var(--font-heading)'
-    };
+  };
+
+  const getHoverClasses = () => {
+    switch (hoverEffect) {
+      case 'scale': return 'hover:scale-105 active:scale-95';
+      case 'glow': return 'hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]';
+      case 'lift': 
+      default: return 'hover:-translate-y-1 active:translate-y-0';
+    }
   };
 
   return (
@@ -90,21 +147,32 @@ const ButtonComponent = (props: any) => {
         />
 
         <button
-          style={getButtonStyles()}
+          style={{
+            ...getVariantStyles(),
+            borderRadius: borderRadius || '0.75rem',
+            fontFamily: fontFamily || 'var(--font-heading)',
+            borderWidth: borderWidth || (variant === 'secondary' ? '2px' : '0px'),
+            opacity: opacity !== undefined ? opacity / 100 : 1,
+            letterSpacing: letterSpacing || 'normal',
+          }}
           className={cn(
-            'font-black transition-all hover:-translate-y-1 active:translate-y-0 text-center shadow-xl border-2',
-            isPrimary ? 'border-transparent' : '',
-            !isPrimary ? 'bg-white dark:bg-slate-900/40' : '',
+            'transition-all text-center shadow-xl border-solid flex items-center justify-center',
+            fontWeight || 'font-black',
             buttonTransform,
             fontStyle || 'italic',
             textTransform || 'uppercase',
             size === 'sm' ? 'px-6 py-2.5 text-[8px]' : size === 'lg' ? 'px-12 py-5 text-[12px]' : 'px-9 py-4 text-[10px]',
-            width === 'full' ? 'w-full' : 'w-auto'
+            width === 'full' ? 'w-full' : 'w-auto',
+            shadow,
+            getHoverClasses(),
+            variant === 'secondary' && !borderColor && 'dark:bg-slate-900/40'
           )}
         >
-          <div className={cn('flex items-center justify-center gap-2', innerTransform)}>
+          <div className={cn('flex items-center justify-center gap-2.5', innerTransform)}>
+            {LeadingIconComp && <LeadingIconComp className="w-3.5 h-3.5" />}
             {text || 'BUTTON'}
-            {link && <ExternalLink className="w-3 h-3 opacity-50" />}
+            {TrailingIconComp && <TrailingIconComp className="w-3.5 h-3.5" />}
+            {!leadingIcon && !trailingIcon && link && variant === 'ghost' && <ExternalLink className="w-3 h-3 opacity-50" />}
           </div>
         </button>
       </div>
@@ -125,6 +193,7 @@ export const ButtonElement = Node.create({
       link: { default: '#' },
       variant: { default: 'primary' },
       color: { default: null },
+      gradient: { default: null },
       size: { default: 'md' },
       borderRadius: { default: '0.75rem' },
       width: { default: 'auto' },
@@ -132,7 +201,17 @@ export const ButtonElement = Node.create({
       transform: { default: 'skew-x-[-10deg]' },
       fontStyle: { default: 'italic' },
       textTransform: { default: 'uppercase' },
-      fontFamily: { default: null }
+      fontFamily: { default: null },
+      fontWeight: { default: 'font-black' },
+      letterSpacing: { default: null },
+      leadingIcon: { default: null },
+      trailingIcon: { default: null },
+      borderWidth: { default: null },
+      borderColor: { default: null },
+      shadow: { default: 'shadow-xl' },
+      hoverEffect: { default: 'lift' },
+      blur: { default: 0 },
+      opacity: { default: 100 }
     };
   },
 
@@ -148,3 +227,4 @@ export const ButtonElement = Node.create({
     return ReactNodeViewRenderer(ButtonComponent);
   },
 });
+

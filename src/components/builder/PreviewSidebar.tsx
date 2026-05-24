@@ -17,7 +17,8 @@ import {
   DividerConfig, 
   SpacerConfig, 
   AdvancedConfig,
-  TestimonialConfig
+  TestimonialConfig,
+  BadgeConfig
 } from './configs';
 import { FormConfig } from './configs/FormConfig';
 import { RowGridConfig } from './RowGridConfig';
@@ -96,13 +97,13 @@ const ConfigAccordion = ({
               <AnimatePresence>
               {showTooltip && (
               <motion.div 
-                initial={{ opacity: 0, scale: 0.98, x: -10 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.98, x: -10 }}
-                className="absolute right-full top-1/2 -translate-y-1/2 mr-6 w-64 p-5 bg-indigo-600 text-white text-[10px] font-medium tracking-wide leading-relaxed rounded-2xl shadow-2xl z-[9999] pointer-events-none border border-white/10 backdrop-blur-xl"
+                initial={{ opacity: 0, scale: 0.98, y: -5 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.98, y: -5 }}
+                className="absolute right-0 top-full mt-2 w-56 p-4 bg-indigo-600 text-white text-[10px] font-medium tracking-wide leading-relaxed rounded-2xl shadow-2xl z-[99999] pointer-events-none border border-white/10 backdrop-blur-xl"
               >
                 {description}
-                <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-indigo-600 rotate-45" />
+                <div className="absolute -top-1.5 right-3 w-3 h-3 bg-indigo-600 rotate-45 border-t border-l border-white/10" />
               </motion.div>
               )}
               </AnimatePresence>
@@ -494,7 +495,7 @@ export const PreviewSidebar = () => {
 
         <div 
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto px-5 py-6 custom-scrollbar space-y-8 pb-40"
+          className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-6 custom-scrollbar space-y-8 pb-40"
         >
            {view === 'theme' ? (
              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500"><ThemeSettings /></div>
@@ -529,10 +530,11 @@ export const PreviewSidebar = () => {
                   <div className="grid gap-4">
                     <ConfigAccordion title="Content Matrix" icon={Settings2} description="Core content and primary information layer.">
                       {layoutTypes.includes(nodeType) ? renderBlockConfig() : (
-                        ['heroHeadline', 'heroSubheadline', 'heroBadge', 'sectionHeading', 'featureCard'].includes(nodeType) && (
+                        ['heroHeadline', 'heroSubheadline', 'sectionHeading', 'featureCard'].includes(nodeType) && (
                           <HeadingConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" activeFormatting={activeFormatting} />
                         )
                       )}
+                      {nodeType === 'heroBadge' && <BadgeConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" />}
                       {nodeType === 'testimonialSection' && <TestimonialConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" />}
                       {(nodeType === 'heroButtonGroup' || nodeType === 'buttonElement') && <ButtonConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" />}
                       {nodeType === 'paragraphElement' && <ParagraphConfig value={targetAttrs || {}} onChange={updateAttribute} elementPath="" activeFormatting={activeFormatting} />}

@@ -11,3 +11,4 @@ export * from './SpacerConfig';
 export * from './AdvancedConfig';
 export * from './TestimonialConfig';
 export { FormConfig } from './FormConfig';
+export * from './BadgeConfig';

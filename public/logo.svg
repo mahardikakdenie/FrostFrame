@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="frost" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="100%" stop-color="#4FACFE" />
+    </linearGradient>
+  </defs>
+  
+  <g transform="translate(10, 10)">
+    <rect x="15" y="15" width="16" height="50" rx="8" fill="url(#frost)" />
+    <rect x="37" y="15" width="30" height="16" rx="8" fill="url(#frost)" />
+    <rect x="37" y="38" width="20" height="16" rx="8" fill="url(#frost)" />
+    <path d="M75 15 L78 22 L85 25 L78 28 L75 35 L72 28 L65 25 L72 22 Z" fill="#00F2FE" />
+  </g>
+
+  <text x="100" y="62" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-size="38" font-weight="800" fill="#1e293b">
+    Frost<tspan fill="url(#frost)">UI</tspan><tspan fill="#64748b" font-weight="600">Framer</tspan>
+  </text>
+</svg>

@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="28" height="28" x="2" y="2" rx="6" fill="#4f46e5" transform="skewX(-2)" transform-origin="center" />
-  <text x="50%" y="55%" dominant-baseline="central" text-anchor="middle" fill="white" 
-        style="font-family: sans-serif; font-weight: 900; font-style: italic; font-size: 20px;">L</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="frostFav" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="100%" stop-color="#4FACFE" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="64" height="64" rx="16" fill="url(#frostFav)" />
+  
+  <rect x="18" y="16" width="10" height="32" rx="4" fill="#ffffff" />
+  <rect x="32" y="16" width="18" height="10" rx="4" fill="#ffffff" />
+  <rect x="32" y="30" width="12" height="10" rx="4" fill="#ffffff" />
 </svg>

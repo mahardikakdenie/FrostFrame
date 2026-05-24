@@ -22,10 +22,126 @@ import {
   PlayCircle,
   ShieldCheck,
   Smartphone,
-  CheckCircle2
+  CheckCircle2,
+  MessageSquare,
+  FormInput,
+  CheckSquare,
+  AlignJustify
 } from 'lucide-react';
 
 export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: any, image?: string, generatePayload: () => any }[]> = {
+  bento: [
+    {
+      id: "bento-modern",
+      name: "Bento Modern",
+      icon: Grid3X3,
+      generatePayload: () => ({
+        type: 'featuresSection',
+        attrs: { id: crypto.randomUUID() },
+        content: [
+          { type: 'sectionHeading', attrs: { id: crypto.randomUUID() } },
+          {
+            type: 'sectionGrid',
+            attrs: { id: crypto.randomUUID(), displayType: 'bento' },
+            content: [
+              {
+                type: 'featureCard',
+                attrs: { id: crypto.randomUUID(), gridColumn: 'col-span-2', gridRow: 'row-span-2', icon: 'Zap' },
+                content: [
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'BIG FEATURE' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'This is a large bento tile that spans multiple rows and columns.' }] }
+                ]
+              },
+              {
+                type: 'featureCard',
+                attrs: { id: crypto.randomUUID(), gridColumn: 'col-span-2', icon: 'Shield' },
+                content: [
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'SECURE' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Wide tile for important info.' }] }
+                ]
+              },
+              {
+                type: 'featureCard',
+                attrs: { id: crypto.randomUUID(), gridColumn: 'col-span-1', icon: 'Smartphone' },
+                content: [
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'MOBILE' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Small square tile.' }] }
+                ]
+              },
+              {
+                type: 'featureCard',
+                attrs: { id: crypto.randomUUID(), gridColumn: 'col-span-1', icon: 'Heart' },
+                content: [
+                  { type: 'heroHeadline', attrs: { id: crypto.randomUUID(), level: 'h3' }, content: [{ type: 'text', text: 'LOVED' }] },
+                  { type: 'heroSubheadline', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: 'Compact.' }] }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    }
+  ],
+  forms: [
+    {
+      id: "form-contact",
+      name: "Contact Form",
+      icon: MessageSquare,
+      generatePayload: () => ({
+        type: 'layoutRow',
+        attrs: { id: crypto.randomUUID(), padding: 'py-12' },
+        content: [
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID(), displayType: 'flex', flexDirection: 'col', gap: '1rem' },
+            content: [
+              { type: 'inputElement', attrs: { id: crypto.randomUUID(), label: 'NAME', placeholder: 'Your Name', name: 'name', required: true } },
+              { type: 'inputElement', attrs: { id: crypto.randomUUID(), label: 'EMAIL', placeholder: 'your@email.com', name: 'email', required: true } },
+              { type: 'textareaElement', attrs: { id: crypto.randomUUID(), label: 'MESSAGE', placeholder: 'How can we help?', name: 'message', rows: 4 } },
+              { type: 'buttonElement', attrs: { id: crypto.randomUUID(), text: 'SEND MESSAGE', width: 'full' } }
+            ]
+          }
+        ]
+      })
+    },
+    {
+      id: "form-newsletter",
+      name: "Newsletter",
+      icon: Zap,
+      generatePayload: () => ({
+        type: 'layoutRow',
+        attrs: { id: crypto.randomUUID(), padding: 'py-12' },
+        content: [
+          {
+            type: 'layoutColumn',
+            attrs: { id: crypto.randomUUID(), displayType: 'flex', flexDirection: 'row', alignItems: 'end', gap: '1rem' },
+            content: [
+              { type: 'inputElement', attrs: { id: crypto.randomUUID(), label: 'NEWSLETTER', placeholder: 'your@email.com', name: 'email' } },
+              { type: 'buttonElement', attrs: { id: crypto.randomUUID(), text: 'SUBSCRIBE', size: 'md' } }
+            ]
+          }
+        ]
+      })
+    },
+    {
+      id: "el-input",
+      name: "Input Field",
+      icon: FormInput,
+      generatePayload: () => ({ type: 'inputElement', attrs: { id: crypto.randomUUID() } })
+    },
+    {
+      id: "el-textarea",
+      name: "TextArea",
+      icon: AlignJustify,
+      generatePayload: () => ({ type: 'textareaElement', attrs: { id: crypto.randomUUID() } })
+    },
+    {
+      id: "el-checkbox",
+      name: "Checkbox",
+      icon: CheckSquare,
+      generatePayload: () => ({ type: 'checkboxElement', attrs: { id: crypto.randomUUID() } })
+    }
+  ],
   layoutRow: [
     {
       id: "grid-2",

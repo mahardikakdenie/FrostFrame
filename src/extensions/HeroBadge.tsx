@@ -3,8 +3,9 @@ import { ReactNodeViewRenderer } from '@tiptap/react';
 import React from 'react';
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { cn } from '../lib/utils';
-import { GripVertical, Trash2 } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
+import { ElementToolbar } from './utils/ElementToolbar';
+import { createMoveHandler } from './utils/nodeMove';
 
 const HeroBadgeComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
@@ -29,56 +30,34 @@ const HeroBadgeComponent = (props: any) => {
   };
 
   return (
-    <NodeViewWrapper 
+    <NodeViewWrapper
+      data-drag-handle
       className={cn(
-        "w-full group/badge relative my-2 z-10",
+        'group/badge w-full relative my-2 z-10',
         textAlign === 'text-center' ? 'flex justify-center' : 'flex justify-start'
       )}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e: React.MouseEvent) => e.stopPropagation()}
     >
-      {/* Visual Indicator & Drag Handle */}
-      <div 
-        className={cn(
-          "absolute -left-12 top-0 bottom-0 flex flex-col items-center justify-center opacity-0 group-hover/badge:opacity-100 transition-opacity z-50",
-          selected && "opacity-100"
-        )}
-      >
-        <div 
-          data-drag-handle
-          className="p-1.5 bg-indigo-600 text-white rounded-lg cursor-grab active:cursor-grabbing shadow-lg hover:scale-110 transition-transform"
-        >
-          <GripVertical className="w-4 h-4" />
-        </div>
-      </div>
-      
       <div className={cn(
-        "relative transition-all duration-300 py-1",
-        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-lg" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 rounded-lg",
-        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
+        'relative transition-all duration-300 py-1',
+        selected ? 'ring-2 ring-indigo-500 ring-offset-4 rounded-lg' : 'hover:ring-2 hover:ring-indigo-200 hover:ring-offset-4 rounded-lg',
+        isHovered && 'ring-4 ring-indigo-500/40 z-50 shadow-2xl'
       )}>
-        {/* Badge Label & Actions */}
-        <div className={cn(
-          "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-50",
-          (selected || editor.isActive('heroBadge')) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        )}>
-          <button 
-            onClick={handleDelete}
-            className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
-            title="Delete Badge"
-          >
-             <Trash2 className="w-3 h-3" />
-          </button>
-          <div 
-            onClick={() => { if (typeof getPos === 'function') editor.commands.setNodeSelection(getPos()); }}
-            className="bg-slate-900/40 backdrop-blur-md text-[10px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer pointer-events-auto"
-          >
-            TOP BADGE
-          </div>
-        </div>
+        <ElementToolbar
+          label="BADGE"
+          selected={selected}
+          isActive={editor.isActive('heroBadge')}
+          node={node}
+          groupName="badge"
+          onDelete={handleDelete}
+          onMoveUp={createMoveHandler(editor, node, getPos, 'up')}
+          onMoveDown={createMoveHandler(editor, node, getPos, 'down')}
+          onSelect={() => { if (typeof getPos === 'function') editor.commands.setNodeSelection(getPos()); }}
+        />
 
-        <div 
-          style={{ 
-            color: color || 'var(--primary-color)', 
+        <div
+          style={{
+            color: color || 'var(--primary-color)',
             backgroundColor: color ? `${color}15` : 'rgba(var(--primary-color-rgb), 0.1)',
             letterSpacing: letterSpacing || '0.2em',
             ...getFontSize()
@@ -105,7 +84,7 @@ export const HeroBadge = Node.create({
   addAttributes() {
     return {
       id: { default: null },
-      color: { default: null }, // Fallback to primary-color via style
+      color: { default: null },
       textAlign: { default: 'text-left' },
       letterSpacing: { default: null },
       fontSizeScale: { default: null }

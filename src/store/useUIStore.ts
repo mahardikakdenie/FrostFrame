@@ -36,6 +36,7 @@ interface UIState {
   };
   inspectMode: boolean;
   saveStatus: 'idle' | 'saving' | 'saved';
+  copiedNode: Record<string, unknown> | null;
   
   setHoveredId: (id: string | null) => void;
   setFocusedId: (id: string | null, level?: 'section' | 'element', path?: SelectionPathItem[], type?: string | null) => void;
@@ -52,6 +53,7 @@ interface UIState {
   closeJsonModal: () => void;
   setInspectMode: (enabled: boolean) => void;
   setSaveStatus: (status: 'idle' | 'saving' | 'saved') => void;
+  setCopiedNode: (node: Record<string, unknown> | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -77,6 +79,7 @@ export const useUIStore = create<UIState>((set) => ({
   jsonModal: { isOpen: false },
   inspectMode: false,
   saveStatus: 'idle',
+  copiedNode: null,
 
   setHoveredId: (id) => set({ hoveredId: id }),
   setFocusedId: (id, level = 'section', path, type = null) => {
@@ -102,4 +105,5 @@ export const useUIStore = create<UIState>((set) => ({
   closeJsonModal: () => set({ jsonModal: { isOpen: false } }),
   setInspectMode: (enabled) => set({ inspectMode: enabled }),
   setSaveStatus: (status) => set({ saveStatus: status }),
+  setCopiedNode: (node) => set({ copiedNode: node }),
 }));

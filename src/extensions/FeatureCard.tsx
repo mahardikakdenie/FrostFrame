@@ -11,39 +11,41 @@ const iconMap: Record<string, any> = {
 };
 
 const FeatureCardView = ({ node, selected }: any) => {
-  const { id, icon, title, iconTransform } = node.attrs;
+  const { id, icon, title, iconTransform, gridColumn, gridRow } = node.attrs;
   const Icon = iconMap[icon] || Zap;
   const hoveredId = useUIStore(state => state.hoveredId);
   const isHovered = hoveredId === id;
 
-  const currentIconTransform = iconTransform || 'skew-x--10';
-  const innerIconTransform = currentIconTransform.includes('skew-x--') 
-    ? currentIconTransform.replace('skew-x--', 'skew-x-') 
-    : currentIconTransform.includes('skew-x-') 
-      ? currentIconTransform.replace('skew-x-', 'skew-x--') 
-      : '';
+  const currentIconTransform = iconTransform || ''; // Remove brutalist default skew
 
   return (
-    <NodeViewWrapper onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}>
+    <NodeViewWrapper 
+      className={cn(
+        "h-full",
+        gridColumn && `md:${gridColumn}`,
+        gridRow && `md:${gridRow}`
+      )}
+      onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}
+    >
       <motion.div 
-        whileHover={{ y: -5 }}
-        className={`group/item p-8 bg-white transition-all hover:shadow-2xl hover:shadow-indigo-100 ${selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : ''} ${isHovered ? 'ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl' : ''}`}
+        whileHover={{ y: -5, scale: 1.01 }}
+        className={cn(
+          "group/item p-8 bg-white/70 backdrop-blur-xl transition-all h-full flex flex-col justify-center",
+          selected ? 'ring-2 ring-indigo-500 bg-indigo-50/50' : 'border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)]',
+          isHovered ? 'ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl' : ''
+        )}
         style={{ 
           borderRadius: 'var(--border-radius)',
-          borderWidth: '2px',
-          borderColor: 'var(--color-slate-100)',
         }}
       >
         <div 
-          className={cn("w-14 h-14 text-white flex items-center justify-center mb-8 transition-all shadow-xl", currentIconTransform)}
+          className={cn("w-14 h-14 text-white flex items-center justify-center mb-8 transition-all shadow-lg", currentIconTransform)}
           style={{ 
-            backgroundColor: 'var(--secondary-color)',
-            borderRadius: '1rem', // Smaller fixed radius for icon container or use theme?
+            background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+            borderRadius: '1.25rem',
           }}
         >
-          <div className={innerIconTransform}>
-            <Icon className="w-7 h-7" />
-          </div>
+          <Icon className="w-7 h-7" />
         </div>
         <NodeViewContent className="feature-card-content" />
       </motion.div>
@@ -54,14 +56,16 @@ const FeatureCardView = ({ node, selected }: any) => {
 export const FeatureCard = Node.create({
   name: 'featureCard',
   group: 'block levelFourElement',
-  content: 'heroHeadline heroSubheadline', // Using existing headline/subheadline for internal content
+  content: 'heroHeadline heroSubheadline', 
   draggable: true,
 
   addAttributes() {
     return {
       id: { default: null },
       icon: { default: 'Zap' },
-      iconTransform: { default: null }, // default 'skew-x--10' handled in component
+      iconTransform: { default: null },
+      gridColumn: { default: 'col-span-1' },
+      gridRow: { default: 'row-span-1' },
     };
   },
 

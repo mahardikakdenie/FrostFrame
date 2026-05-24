@@ -2,9 +2,12 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
 import React from 'react';
 import { cn } from '../lib/utils';
-import { Trash2, GripVertical, Play, ArrowUp, ArrowDown, Move } from 'lucide-react';
+import { Play, Upload, Youtube } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
 import { normalizeResponsive } from '../lib/responsive';
+import { ElementToolbar } from './utils/ElementToolbar';
+import { createMoveHandler } from './utils/nodeMove';
+import { saveToClipboard } from '../lib/db';
 
 const VideoComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
@@ -12,20 +15,42 @@ const VideoComponent = (props: any) => {
   
   const activeDevice = useUIStore(state => state.activeDevice);
   const openConfirmModal = useUIStore(state => state.openConfirmModal);
+  const openMediaModal = useUIStore(state => state.openMediaModal);
   const hoveredId = useUIStore(state => state.hoveredId);
+  const isDragging = useUIStore(state => state.isDragging);
   const isHovered = hoveredId === id;
 
-  const handleSelectNode = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSelectNode = () => {
     if (typeof getPos === 'function') {
       editor.commands.setNodeSelection(getPos());
     }
   };
 
+  /** Open file picker (upload mode) via MediaLibraryModal */
+  const openVideoPicker = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    handleSelectNode();
+    openMediaModal(id || 'video-pick', (url: string) => {
+      const pos = getPos();
+      if (typeof pos === 'number') {
+        editor.view.dispatch(
+          editor.view.state.tr.setNodeMarkup(pos, undefined, {
+            ...node.attrs,
+            src: url,
+            sourceType: 'upload',
+          })
+        );
+      }
+    }, 'video');
+  };
+
+  /** Double-click: open upload modal if in upload mode, else just select */
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
+    if (sourceType === 'upload' || !src) {
+      openVideoPicker(e);
+    } else {
+      handleSelectNode();
     }
   };
 
@@ -44,30 +69,10 @@ const VideoComponent = (props: any) => {
     });
   };
 
-  const handleMove = (direction: 'up' | 'down') => (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const pos = getPos();
-    if (typeof pos !== 'number') return;
-
-    const { doc } = editor.state;
-    const $pos = doc.resolve(pos);
-    const parent = $pos.parent;
-    const index = $pos.index();
-
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= parent.childCount) return;
-
-    const otherNode = parent.child(targetIndex);
-    const targetPos = direction === 'up' 
-      ? pos - otherNode.nodeSize 
-      : pos + node.nodeSize;
-
-    editor.chain()
-      .deleteRange({ from: pos, to: pos + node.nodeSize })
-      .insertContentAt(targetPos, node.toJSON())
-      .setNodeSelection(targetPos)
-      .focus()
-      .run();
+    const nodeJSON = node.toJSON();
+    await saveToClipboard(nodeJSON);
   };
 
   const getYoutubeEmbedUrl = (url: string) => {
@@ -100,29 +105,17 @@ const VideoComponent = (props: any) => {
   const currentBorderRadius = getResponsiveVal(borderRadius, '1.5rem');
 
   return (
-    <NodeViewWrapper 
+    <NodeViewWrapper
+      data-drag-handle
+      draggable
+      data-node-id={id}
       className={cn(
         "group/video relative my-4 w-full transition-all",
         (isHovered || selected) ? "z-[300]" : "z-10"
       )}
-      onClick={handleSelectNode}
-      onDoubleClick={handleDoubleClick}
+      onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleSelectNode(); }}
+      onDoubleClick={(e: React.MouseEvent) => { e.stopPropagation(); handleDoubleClick(e); }}
     >
-      {/* Visual Indicator & Drag Handle (Left Side) */}
-      <div 
-        className={cn(
-          "absolute -left-12 top-0 bottom-0 flex flex-col items-center justify-center opacity-0 group-hover/video:opacity-100 transition-opacity z-50",
-          (selected || isHovered) && "opacity-100"
-        )}
-      >
-        <div 
-          data-drag-handle
-          className="p-1.5 bg-indigo-600 text-white rounded-lg cursor-grab active:cursor-grabbing shadow-lg hover:scale-110 transition-transform"
-        >
-          <GripVertical className="w-4 h-4" />
-        </div>
-      </div>
-
       <div className={cn(
         "relative transition-all duration-300 bg-slate-900 flex items-center justify-center",
         selected ? "ring-2 ring-indigo-500 ring-offset-4 shadow-2xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-4 shadow-lg",
@@ -135,73 +128,84 @@ const VideoComponent = (props: any) => {
         marginTop: currentMarginTop !== '0px' ? currentMarginTop : undefined,
         padding: currentPadding !== '0' ? currentPadding : undefined
       }}>
-        {/* Badge Label & Actions (Top-Right Standard) */}
-        <div className={cn(
-          "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-[400]",
-          (selected || isHovered) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
-        )}>
-          <button 
-            onClick={handleDelete}
-            className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
-            title="Delete Video"
-          >
-             <Trash2 className="w-3 h-3" />
-          </button>
-          
-          <button 
-            onClick={handleMove('down')}
-            className="bg-slate-700/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-slate-900 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
-            title="Move Down"
-          >
-             <ArrowDown className="w-3 h-3" />
-          </button>
-          
-          <button 
-            onClick={handleMove('up')}
-            className="bg-slate-700/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-slate-900 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
-            title="Move Up"
-          >
-             <ArrowUp className="w-3 h-3" />
-          </button>
-
-          <div 
-            onClick={handleSelectNode}
-            className="bg-indigo-600 text-[10px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer pointer-events-auto flex items-center gap-1.5"
-          >
-            <Move className="w-2.5 h-2.5" />
-            {sourceType?.toUpperCase() || 'VIDEO'}
-          </div>
-        </div>
+        <ElementToolbar
+          label={`VIDEO · ${sourceType?.toUpperCase() ?? 'LINK'}`}
+          selected={selected}
+          isActive={selected || isHovered}
+          node={node}
+          groupName="video"
+          onDelete={handleDelete}
+          onMoveUp={createMoveHandler(editor, node, getPos, 'up')}
+          onMoveDown={createMoveHandler(editor, node, getPos, 'down')}
+          onSelect={handleSelectNode}
+        />
 
         {src ? (
           sourceType === 'youtube' ? (
-            <iframe 
+            <iframe
               src={getYoutubeEmbedUrl(src)}
-              className="w-full h-full absolute inset-0 border-0"
+              draggable={false}
+              className={cn(
+                "w-full h-full absolute inset-0 border-0",
+                !selected && "pointer-events-none"
+              )}
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
             />
           ) : (
-            <video 
-              key={src} // Force re-render on src change
-              src={src} 
+            <video
+              key={src}
+              src={src}
               poster={poster}
               autoPlay={autoplay}
               loop={loop}
               muted
               playsInline
-              className="w-full h-full object-cover"
-              controls
+              draggable={false}
+              className={cn(
+                "w-full h-full object-cover",
+                !selected && "pointer-events-none"
+              )}
+              controls={selected}
             />
           )
         ) : (
-          <div className="flex flex-col items-center gap-4 py-20">
-             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20 text-white animate-pulse">
-                <Play className="w-6 h-6 fill-white" />
-             </div>
-             <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic text-center px-8">
-               {sourceType === 'youtube' ? 'Enter YouTube URL in Sidebar' : 'Configure Video Source in Sidebar'}
-             </span>
+          /* ── Empty state: interactive CTA matching source type ── */
+          <div className="flex flex-col items-center gap-6 py-16 px-8 w-full">
+            <div className={cn(
+              "w-16 h-16 rounded-2xl flex items-center justify-center border border-white/20 text-white shadow-xl",
+              sourceType === 'youtube' ? 'bg-red-600/80' : 'bg-indigo-600/80'
+            )}>
+              {sourceType === 'youtube'
+                ? <Youtube className="w-7 h-7" />
+                : sourceType === 'upload'
+                  ? <Upload className="w-7 h-7" />
+                  : <Play className="w-7 h-7 fill-white" />}
+            </div>
+
+            <div className="flex flex-col items-center gap-2 text-center">
+              <span className="text-[11px] font-black text-white/80 uppercase tracking-widest italic">
+                {sourceType === 'youtube'
+                  ? 'Paste YouTube URL in Sidebar'
+                  : sourceType === 'upload'
+                    ? 'Upload a Video File'
+                    : 'Paste a Direct Video Link'}
+              </span>
+              <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                {sourceType === 'youtube' ? 'youtube.com/watch?v=...' : 'MP4 · WEBM · OGG'}
+              </span>
+            </div>
+
+            {/* CTA button for upload mode */}
+            {sourceType === 'upload' && (
+              <button
+                onClick={openVideoPicker}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                Select Video File
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -213,7 +217,6 @@ export const VideoElement = Node.create({
   name: 'videoElement',
   group: 'block',
   draggable: true,
-  isolating: true,
 
   addAttributes() {
     return {

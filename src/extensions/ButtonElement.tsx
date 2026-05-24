@@ -2,23 +2,18 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
 import React from 'react';
 import { cn } from '../lib/utils';
-import { GripVertical, Trash2, ExternalLink, ArrowUp, ArrowDown } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
+import { ElementToolbar } from './utils/ElementToolbar';
+import { createMoveHandler } from './utils/nodeMove';
 
 const ButtonComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
   const { id, text, link, variant, color, size, borderRadius, width, marginTop, transform, fontStyle, textTransform, fontFamily } = node.attrs;
-  
+
   const openConfirmModal = useUIStore(state => state.openConfirmModal);
   const hoveredId = useUIStore(state => state.hoveredId);
   const isHovered = hoveredId === id;
-
-  const handleSelectNode = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (typeof getPos === 'function') {
-      editor.commands.setNodeSelection(getPos());
-    }
-  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -35,109 +30,54 @@ const ButtonComponent = (props: any) => {
     });
   };
 
-  const handleMove = (direction: 'up' | 'down') => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const pos = getPos();
-    if (typeof pos !== 'number') return;
-
-    const { doc } = editor.state;
-    const $pos = doc.resolve(pos);
-    const parent = $pos.parent;
-    const index = $pos.index();
-
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= parent.childCount) return;
-
-    const otherNode = parent.child(targetIndex);
-    const targetPos = direction === 'up' 
-      ? pos - otherNode.nodeSize 
-      : pos + node.nodeSize;
-
-    editor.chain()
-      .deleteRange({ from: pos, to: pos + node.nodeSize })
-      .insertContentAt(targetPos, node.toJSON())
-      .setNodeSelection(targetPos)
-      .focus()
-      .run();
-  };
-
   const isPrimary = variant === 'primary';
-  
   const buttonTransform = transform || 'skew-x--10';
-  const innerTransform = buttonTransform.includes('skew-x--') 
-    ? buttonTransform.replace('skew-x--', 'skew-x-') 
-    : buttonTransform.includes('skew-x-') 
-      ? buttonTransform.replace('skew-x-', 'skew-x--') 
+  const innerTransform = buttonTransform.includes('skew-x--')
+    ? buttonTransform.replace('skew-x--', 'skew-x-')
+    : buttonTransform.includes('skew-x-')
+      ? buttonTransform.replace('skew-x-', 'skew-x--')
       : '';
 
   return (
-    <NodeViewWrapper 
+    <NodeViewWrapper
+      data-drag-handle
       className={cn(
-        "group/btn relative my-4 inline-block transition-all",
+        'group/btn relative my-4 inline-block transition-all',
         width === 'full' ? 'w-full' : 'w-auto',
-        (isHovered || selected) ? "z-[300]" : "z-10"
+        (isHovered || selected) ? 'z-[300]' : 'z-10'
       )}
       style={{ marginTop: marginTop || '0px' }}
-      onClick={handleSelectNode}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (typeof getPos === 'function') editor.commands.setNodeSelection(getPos());
+      }}
     >
       <div className={cn(
-        "relative transition-all duration-300",
-        selected ? "ring-2 ring-indigo-500 ring-offset-4 rounded-xl shadow-2xl" : "hover:ring-2 hover:ring-indigo-100 hover:ring-offset-2 rounded-xl",
-        isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-[301] shadow-2xl transition-all duration-300"
+        'relative transition-all duration-300',
+        selected ? 'ring-2 ring-indigo-500 ring-offset-4 rounded-xl shadow-2xl' : 'hover:ring-2 hover:ring-indigo-100 hover:ring-offset-2 rounded-xl',
+        isHovered && 'ring-4 ring-indigo-500/40 z-[301] shadow-2xl'
       )}>
-        {/* Badge Label & Actions (Top-Right Standard) */}
-        <div className={cn(
-          "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all duration-300 z-[400]",
-          selected ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
-        )}>
-          <button 
-            onClick={handleDelete}
-            className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
-            title="Delete Button"
-          >
-             <Trash2 className="w-3 h-3" />
-          </button>
-          
-          <button 
-            onClick={handleMove('down')}
-            className="bg-slate-700/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-slate-900 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
-            title="Move Down"
-          >
-             <ArrowDown className="w-3 h-3" />
-          </button>
-          
-          <button 
-            onClick={handleMove('up')}
-            className="bg-slate-700/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-slate-900 transition-all hover:scale-110 active:scale-90 pointer-events-auto"
-            title="Move Up"
-          >
-             <ArrowUp className="w-3 h-3" />
-          </button>
-
-          <div 
-            onClick={handleSelectNode}
-            className="bg-slate-900/40 backdrop-blur-md text-[9px] text-white px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-xl border border-white/20 cursor-pointer pointer-events-auto"
-          >
-            BUTTON
-          </div>
-
-          <div 
-            data-drag-handle
-            className="bg-slate-900/40 backdrop-blur-md text-white p-1 rounded-full cursor-grab active:cursor-grabbing pointer-events-auto shadow-xl border border-white/20"
-          >
-            <GripVertical className="w-3 h-3" />
-          </div>
-        </div>
+        <ElementToolbar
+          label="BUTTON"
+          selected={selected}
+          isActive={editor.isActive('buttonElement')}
+          node={node}
+          groupName="btn"
+          onDelete={handleDelete}
+          onMoveUp={createMoveHandler(editor, node, getPos, 'up')}
+          onMoveDown={createMoveHandler(editor, node, getPos, 'down')}
+          onSelect={() => { if (typeof getPos === 'function') editor.commands.setNodeSelection(getPos()); }}
+        />
 
         {isPrimary ? (
-          <button 
-            style={{ 
+          <button
+            style={{
               backgroundColor: color || 'var(--primary-color)',
               borderRadius: borderRadius || '0.75rem',
               fontFamily: fontFamily || 'var(--font-heading)'
             }}
             className={cn(
-              "text-white font-black transition-all hover:-translate-y-1 active:translate-y-0 text-center shadow-xl",
+              'text-white font-black transition-all hover:-translate-y-1 active:translate-y-0 text-center shadow-xl',
               buttonTransform,
               fontStyle || 'italic',
               textTransform || 'uppercase',
@@ -145,21 +85,21 @@ const ButtonComponent = (props: any) => {
               width === 'full' ? 'w-full' : 'w-auto'
             )}
           >
-            <div className={cn("flex items-center justify-center gap-2", innerTransform)}>
+            <div className={cn('flex items-center justify-center gap-2', innerTransform)}>
               {text || 'BUTTON'}
               {link && <ExternalLink className="w-3 h-3 opacity-50" />}
             </div>
           </button>
         ) : (
-          <button 
-            style={{ 
-              borderColor: color || 'var(--primary-color)', 
+          <button
+            style={{
+              borderColor: color || 'var(--primary-color)',
               color: color || 'var(--primary-color)',
               borderRadius: borderRadius || '0.75rem',
               fontFamily: fontFamily || 'var(--font-heading)'
             }}
             className={cn(
-              "bg-white border-2 font-black transition-all hover:bg-slate-50 hover:-translate-y-1 active:translate-y-0 text-center shadow-xl",
+              'bg-white border-2 font-black transition-all hover:bg-slate-50 hover:-translate-y-1 active:translate-y-0 text-center shadow-xl',
               buttonTransform,
               fontStyle || 'italic',
               textTransform || 'uppercase',
@@ -167,7 +107,7 @@ const ButtonComponent = (props: any) => {
               width === 'full' ? 'w-full' : 'w-auto'
             )}
           >
-            <div className={cn("flex items-center justify-center gap-2", innerTransform)}>
+            <div className={cn('flex items-center justify-center gap-2', innerTransform)}>
               {text || 'BUTTON'}
               {link && <ExternalLink className="w-3 h-3 opacity-50" />}
             </div>
@@ -195,10 +135,10 @@ export const ButtonElement = Node.create({
       borderRadius: { default: '0.75rem' },
       width: { default: 'auto' },
       marginTop: { default: '0px' },
-      transform: { default: null }, // default 'skew-x--10' handled in component
-      fontStyle: { default: null }, // default 'italic' handled in component
-      textTransform: { default: null }, // default 'uppercase' handled in component
-      fontFamily: { default: null } // default 'var(--font-heading)' handled in component
+      transform: { default: null },
+      fontStyle: { default: null },
+      textTransform: { default: null },
+      fontFamily: { default: null }
     };
   },
 

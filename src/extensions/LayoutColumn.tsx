@@ -1,10 +1,11 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
-import { GripVertical, Plus, Trash2, LayoutTemplate, ArrowUp, ArrowDown } from 'lucide-react';
+import { GripVertical, Plus, Trash2, LayoutTemplate, ArrowUp, ArrowDown, ClipboardPaste } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
 import { getResponsiveSpacing, normalizeResponsive } from '../lib/responsive';
+import { getFromClipboard, clearClipboard } from '../lib/db';
 
 const LayoutColumnComponent = (props: any) => {
   const { node, selected, editor, getPos } = props;
@@ -34,6 +35,9 @@ const LayoutColumnComponent = (props: any) => {
   const hoveredId = useUIStore(state => state.hoveredId);
   const selectionPath = useUIStore(state => state.selectionPath);
   const inspectMode = useUIStore(state => state.inspectMode);
+  const copiedNode = useUIStore(state => state.copiedNode);
+  const openConfirmModal = useUIStore(state => state.openConfirmModal);
+  const setCopiedNode = useUIStore(state => state.setCopiedNode);
   
   const isFocused = focusedId === id;
   const isHovered = hoveredId === id;
@@ -43,6 +47,29 @@ const LayoutColumnComponent = (props: any) => {
   const handleSelectNode = (e: React.MouseEvent) => {
     if (inspectMode) return;
     e.stopPropagation();
+    
+    // Check if there's clipboard content and column is empty
+    const clipboardData = localStorage.getItem('lando-clipboard');
+    if (clipboardData && isEmpty) {
+      try {
+        const nodeJSON = JSON.parse(clipboardData);
+        // Generate new ID for pasted node
+        nodeJSON.attrs.id = crypto.randomUUID();
+        
+        const pos = getPos();
+        if (typeof pos === 'number') {
+          // Insert at the end of this column (inside)
+          const insertPos = pos + node.nodeSize - 1;
+          editor.chain().focus().insertContentAt(insertPos, nodeJSON).run();
+          localStorage.removeItem('lando-clipboard'); // Clear after paste
+          return;
+        }
+      } catch (e) {
+        console.error('Failed to paste:', e);
+      }
+    }
+    
+    // Normal selection if no paste
     if (typeof getPos === 'function') {
       editor.commands.setNodeSelection(getPos());
     }
@@ -59,12 +86,17 @@ const LayoutColumnComponent = (props: any) => {
   const handleDelete = (e: React.MouseEvent) => {
     if (inspectMode) return;
     e.stopPropagation();
-    if (confirm('Delete this column and its contents?')) {
-      const pos = getPos();
-      if (typeof pos === 'number') {
-        editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+    openConfirmModal({
+      title: 'Delete Column',
+      message: 'Delete this column and all its contents? This cannot be undone.',
+      variant: 'danger',
+      onConfirm: () => {
+        const pos = getPos();
+        if (typeof pos === 'number') {
+          editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize));
+        }
       }
-    }
+    });
   };
 
   const handleMove = (direction: 'up' | 'down') => (e: React.MouseEvent) => {
@@ -81,16 +113,52 @@ const LayoutColumnComponent = (props: any) => {
     if (targetIndex < 0 || targetIndex >= parent.childCount) return;
 
     const otherNode = parent.child(targetIndex);
-    const targetPos = direction === 'up' 
-      ? pos - otherNode.nodeSize 
-      : pos + node.nodeSize;
+    const { tr } = editor.state;
 
-    editor.chain()
-      .deleteRange({ from: pos, to: pos + node.nodeSize })
-      .insertContentAt(targetPos, node.toJSON())
-      .setNodeSelection(targetPos)
-      .focus()
-      .run();
+    if (direction === 'up') {
+      const insertPos = pos - otherNode.nodeSize;
+      tr.insert(insertPos, node);
+      const deleteFrom = pos + node.nodeSize;
+      tr.delete(deleteFrom, deleteFrom + node.nodeSize);
+    } else {
+      tr.delete(pos, pos + node.nodeSize);
+      const preDeletionEnd = pos + node.nodeSize + otherNode.nodeSize;
+      const insertPos = tr.mapping.map(preDeletionEnd);
+      tr.insert(insertPos, node);
+    }
+
+    editor.view.dispatch(tr);
+  };
+
+  /** Paste copied node at the END of this column (push, does not replace existing) */
+  const handlePaste = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Read from Zustand store first, fallback to localStorage
+    let nodeJSON: Record<string, unknown> | null = copiedNode;
+    if (!nodeJSON) {
+      try {
+        const raw = localStorage.getItem('lando-clipboard');
+        if (raw) nodeJSON = JSON.parse(raw);
+      } catch {}
+    }
+    if (!nodeJSON) return;
+
+    // Always assign a new unique ID to avoid duplicates
+    if (nodeJSON.attrs && typeof nodeJSON.attrs === 'object') {
+      nodeJSON = { ...nodeJSON, attrs: { ...(nodeJSON.attrs as Record<string, unknown>), id: crypto.randomUUID() } };
+    }
+
+    const pos = getPos();
+    if (typeof pos !== 'number') return;
+
+    // Insert at the END of this column (before the closing node = pos + nodeSize - 1)
+    const insertPos = pos + node.nodeSize - 1;
+    try {
+      editor.chain().focus().insertContentAt(insertPos, nodeJSON as any).run();
+    } catch (err) {
+      console.error('Paste failed:', err);
+    }
   };
 
   const handleWrapWithRow = (e: React.MouseEvent) => {
@@ -259,7 +327,17 @@ const LayoutColumnComponent = (props: any) => {
             "absolute -top-7 right-0 flex flex-row-reverse items-center gap-1 transition-all z-50 pointer-events-none",
             (!inspectMode && isFocused && !isAncestorOfFocus) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
           )}>
-            <button 
+          {/* Paste — only shown when there is a copied node in clipboard */}
+            {(copiedNode || localStorage.getItem('lando-clipboard')) && (
+              <button
+                onClick={handlePaste}
+                className="bg-emerald-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-emerald-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto ml-0.5"
+                title="Paste copied element at bottom"
+              >
+                <ClipboardPaste className="w-3 h-3" />
+              </button>
+            )}
+            <button
               onClick={handleDelete}
               className="bg-rose-500/80 backdrop-blur-md text-white p-1 rounded-full shadow-xl hover:bg-rose-600 transition-all hover:scale-110 active:scale-90 pointer-events-auto ml-1"
               title="Delete Column"
@@ -309,8 +387,12 @@ const LayoutColumnComponent = (props: any) => {
                   <Plus className="w-6 h-6 animate-pulse" />
                 </div>
                 <div className="flex flex-col items-center gap-1 opacity-40 group-hover/column:opacity-100 transition-all duration-500">
-                  <span className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.3em] italic group-hover/column:scale-105 transition-transform">DROP HERE</span>
-                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">Drag Elements Into This Slot</span>
+                  <span className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.3em] italic group-hover/column:scale-105 transition-transform">
+                    {copiedNode || localStorage.getItem('lando-clipboard') ? 'PASTE OR DROP HERE' : 'DROP HERE'}
+                  </span>
+                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">
+                    {copiedNode || localStorage.getItem('lando-clipboard') ? 'Paste Button Above · Or Drag Elements' : 'Drag Elements Into This Slot'}
+                  </span>
                 </div>
               </div>
             )}

@@ -9,12 +9,14 @@ const SectionGridView = ({ node }: any) => {
   const hoveredId = useUIStore(state => state.hoveredId);
   const isHovered = hoveredId === id;
   
-  let colsClass = '';
+  let layoutClass = '';
   if (displayType === 'grid') {
-      colsClass = columns === 2 ? "md:grid-cols-2" : columns === 4 ? "md:grid-cols-4" : "md:grid-cols-3";
+      layoutClass = cn("grid gap-12", columns === 2 ? "md:grid-cols-2" : columns === 4 ? "md:grid-cols-4" : "md:grid-cols-3");
+  } else if (displayType === 'bento') {
+      layoutClass = "grid grid-cols-1 md:grid-cols-4 grid-rows-[repeat(2,minmax(250px,auto))] gap-6";
+  } else {
+      layoutClass = cn("flex gap-12", flexWrap === 'wrap' ? 'flex-wrap' : 'flex-nowrap');
   }
-
-  const baseDisplayClass = displayType === 'flex' ? `flex ${flexWrap === 'wrap' ? 'flex-wrap' : 'flex-nowrap'}` : 'grid';
 
   return (
     <NodeViewWrapper className={cn(
@@ -22,11 +24,7 @@ const SectionGridView = ({ node }: any) => {
       isHovered && "ring-4 ring-indigo-500/40 border-indigo-500 z-50 shadow-2xl transition-all duration-300"
     )}>
       <NodeViewContent 
-        className={cn(
-          "gap-12",
-          baseDisplayClass,
-          colsClass
-        )} 
+        className={layoutClass} 
       />
     </NodeViewWrapper>
   );
@@ -42,7 +40,7 @@ export const SectionGrid = Node.create({
     return {
       id: { default: null },
       columns: { default: 3 },
-      displayType: { default: 'grid' },
+      displayType: { default: 'grid' }, // 'grid' | 'flex' | 'bento'
       flexWrap: { default: 'wrap' },
     };
   },

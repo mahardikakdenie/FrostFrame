@@ -27,6 +27,7 @@ import { SpacerElement } from './SpacerElement';
 import { ParagraphElement } from './ParagraphElement';
 import { IconElement } from './IconElement';
 import { ButtonElement } from './ButtonElement';
+import { InputElement, TextAreaElement, CheckboxElement } from './FormElements';
 
 export const BuilderExtensions = [
   StarterKit.configure({
@@ -76,4 +77,7 @@ export const BuilderExtensions = [
   ParagraphElement,
   IconElement,
   ButtonElement,
+  InputElement,
+  TextAreaElement,
+  CheckboxElement,
 ];

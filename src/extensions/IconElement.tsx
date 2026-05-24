@@ -92,7 +92,7 @@ export const IconElement = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'icon-element' }), 0];
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'icon-element' })];
   },
 
   addNodeView() {

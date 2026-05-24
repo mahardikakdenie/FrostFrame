@@ -1,7 +1,9 @@
 import Dexie, { type Table } from 'dexie';
 
-export interface Draft {
+export interface Page {
   id: string;
+  name: string;
+  slug: string;
   content: any;
   updatedAt: number;
 }
@@ -13,13 +15,13 @@ export interface Clipboard {
 }
 
 export class LandoStudioDatabase extends Dexie {
-  drafts!: Table<Draft>;
+  pages!: Table<Page>;
   clipboard!: Table<Clipboard>;
 
   constructor() {
     super('LandoStudioDB');
-    this.version(2).stores({
-      drafts: 'id, updatedAt',
+    this.version(3).stores({
+      pages: 'id, name, slug, updatedAt',
       clipboard: 'id, copiedAt'
     });
   }
@@ -28,51 +30,32 @@ export class LandoStudioDatabase extends Dexie {
 export const db = new LandoStudioDatabase();
 
 /**
- * Saves the current editor content to IndexedDB.
+ * Saves a specific page content to IndexedDB.
  */
-export const saveDraftToDB = async (content: any) => {
+export const savePageToDB = async (pageId: string, name: string, slug: string, content: any) => {
   try {
-    await db.drafts.put({
-      id: 'current-draft',
+    await db.pages.put({
+      id: pageId,
+      name,
+      slug,
       content,
       updatedAt: Date.now(),
     });
   } catch (error) {
-    console.error('Failed to save draft to IndexedDB:', error);
+    console.error(`Failed to save page ${pageId} to IndexedDB:`, error);
   }
 };
 
 /**
- * Retrieves the draft from IndexedDB.
+ * Retrieves a specific page from IndexedDB.
  */
-export const getDraftFromDB = async () => {
+export const getPageFromDB = async (pageId: string) => {
   try {
-    return await db.drafts.get('current-draft');
+    return await db.pages.get(pageId);
   } catch (error) {
-    console.error('Failed to get draft from IndexedDB:', error);
+    console.error(`Failed to get page ${pageId} from IndexedDB:`, error);
     return null;
   }
-};
-
-/**
- * Migrates data from LocalStorage to IndexedDB if it exists.
- */
-export const migrateFromLocalStorage = async () => {
-  const LOCAL_STORAGE_KEY = 'lando-builder-draft';
-  const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
-  
-  if (localData) {
-    try {
-      const content = JSON.parse(localData);
-      await saveDraftToDB(content);
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      console.log('🚀 [Migration] Draft successfully moved from LocalStorage to IndexedDB.');
-      return content;
-    } catch (e) {
-      console.error('❌ [Migration] Failed to migrate draft from LocalStorage:', e);
-    }
-  }
-  return null;
 };
 
 /**

@@ -3,23 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+"use client";
+
 import React, { useEffect } from 'react';
-import { Editor } from './components/builder/Editor';
-import { PreviewSidebar } from './components/builder/PreviewSidebar';
-import { BlockLibrarySidebar } from './components/builder/BlockLibrarySidebar';
-import { useStore } from './store/useStore';
-import { useUIStore } from './store/useUIStore';
-import { useThemeStore } from './store/useThemeStore';
-import { Monitor, Tablet, Smartphone, Eye, Plus, Send, Layout, ChevronLeft, Search, Undo2, Redo2, Trash2, Save, Code2, Sun, Moon } from 'lucide-react';
-import { cn } from './lib/utils';
-import { MediaLibraryModal } from './components/builder/MediaLibraryModal';
-import { ConfirmationModal } from './components/builder/ConfirmationModal';
-import { JSONPreviewModal } from './components/builder/JSONPreviewModal';
-import { ThemeSettings } from './components/builder/ThemeSettings';
-import { saveDraftToDB, db } from './lib/db';
+import { Editor } from '../components/builder/Editor';
+import { PreviewSidebar } from '../components/builder/PreviewSidebar';
+import { BlockLibrarySidebar } from '../components/builder/BlockLibrarySidebar';
+import { PagesSidebar } from '../components/builder/PagesSidebar';
+import { useStore } from '../store/useStore';
+import { useUIStore } from '../store/useUIStore';
+import { useThemeStore } from '../store/useThemeStore';
+import { useProjectStore } from '../store/useProjectStore';
+import { Monitor, Tablet, Smartphone, Eye, Plus, Send, Layout, ChevronLeft, Search, Undo2, Redo2, Trash2, Save, Code2, Sun, Moon, FileText } from 'lucide-react';
+import { cn } from '../lib/utils';
+import { MediaLibraryModal } from '../components/builder/MediaLibraryModal';
+import { ConfirmationModal } from '../components/builder/ConfirmationModal';
+import { JSONPreviewModal } from '../components/builder/JSONPreviewModal';
+import { ThemeSettings } from '../components/builder/ThemeSettings';
+import { savePageToDB, getPageFromDB, db } from '../lib/db';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function App() {
+export default function Page() {
   const previewMode = useUIStore((state) => state.previewMode);
   const setPreviewMode = useUIStore((state) => state.setPreviewMode);
   const focusedId = useUIStore((state) => state.focusedId);
@@ -37,6 +41,30 @@ export default function App() {
   const colorMode = useThemeStore((state) => state.colorMode);
   const toggleColorMode = useThemeStore((state) => state.toggleColorMode);
 
+  const { activePageId, pages, initProject } = useProjectStore();
+
+  // 1. Initialize Project on mount
+  useEffect(() => {
+    initProject();
+  }, []);
+
+  // 2. Load page content when activePageId changes
+  useEffect(() => {
+    const loadPage = async () => {
+      if (!activePageId) return;
+      
+      // Clear focus before changing content to avoid "Position out of range"
+      setFocusedId(null, 'section', [], null);
+      
+      const pageData = await getPageFromDB(activePageId);
+      const editor = (window as any).editor;
+      if (editor && pageData) {
+        editor.commands.setContent(pageData.content);
+      }
+    };
+    loadPage();
+  }, [activePageId]);
+
   useEffect(() => {
     if (colorMode === 'dark') {
       document.documentElement.classList.add('dark');
@@ -47,10 +75,12 @@ export default function App() {
 
   const handleSaveDraft = async () => {
     const editor = (window as any).editor;
-    if (editor) {
+    const activePage = pages.find(p => p.id === activePageId);
+    
+    if (editor && activePageId && activePage) {
       setSaveStatus('saving');
       const content = editor.getJSON();
-      await saveDraftToDB(content);
+      await savePageToDB(activePageId, activePage.name, activePage.slug, content);
       
       setTimeout(() => {
         setSaveStatus('saved');
@@ -212,7 +242,7 @@ export default function App() {
                         const editor = (window as any).editor;
                         if (editor) {
                           editor.commands.clearContent();
-                          await db.drafts.delete('current-draft');
+                          if (activePageId) await db.pages.delete(activePageId);
                           setSaveStatus('idle');
                         }
                       }
@@ -261,6 +291,16 @@ export default function App() {
                {focusedId ? 'Properties' : 'Library'}
              </button>
              <button 
+               onClick={() => setActiveSidebarTab('pages')}
+               className={cn(
+                 "flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                 activeSidebarTab === 'pages' ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-white dark:bg-slate-800 shadow-sm"
+               )}
+             >
+               <FileText className="w-3.5 h-3.5" />
+               Pages
+             </button>
+             <button 
                onClick={() => setActiveSidebarTab('design')}
                className={cn(
                  "flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
@@ -275,6 +315,8 @@ export default function App() {
           <div className="flex-1 overflow-hidden relative">
              {activeSidebarTab === 'library' ? (
                 focusedId ? <PreviewSidebar /> : <BlockLibrarySidebar onAddSection={addSection} />
+             ) : activeSidebarTab === 'pages' ? (
+                <PagesSidebar />
              ) : (
                 <div className="p-8 overflow-y-auto h-full custom-scrollbar">
                    <ThemeSettings />
@@ -305,7 +347,7 @@ export default function App() {
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                </div>
                <div className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 h-6 rounded-lg text-[9px] text-slate-400 dark:text-slate-500 flex items-center px-4 italic font-bold">
-                  https://lando-builder.studio/my-awesome-startup
+                  {`https://lando-builder.studio${pages.find(p => p.id === activePageId)?.slug || ''}`}
                </div>
             </div>
             
@@ -376,4 +418,3 @@ export default function App() {
     </div>
   );
 }
-

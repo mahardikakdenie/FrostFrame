@@ -27,6 +27,7 @@ import { SpacerElement } from './SpacerElement';
 import { ParagraphElement } from './ParagraphElement';
 import { IconElement } from './IconElement';
 import { ButtonElement } from './ButtonElement';
+import { NavigationElement } from './NavigationElement';
 import { InputElement, TextAreaElement, CheckboxElement } from './FormElements';
 
 export const BuilderExtensions = [
@@ -77,6 +78,7 @@ export const BuilderExtensions = [
   ParagraphElement,
   IconElement,
   ButtonElement,
+  NavigationElement,
   InputElement,
   TextAreaElement,
   CheckboxElement,

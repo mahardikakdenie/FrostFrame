@@ -28,7 +28,7 @@ export const TestimonialSection = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['section', mergeAttributes(HTMLAttributes, { 'data-type': 'testimonial-section' }), 0];
+    return ['section', mergeAttributes(HTMLAttributes, { 'data-type': 'testimonial-section' })];
   },
 
   addNodeView() {

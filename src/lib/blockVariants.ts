@@ -619,6 +619,12 @@ export const BLOCK_VARIANTS: Record<string, { id: string, name: string, icon: an
       generatePayload: () => ({ type: 'videoElement', attrs: { id: crypto.randomUUID() } })
     },
     {
+      id: "el-nav",
+      name: "Navigation",
+      icon: AlignJustify,
+      generatePayload: () => ({ type: 'navigationElement', attrs: { id: crypto.randomUUID() } })
+    },
+    {
       id: "el-divider",
       name: "Divider",
       icon: Minus,

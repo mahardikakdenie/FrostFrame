@@ -4,7 +4,7 @@ import { X, Search, Upload, Image as ImageIcon, Loader2, Download } from 'lucide
 import { useUIStore } from '../../store/useUIStore';
 import { cn } from '../../lib/utils';
 
-const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY || '';
+const UNSPLASH_ACCESS_KEY = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '';
 
 export const MediaLibraryModal = () => {
   const { mediaModal, closeMediaModal } = useUIStore();

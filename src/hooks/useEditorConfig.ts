@@ -5,7 +5,8 @@ import { useUIStore } from '../store/useUIStore';
 import { debounce } from '../lib/utils';
 import { BuilderExtensions } from '../extensions/registry';
 import { buildSelectionPath, resolveSmartDropPosition } from '../components/builder/editorHelpers';
-import { saveDraftToDB, getDraftFromDB, migrateFromLocalStorage } from '../lib/db';
+import { savePageToDB, getPageFromDB } from '../lib/db';
+import { useProjectStore } from '../store/useProjectStore';
 
 const TEXT_NODES = [
   'heroHeadline', 'heroSubheadline', 'heroBadge', 
@@ -36,13 +37,20 @@ export const useEditorConfig = () => {
 
   const debouncedSave = useMemo(() => 
     debounce(async (editor: any) => {
-      const json = editor.getJSON();
-      await saveDraftToDB(json);
-      console.log('Auto-saved draft to IndexedDB (debounced)');
+      const activePageId = useProjectStore.getState().activePageId;
+      const pages = useProjectStore.getState().pages;
+      const activePage = pages.find(p => p.id === activePageId);
+      
+      if (editor && activePageId && activePage) {
+        const json = editor.getJSON();
+        await savePageToDB(activePageId, activePage.name, activePage.slug, json);
+        console.log(`Auto-saved page ${activePage.name} to IndexedDB`);
+      }
     }, 1500), 
   []);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: BuilderExtensions,
     content: {
       type: 'doc',
@@ -51,7 +59,13 @@ export const useEditorConfig = () => {
           type: 'layoutRow',
           attrs: { id: crypto.randomUUID(), gridCols: 1, displayType: 'flex' },
           content: [
-            { type: 'layoutColumn', attrs: { id: crypto.randomUUID() } }
+            { 
+              type: 'layoutColumn', 
+              attrs: { id: crypto.randomUUID() },
+              content: [
+                { type: 'paragraphElement', attrs: { id: crypto.randomUUID() }, content: [{ type: 'text', text: ' ' }] }
+              ]
+            }
           ]
         }
       ]
@@ -330,37 +344,65 @@ export const useEditorConfig = () => {
         const storedSourceType = (view as any).__dragSourceType as string | undefined;
         const isInternalMove = (moved && !!storedSourceType) || (!!storedSourceType && !payloadStr && view.state.selection instanceof NodeSelection && (view.state.selection as NodeSelection).node.type.spec.draggable === true && (view.state.selection as NodeSelection).node.type.name === storedSourceType);
 
+        const { parentType, insertPos } = resolveSmartDropPosition(view, coordinates.pos, type, event.clientX, event.clientY);
+
+        // Helper to check if a type is a basic element that needs wrapping
+        const isBasicElement = (t: string) => [
+          'heroHeadline', 'heroSubheadline', 'heroBadge', 'heroButtonGroup',
+          'heroMedia', 'featureCard', 'paragraphElement', 'iconElement',
+          'dividerElement', 'imageElement', 'videoElement', 'spacerElement',
+          'buttonElement', 'formElements', 'navigationElement'
+        ].includes(t);
+
         if (isInternalMove) {
-          const { insertPos, parentType } = resolveSmartDropPosition(view, coordinates.pos, type, event.clientX, event.clientY);
-          const { tr, selection } = view.state;
-          const nodeToInsert = (selection instanceof NodeSelection) ? (selection as NodeSelection).node : (slice.content.childCount > 0 ? slice.content.child(0) : null);
-          if (!nodeToInsert) return false;
+          try {
+            const { tr, selection } = view.state;
+            const nodeToInsert = (selection instanceof NodeSelection) ? (selection as NodeSelection).node : (slice.content.childCount > 0 ? slice.content.child(0) : null);
+            if (!nodeToInsert) return false;
 
-          tr.delete(selection.from, selection.to);
-          const mappedInsertPos = tr.mapping.map(insertPos);
+            tr.delete(selection.from, selection.to);
+            const docSize = tr.doc.content.size;
+            const mappedInsertPos = Math.min(tr.mapping.map(insertPos), docSize);
 
-          if (parentType === 'doc' && !type.includes('Section') && !type.toLowerCase().includes('row')) {
-            const wrappedContent = {
-              type: 'layoutRow',
-              attrs: { id: crypto.randomUUID(), displayType: 'flex', padding: 'py-12' },
-              content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() }, content: [nodeToInsert.toJSON()] }]
-            };
-            tr.insert(mappedInsertPos, view.state.schema.nodeFromJSON(wrappedContent));
-          } else {
-            tr.insert(mappedInsertPos, nodeToInsert);
+            if (isBasicElement(type) && parentType !== 'layoutColumn') {
+              const wrappedContent = {
+                type: 'layoutRow',
+                attrs: { id: crypto.randomUUID(), displayType: 'flex', padding: 'py-12' },
+                content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() }, content: [nodeToInsert.toJSON()] }]
+              };
+              tr.insert(mappedInsertPos, view.state.schema.nodeFromJSON(wrappedContent));
+            } else {
+              tr.insert(mappedInsertPos, nodeToInsert);
+            }
+            view.dispatch(tr);
+          } catch (e) {
+            console.warn('Internal move failed, position out of range:', e);
           }
-          view.dispatch(tr);
           delete (view as any).__dragSourceType;
           return true;
         }
 
         delete (view as any).__dragSourceType;
-        const { parentType, insertPos } = resolveSmartDropPosition(view, coordinates.pos, type, event.clientX, event.clientY);
+        const editorInstance = (window as any).editor;
+        if (!editorInstance) return false;
+
+        // Clamp insertPos to valid document range
+        const safeInsertPos = Math.min(insertPos, view.state.doc.content.size);
 
         if (payloadStr) {
           try {
-            const content = JSON.parse(payloadStr);
-            (window as any).editor.chain().focus().insertContentAt(insertPos, content).run();
+            let content = JSON.parse(payloadStr);
+            
+            // Auto-wrap variant payloads if needed
+            if (isBasicElement(type) && parentType !== 'layoutColumn') {
+              content = {
+                type: 'layoutRow',
+                attrs: { id: crypto.randomUUID(), displayType: 'flex', padding: 'py-12' },
+                content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() }, content: [content] }]
+              };
+            }
+            
+            editorInstance.chain().focus().insertContentAt(safeInsertPos, content).run();
             return true;
           } catch (e) { console.error(e); }
         }
@@ -377,15 +419,19 @@ export const useEditorConfig = () => {
           content.content = [{ type: 'text', text: defaultTextMap[type] }];
         }
 
-        if (parentType === 'doc' && !type.includes('Section') && !type.toLowerCase().includes('row')) {
-          const wrappedContent = {
-            type: 'layoutRow',
-            attrs: { id: crypto.randomUUID(), displayType: 'flex', padding: 'py-12' },
-            content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() }, content: [content] }]
-          };
-          (window as any).editor.chain().focus().insertContentAt(insertPos, wrappedContent).run();
-        } else {
-          (window as any).editor.chain().focus().insertContentAt(insertPos, content).run();
+        try {
+          if (isBasicElement(type) && parentType !== 'layoutColumn') {
+            const wrappedContent = {
+              type: 'layoutRow',
+              attrs: { id: crypto.randomUUID(), displayType: 'flex', padding: 'py-12' },
+              content: [{ type: 'layoutColumn', attrs: { id: crypto.randomUUID() }, content: [content] }]
+            };
+            editorInstance.chain().focus().insertContentAt(safeInsertPos, wrappedContent).run();
+          } else {
+            editorInstance.chain().focus().insertContentAt(safeInsertPos, content).run();
+          }
+        } catch (e) {
+          console.warn('Insert failed, position out of range:', e);
         }
         return true;
       },
@@ -398,21 +444,18 @@ export const useEditorConfig = () => {
       editor.setOptions({
         editorProps: { attributes: { contenteditable: (!inspectMode).toString() } }
       });
-      const loadInitialContent = async () => {
-        await migrateFromLocalStorage();
-        const draft = await getDraftFromDB();
-        if (draft && draft.content) editor.commands.setContent(draft.content);
-      };
-      loadInitialContent();
     }
   }, [editor, inspectMode]);
 
   useEffect(() => {
     if (!editor || !focusedId) return;
     const { selection } = editor.state;
-    const currentId = selection instanceof NodeSelection 
-      ? selection.node.attrs.id 
-      : (selection.$from.parent.attrs.id || selection.$from.before().toString());
+    let currentId: string | null = null;
+    try {
+      currentId = selection instanceof NodeSelection 
+        ? selection.node.attrs.id 
+        : (selection.$from.parent.attrs.id || (selection.$from.depth > 0 ? selection.$from.before().toString() : null));
+    } catch { /* depth 0 — no parent to get before() from */ }
 
     if (currentId !== focusedId) {
       let foundPos = -1;
@@ -422,9 +465,18 @@ export const useEditorConfig = () => {
           return false;
         }
       });
-      if (foundPos !== -1) {
-        try { editor.commands.setNodeSelection(foundPos); }
-        catch { editor.commands.setTextSelection(foundPos); }
+
+      if (foundPos !== -1 && foundPos < editor.state.doc.content.size) {
+        try {
+          const nodeAtPos = editor.state.doc.nodeAt(foundPos);
+          if (nodeAtPos) {
+            editor.commands.setNodeSelection(foundPos);
+          } else {
+            editor.commands.setTextSelection(foundPos);
+          }
+        } catch (e) {
+          console.warn('Selection sync bypassed due to document mismatch:', e);
+        }
       }
     }
   }, [focusedId, editor]);

@@ -283,7 +283,7 @@ export const VideoElement = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'video-element' }), 0];
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'video-element' })];
   },
 
   addNodeView() {

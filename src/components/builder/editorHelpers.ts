@@ -8,7 +8,10 @@ import { Selection } from '@tiptap/pm/state';
  */
 export const buildSelectionPath = (doc: ProsemirrorNode, selection: Selection) => {
   const path: { id: string; type: string; label: string }[] = [];
-  const resolved = doc.resolve(selection.from);
+  
+  // 🛡️ Guard: Ensure selection is within current doc range
+  const safeFrom = Math.min(selection.from, doc.content.size);
+  const resolved = doc.resolve(safeFrom);
   
   // Cache for label formatting to avoid repetitive regex
   const formatLabel = (name: string) => name.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
@@ -80,7 +83,10 @@ export const resolveSmartDropPosition = (
   inside?: number  // kept for API compatibility
 ) => {
   const { state } = view;
-  const resolvedPos = state.doc.resolve(pos);
+  
+  // 🛡️ Guard: Ensure pos is within current doc range
+  const safePos = Math.min(Math.max(0, pos), state.doc.content.size);
+  const resolvedPos = state.doc.resolve(safePos);
 
   // ── Step 1: Find nearest column / row / section / doc ──────────────────────
   let containerNode: ProsemirrorNode | null = null;
@@ -268,13 +274,14 @@ export const resolveSmartDropPosition = (
   let parentType = containerNode.type.name;
 
   // ── Step 4: Smart redirect — element/row dropped onto Row/Section ──────────
-  const isRow = type.toLowerCase().includes('row');
+  const safeType = type || 'paragraphElement';
+  const isRow = safeType.toLowerCase().includes('row');
   const isElement = [
     'heroHeadline', 'heroSubheadline', 'heroBadge', 'heroButtonGroup',
     'heroMedia', 'featureCard', 'paragraphElement', 'iconElement',
     'dividerElement', 'imageElement', 'videoElement', 'spacerElement',
-    'buttonElement', 'formElements',
-  ].includes(type);
+    'buttonElement', 'formElements', 'navigationElement'
+  ].includes(safeType);
 
   if (side === 'inside' && (isElement || isRow) && (parentType === 'layoutRow' || parentType === 'layoutSection')) {
     let targetRowNode: ProsemirrorNode | null = null;

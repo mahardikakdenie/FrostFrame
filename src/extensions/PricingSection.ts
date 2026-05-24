@@ -28,7 +28,7 @@ export const PricingSection = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['section', mergeAttributes(HTMLAttributes, { 'data-type': 'pricing-section' }), 0];
+    return ['section', mergeAttributes(HTMLAttributes, { 'data-type': 'pricing-section' })];
   },
 
   addNodeView() {

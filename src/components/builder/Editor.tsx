@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { EditorContent } from '@tiptap/react';
 import { FloatingToolbar } from './FloatingToolbar';

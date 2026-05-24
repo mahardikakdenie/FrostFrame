@@ -220,7 +220,7 @@ export const ButtonElement = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'button-element' }), 0];
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'button-element' })];
   },
 
   addNodeView() {

@@ -123,7 +123,7 @@ export const HeroButtonGroup = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'hero-button-group' }), 0];
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'hero-button-group' })];
   },
 
   addNodeView() {

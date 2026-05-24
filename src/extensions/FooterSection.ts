@@ -28,7 +28,7 @@ export const FooterSection = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['footer', mergeAttributes(HTMLAttributes, { 'data-type': 'footer-section' }), 0];
+    return ['footer', mergeAttributes(HTMLAttributes, { 'data-type': 'footer-section' })];
   },
 
   addNodeView() {

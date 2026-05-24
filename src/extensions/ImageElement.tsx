@@ -223,7 +223,7 @@ export const ImageElement = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'image-element' }), 0];
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'image-element' })];
   },
 
   addNodeView() {

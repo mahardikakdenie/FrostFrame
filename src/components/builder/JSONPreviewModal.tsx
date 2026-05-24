@@ -2,27 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Code2, Copy, Check, Database } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
-import { getDraftFromDB } from '../../lib/db';
+import { useProjectStore } from '../../store/useProjectStore';
+import { getPageFromDB } from '../../lib/db';
 import { cn } from '../../lib/utils';
 
 export const JSONPreviewModal = () => {
   const { jsonModal, closeJsonModal } = useUIStore();
+  const { activePageId } = useProjectStore();
   const [jsonContent, setJsonContent] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (jsonModal.isOpen) {
       const fetchJson = async () => {
-        const draft = await getDraftFromDB();
-        if (draft && draft.content) {
-          setJsonContent(JSON.stringify(draft.content, null, 2));
+        if (!activePageId) {
+          setJsonContent('// No active page');
+          return;
+        }
+        const page = await getPageFromDB(activePageId);
+        if (page && page.content) {
+          setJsonContent(JSON.stringify(page.content, null, 2));
         } else {
-          setJsonContent('// No draft found in IndexedDB');
+          setJsonContent('// No content found for this page in IndexedDB');
         }
       };
       fetchJson();
     }
-  }, [jsonModal.isOpen]);
+  }, [jsonModal.isOpen, activePageId]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(jsonContent);
@@ -76,7 +82,9 @@ export const JSONPreviewModal = () => {
           <div className="flex-1 overflow-hidden p-8 flex flex-col gap-4">
             <div className="flex items-center gap-2 px-1 text-left">
               <Database className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-              <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Store: drafts / Key: current-draft</span>
+              <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                Store: pages / Key: {activePageId || 'none'}
+              </span>
             </div>
             
             <div className="flex-1 bg-slate-900 rounded-[1.5rem] p-6 overflow-auto custom-scrollbar border-4 border-slate-800 dark:border-slate-950 shadow-inner">

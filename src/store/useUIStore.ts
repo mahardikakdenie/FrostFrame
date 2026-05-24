@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from 'zustand';
 
 interface SelectionPathItem {
@@ -15,7 +17,7 @@ interface UIState {
   previewMode: 'desktop' | 'tablet' | 'mobile';
   activeDevice: 'desktop' | 'tablet' | 'mobile';
   drillDownId: string | null; 
-  activeSidebarTab: 'library' | 'design';
+  activeSidebarTab: 'library' | 'design' | 'pages';
   isDragging: boolean;
   draggedType: string | null;
   mediaModal: { 
@@ -43,7 +45,7 @@ interface UIState {
   setPreviewMode: (mode: 'desktop' | 'tablet' | 'mobile') => void;
   setActiveDevice: (device: 'desktop' | 'tablet' | 'mobile') => void;
   setDrillDownId: (id: string | null) => void;
-  setActiveSidebarTab: (tab: 'library' | 'design') => void;
+  setActiveSidebarTab: (tab: 'library' | 'design' | 'pages') => void;
   setDragState: (isDragging: boolean, type: string | null) => void;
   openMediaModal: (targetId: string, onSelect: (url: string) => void, type?: 'image' | 'video') => void;
   closeMediaModal: () => void;

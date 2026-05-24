@@ -83,20 +83,20 @@ export const MediaConfig = ({ value, onChange, mediaKey = 'src' }: ElementConfig
         )}
 
         {/* URL + Open modal */}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <input
             type="text"
-            className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-inner"
+            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-inner"
             value={currentSrc}
             onChange={(e) => onChange(mediaKey, e.target.value)}
             placeholder="https://... or paste URL"
           />
           <button
             onClick={handleOpenModal}
-            className="bg-indigo-600 text-white px-5 py-3 rounded-xl shadow-lg hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap"
+            className="w-full bg-indigo-600 text-white px-5 py-3 rounded-xl shadow-lg hover:bg-indigo-700 transition-all active:scale-95 flex justify-center items-center gap-2 text-[10px] font-black uppercase tracking-wider"
           >
             <ImageIcon className="w-4 h-4" />
-            <span>Browse</span>
+            <span>Browse Library</span>
           </button>
         </div>
       </div>

@@ -50,27 +50,6 @@ We didn't want to build another "easy" website builder. We wanted to build a **p
 ### The Evolution
 Lando Studio was born in a small room with three monitors and a lot of coffee. We spent months perfecting the "Smart Redirect" logic so that a user could drag a complex section and have it snap into place with mathematical perfection. We realized that while the world needed "Bold," businesses needed "Results." So, we engineered adaptive kits that translated our brutalist energy into high-converting funnels and elegant event pages.
 
----
-
-## 💼 Investor Pitch: The Open Source Powerhouse
-
-### The Opportunity
-The "No-Code" market is projected to reach **$187 Billion by 2030**. However, the current players (Webflow, Wix, Framer) are becoming increasingly expensive, closed-source, and complex. 
-
-**Lando Studio is the Disruptor.** 
-
-By moving to an **Open Source** model, we are not just building a product; we are building an **Ecosystem**. We are inviting the world's best developers to build "Lando Extensions," "Lando Themes," and "Lando Plugins."
-
-### Why Invest?
-1.  **Viral Growth:** Open source projects like Supabase and Vercel have proven that developer adoption is the strongest moat.
-2.  **Scalable Revenue:** Our future roadmap includes a "Lando Cloud" for hosting and a "Lando Pro" marketplace for premium industry kits.
-3.  **Untapped Niche:** We own the "Brutalist/High-Conversion" niche. While others go soft, we go bold.
-4.  **Developer-First:** Built on Tiptap (Prosemirror), we have the most extensible editor architecture on the market.
-
-**Join us in reclaiming the web. Let’s make the internet exciting again.**
-
----
-
 ## 🛠 Tech Stack & Architecture
 
 - **Core:** React 18 + TypeScript
